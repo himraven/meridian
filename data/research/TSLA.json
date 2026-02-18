@@ -1,0 +1,130 @@
+{
+  "overview": {
+    "ticker": "TSLA",
+    "name": "Tesla Inc.",
+    "market": "US",
+    "price": 410.63,
+    "change": -6.81,
+    "changePercent": -1.631,
+    "marketCap": 1540861067264,
+    "pe": 383.77,
+    "pb": 18.75,
+    "sector": "Consumer Cyclical",
+    "industry": "Auto Manufacturers"
+  },
+  "rating": {
+    "signal": "caution",
+    "targetPrice": 280.0,
+    "safetyMargin": -46.6,
+    "moatScore": 6.2,
+    "riskLevel": "very-high",
+    "thesis": "Tesla trades at 383x earnings while revenue declined -3.1% and net income collapsed -60.6% in the latest year. The Robotaxi and FSD optionality is real but priced in at absurd multiples. Automotive margin erosion is a structural problem. Significant downside risk to $280 or below. Caution warranted."
+  },
+  "financials": [
+    {"year": 2022, "revenue": 81462000000, "netIncome": 12583000000, "operatingCashFlow": 14724000000, "freeCashFlow": 7552000000, "eps": 1.07, "roe": 28.1, "debtToEquity": 0.13, "currentRatio": 1.53},
+    {"year": 2023, "revenue": 96773000000, "netIncome": 14999000000, "operatingCashFlow": 13256000000, "freeCashFlow": 4357000000, "eps": 1.07, "roe": 23.9, "debtToEquity": 0.15, "currentRatio": 1.73},
+    {"year": 2024, "revenue": 97690000000, "netIncome": 7130000000, "operatingCashFlow": 14923000000, "freeCashFlow": 3581000000, "eps": 1.07, "roe": 9.8, "debtToEquity": 0.19, "currentRatio": 2.02},
+    {"year": 2025, "revenue": 94827000000, "netIncome": 3794000000, "operatingCashFlow": 14747000000, "freeCashFlow": 6220000000, "eps": 1.07, "roe": 4.6, "debtToEquity": 0.18, "currentRatio": 2.16}
+  ],
+  "valuation": [
+    {"metric": "P/E", "current": 383.77, "average": 150.0, "industryAvg": 8.0, "note": "Extreme speculation; auto peers trade at 5-10x PE"},
+    {"metric": "P/B", "current": 18.75, "average": 20.0, "industryAvg": 1.2, "note": "Significantly above auto sector; reflects tech company premium"},
+    {"metric": "P/S", "current": 16.2, "average": 10.0, "industryAvg": 0.4, "note": "Revenue declining yet P/S at 40x industry average"},
+    {"metric": "EV/EBITDA", "current": 95.0, "average": 60.0, "industryAvg": 4.0, "note": "Only justified if Robotaxi/FSD generates $20B+ annual revenue"},
+    {"metric": "PEG", "current": -6.3, "average": 5.0, "industryAvg": 0.8, "note": "Negative PEG — earnings declining while stock prices in growth"}
+  ],
+  "moat": [
+    {
+      "factor": "Supercharger Network",
+      "score": 8.0,
+      "description": "Tesla's 60,000+ Supercharger stations represent a genuine infrastructure moat. The NACS standard adoption by Ford, GM, and others validates Tesla's network superiority.",
+      "evidence": ["60,000+ Superchargers globally as of 2025", "NACS adopted as the North American standard by all major automakers", "Network is a genuine switching cost for Tesla owners"]
+    },
+    {
+      "factor": "FSD & Autonomy Data Lead",
+      "score": 7.5,
+      "description": "Tesla has accumulated hundreds of billions of real-world miles of FSD training data from its global fleet. This data advantage is real but the commercial timeline remains uncertain.",
+      "evidence": ["7+ million vehicles generating real-world driving data", "FSD v12+ uses end-to-end neural networks trained on real data", "Robotaxi Austin pilot launched in limited form in 2025"]
+    },
+    {
+      "factor": "Brand & Direct Sales Model",
+      "score": 7.2,
+      "description": "Tesla's brand among EV enthusiasts remains strong, and its direct-to-consumer sales model eliminates dealer margins. However, brand sentiment has deteriorated amid CEO controversy.",
+      "evidence": ["Direct sales model saves estimated 5-8% in dealer margin", "Brand loyalty remains high among existing Tesla owners", "Brand sentiment surveys show declining favorability in Europe 2025"]
+    },
+    {
+      "factor": "Energy Storage Business",
+      "score": 7.8,
+      "description": "Tesla's energy division (Powerwall, Megapack) is growing rapidly and represents an underappreciated business. Grid-scale battery storage is a secular growth market.",
+      "evidence": ["Energy generation and storage revenue growing 50%+ YoY", "Megapack deployments accelerating as grid storage demand surges", "Higher margin business than automotive"]
+    },
+    {
+      "factor": "Manufacturing Efficiency (Gigafactories)",
+      "score": 6.8,
+      "description": "Tesla's Gigafactories represent massive fixed-cost investments. The cost structure is improving but gross margins (18.0%) are well below peak (29.1% in 2022).",
+      "evidence": ["Gross margin compressed from 29.1% (2022) to 18.0% (2025) from price cuts", "Unboxed manufacturing process could reduce production costs 50%", "Cybertruck profitability remains elusive"]
+    }
+  ],
+  "risks": [
+    {
+      "severity": "very-high",
+      "title": "Extreme Valuation Disconnected from Fundamentals",
+      "description": "Tesla trades at 383x earnings while net income fell 60.6% and revenue declined 3.1% in the most recent fiscal year. Even on optimistic Robotaxi assumptions, current pricing is difficult to justify.",
+      "monitorTrigger": "Q1 2026 automotive gross margin falls below 15%; Robotaxi commercial launch delayed beyond 2026",
+      "bearArgument": "Strip out speculative Robotaxi optionality and Tesla is a slow-growth auto company earning $3.8B annually. Comparable automotive companies trade at 6-10x earnings. At 10x, Tesla would be worth approximately $38B or roughly $10/share."
+    },
+    {
+      "severity": "high",
+      "title": "CEO Brand Risk & Musk Distraction",
+      "description": "Elon Musk's political activities and leadership of multiple companies have created significant brand damage in key European markets. Tesla's European sales fell sharply in 2025.",
+      "monitorTrigger": "European market share falls below 10%; Musk reduces Tesla involvement for other ventures",
+      "bearArgument": "Tesla is losing market share in Europe to BYD, Volkswagen, and Stellantis EVs. A CEO-driven boycott could cost Tesla $5-10B in revenue in markets where EV adoption is most advanced."
+    },
+    {
+      "severity": "high",
+      "title": "Chinese Competition from BYD",
+      "description": "BYD overtook Tesla as the world's largest EV seller in 2024. BYD's Han and Seal models compete directly with Tesla at lower prices. In China, Tesla's market share is declining.",
+      "monitorTrigger": "Tesla China deliveries fall below 150,000/quarter; BYD launches competitive models in North America",
+      "bearArgument": "China is Tesla's most important market for manufacturing margins. If China revenue declines 20-30%, Tesla's global profitability could turn negative."
+    },
+    {
+      "severity": "medium",
+      "title": "Robotaxi Regulatory & Technical Delays",
+      "description": "The current $1.5T market cap largely prices in a successful Robotaxi business. Regulatory approval and liability frameworks could delay full commercial rollout by years.",
+      "monitorTrigger": "NHTSA initiates safety investigation into FSD accidents; Austin Robotaxi pilot paused",
+      "bearArgument": "Waymo spent $10B+ to achieve limited robotaxi operations in 4 US cities. Tesla's cost-reduction approach may face safety certification hurdles that extend timelines significantly."
+    }
+  ],
+  "catalysts": [
+    {
+      "event": "Robotaxi Commercial Expansion",
+      "date": "2026-H1",
+      "probability": 0.45,
+      "impact": "very-high",
+      "description": "If Tesla's Robotaxi service scales beyond Austin to 5-10 cities with demonstrated safety record, it could unlock a re-rating toward the bull case. High impact, uncertain probability."
+    },
+    {
+      "event": "Affordable Model ($25K vehicle) Launch",
+      "date": "2026-H2",
+      "probability": 0.70,
+      "impact": "high",
+      "description": "A $25,000 base-model Tesla could re-accelerate volume growth and demonstrate that Tesla can compete in the mainstream auto market."
+    },
+    {
+      "event": "Q1 2026 Earnings — Automotive Margin Recovery",
+      "date": "2026-04",
+      "probability": 0.55,
+      "impact": "high",
+      "description": "If automotive gross margins recover toward 20%+ (from 18% now) in Q1, the market may interpret this as a turning point after years of margin compression."
+    },
+    {
+      "event": "Optimus Robot Commercial Deployment",
+      "date": "2026-H2",
+      "probability": 0.35,
+      "impact": "high",
+      "description": "Commercial deployment of the Optimus humanoid robot in Tesla factories would validate the long-term robotics vision, though commercial scale is likely years away."
+    }
+  ],
+  "novaAnalysis": "# Meridian AI Investment Analysis — Tesla Inc. (TSLA)\n\n**Verdict: CAUTION | Target Price: $280 | Current: $410.63 | Downside: ~32%**\n\n---\n\n## The Hard Truth About Tesla's Valuation\n\nTesla is simultaneously one of the most innovative companies in the world and one of the most dangerously overvalued stocks in the market. At $410 per share and a 383x trailing PE, investors are pricing in a future where Tesla's Robotaxi network becomes the dominant global rideshare platform, Optimus robots become ubiquitous, and Full Self-Driving achieves regulatory approval across multiple jurisdictions — all in a timeframe that justifies the current $1.54 trillion market cap.\n\nLet's be direct: **net income fell 60.6% in FY2025. Revenue declined 3.1%. ROE dropped to 4.6% from 28.1% three years ago. Automotive gross margins compressed from 29.1% (2022) to 18.0% (2025).** This is not the financial profile of a company that warrants a $1.5 trillion market cap.\n\n---\n\n## The Bull Case (And Why It's Priced In)\n\nWe're not dismissing the bull case — it's genuinely powerful:\n\n**Robotaxi**: If Tesla's Full Self-Driving achieves Level 4 autonomy and deploys a global rideshare network, the economic model is extraordinary. Waymo charges $12-15 per ride and is scaling. Tesla has 7+ million vehicles generating training data. The Austin pilot has launched.\n\n**Energy Storage**: Tesla's Megapack business is growing 50%+ annually. Grid-scale storage is a critical component of the global energy transition. This is an underappreciated but real growth business with higher margins than automotive.\n\n**Optimus Robot**: Humanoid robots in factories could eventually represent a trillion-dollar market. Tesla is early but credibly positioned.\n\n**The problem**: These opportunities are already priced in at $410. To justify the current valuation, Tesla needs to execute flawlessly on all three fronts simultaneously — Robotaxi at scale, $25K affordable vehicle driving volume, AND margin recovery — while fighting BYD, Waymo, and legacy automakers in their respective lanes.\n\n---\n\n## The Deteriorating Core Business\n\nThe data tells an uncomfortable story:\n\n- **Revenue**: $81.5B (2022) → $96.8B (2023) → $97.7B (2024) → $94.8B (2025). Growth has stalled and reversed.\n- **Net Income**: $12.6B (2022) → $15.0B (2023) → $7.1B (2024) → $3.8B (2025). Down 75% from peak.\n- **Gross Margin**: 29.1% (2022) → 18.0% (2025). Years of aggressive price cuts have hollowed out profitability.\n- **Free Cash Flow**: $7.6B (2022) → $4.4B (2023) → $3.6B (2024) → $6.2B (2025). Modest improvement but far from sufficient to justify a $1.5T market cap.\n\n---\n\n## CEO Risk: The Musk Factor\n\nWe must address what many Wall Street analysts euphemistically call \"key person risk.\" Elon Musk's political activities through DOGE and his statements on X have alienated a significant portion of Tesla's core customer base — urban, educated, environmentally conscious consumers in US blue states and Europe. Tesla's European sales fell dramatically in 2025 amid organized boycotts in Germany, France, and the Nordic countries. This is a brand crisis, not just noise.\n\nThe question investors must ask: Would Tesla's stock price decline significantly if Musk were to step back from day-to-day operations? History suggests the stock would actually rally on that news — which tells you something important about how the market perceives this risk.\n\n---\n\n## Valuation: The Math Doesn't Work\n\nAt $410 and $3.8B in trailing net income, Tesla's PE is 383x. Even if we use forward estimates of $10-12B in FY2026 earnings (which requires significant recovery), the stock trades at 35-40x those estimates. For an auto company. With declining margins. In a highly competitive market.\n\nThe only scenario where $410 is justified requires Robotaxi generating $30-50B in annual revenue by 2028-2030 with 60%+ margins. That's a scenario worth maybe $150-200 of intrinsic value today, discounted for execution risk, regulatory uncertainty, and competition from Waymo.\n\nOur bear case: Core automotive at 10x earnings ($38B) + speculative Robotaxi/Optimus optionality ($50-100B) = $88-138B total, implying $23-37 per share. Our base case target of $280 assumes more credit for the growth businesses but still implies 32% downside.\n\n---\n\n## Portfolio Sizing Recommendation\n\n**Tesla is not appropriate as a core holding at current prices.** For investors who believe in the Robotaxi/Optimus long-term thesis, we recommend a maximum 2% speculative position sized to what you can afford to lose 50-70%. Do not hold as a significant portion of your portfolio. Existing holders with large gains should strongly consider reducing exposure to 1-2% or less.\n\n*Generated by Meridian AI. For informational purposes only. Not investment advice.*",
+  "generatedAt": "2026-02-18T12:00:00Z"
+}

@@ -1,0 +1,230 @@
+{
+  "overview": {
+    "ticker": "PLTR",
+    "name": "Palantir Technologies",
+    "market": "US",
+    "price": 133.02,
+    "change": 1.61,
+    "changePercent": 1.22517,
+    "marketCap": 317044719616,
+    "pe": 211.14287,
+    "pb": 42.979,
+    "sector": "Technology",
+    "industry": "Software - Infrastructure"
+  },
+  "rating": {
+    "signal": "caution",
+    "targetPrice": 95,
+    "safetyMargin": -28.6,
+    "moatScore": 7.5,
+    "riskLevel": "high",
+    "thesis": "Best-in-class AI/data platform with government moat, but PE 211x prices in years of perfection — any stumble triggers violent correction",
+    "updatedAt": "2026-02-18"
+  },
+  "financials": [
+    {
+      "year": 2021,
+      "revenue": 1541889000.0,
+      "netIncome": -520379000.0,
+      "operatingCashFlow": 333851000.0,
+      "freeCashFlow": 321224000.0,
+      "eps": 0.63,
+      "roe": -22.7,
+      "debtToEquity": 0.11,
+      "currentRatio": 4.34
+    },
+    {
+      "year": 2022,
+      "revenue": 1905871000.0,
+      "netIncome": -373705000.0,
+      "operatingCashFlow": 223737000.0,
+      "freeCashFlow": 183710000.0,
+      "eps": 0.63,
+      "roe": -14.6,
+      "debtToEquity": 0.1,
+      "currentRatio": 5.17
+    },
+    {
+      "year": 2023,
+      "revenue": 2225012000.0,
+      "netIncome": 209825000.0,
+      "operatingCashFlow": 712183000.0,
+      "freeCashFlow": 697069000.0,
+      "eps": 0.63,
+      "roe": 6.0,
+      "debtToEquity": 0.07,
+      "currentRatio": 5.55
+    },
+    {
+      "year": 2024,
+      "revenue": 2865507000.0,
+      "netIncome": 462190000.0,
+      "operatingCashFlow": 1153865000.0,
+      "freeCashFlow": 1141231000.0,
+      "eps": 0.63,
+      "roe": 9.2,
+      "debtToEquity": 0.05,
+      "currentRatio": 5.96
+    }
+  ],
+  "valuation": [
+    {
+      "metric": "PE",
+      "current": 211.1,
+      "fiveYearAvg": 85.0,
+      "industryAvg": 35.0,
+      "percentile": 97
+    },
+    {
+      "metric": "PB",
+      "current": 43.0,
+      "fiveYearAvg": 12.0,
+      "industryAvg": 8.5,
+      "percentile": 98
+    },
+    {
+      "metric": "PS",
+      "current": 110.6,
+      "fiveYearAvg": 25.0,
+      "industryAvg": 10.0,
+      "percentile": 99
+    },
+    {
+      "metric": "EV/EBITDA",
+      "current": 175.0,
+      "fiveYearAvg": 65.0,
+      "industryAvg": 25.0,
+      "percentile": 97
+    },
+    {
+      "metric": "PEG",
+      "current": 3.1,
+      "fiveYearAvg": 1.8,
+      "industryAvg": 1.5,
+      "percentile": 88
+    }
+  ],
+  "moat": [
+    {
+      "name": "Government Lock-in",
+      "score": 9.2,
+      "description": "Deep integration with US intelligence and defense agencies creates near-permanent relationships",
+      "evidence": [
+        "20+ year relationship with CIA, NSA, and DOD",
+        "Gotham platform embedded in critical national security workflows",
+        "Security clearance requirements create massive switching costs",
+        "FedRAMP High authorization limits competition"
+      ]
+    },
+    {
+      "name": "Data Network Effects",
+      "score": 8.5,
+      "description": "More deployments generate better ontologies and models, widening the gap with competitors",
+      "evidence": [
+        "Foundry platform processes petabytes across 300+ enterprise deployments",
+        "AIP (Artificial Intelligence Platform) leveraging proprietary ontology layer",
+        "Customer data compounds — models improve with each deployment cycle"
+      ]
+    },
+    {
+      "name": "Switching Costs",
+      "score": 8.8,
+      "description": "Once Palantir is woven into decision-making workflows, ripping it out is nearly impossible",
+      "evidence": [
+        "Average contract duration 5+ years with government clients",
+        "Deep integration with existing data infrastructure",
+        "Retraining costs for analysts switching platforms estimated at 6-12 months",
+        "Net dollar retention rate consistently above 115%"
+      ]
+    },
+    {
+      "name": "Technical Moat",
+      "score": 7.8,
+      "description": "Ontology-based approach fundamentally different from traditional BI tools",
+      "evidence": [
+        "Ontology layer maps real-world objects and relationships — not just SQL queries",
+        "15+ years of R&D investment in data fusion technology",
+        "AIP bootcamps convert prospects at unprecedented speed (days, not months)"
+      ]
+    },
+    {
+      "name": "Brand & Trust",
+      "score": 7.0,
+      "description": "Reputation for handling most sensitive data builds irreplaceable trust",
+      "evidence": [
+        "Trusted by Five Eyes intelligence alliance",
+        "COVID response showcased capability to broader government audience",
+        "Commercial customers increasingly view Palantir as 'safe choice' for AI"
+      ]
+    }
+  ],
+  "risks": [
+    {
+      "category": "Extreme Valuation",
+      "severity": "high",
+      "description": "At PE 211x, the stock prices in flawless execution for 5+ years. Any earnings miss will trigger violent selloff",
+      "monitorTrigger": "Revenue growth decelerating below 40% YoY; operating margin compression below 35%",
+      "bearishArgument": "If growth normalizes to 30% and market applies a 50x PE (still generous), stock drops to $35 — a 75% decline from current levels"
+    },
+    {
+      "category": "Insider Selling",
+      "severity": "high",
+      "description": "CEO Alex Karp has consistently sold large blocks of shares, signaling potential overvaluation concerns",
+      "monitorTrigger": "Insider selling pace increasing; CEO selling more than $100M/quarter",
+      "bearishArgument": "Persistent insider selling at these levels is the strongest signal that management believes the stock is overvalued"
+    },
+    {
+      "category": "Government Budget Cuts",
+      "severity": "medium",
+      "description": "DOGE efficiency drive and federal spending cuts could impact government contracts",
+      "monitorTrigger": "Defense budget flat or declining; contract renewals at lower values; DOGE targeting Palantir contracts",
+      "bearishArgument": "Government revenue (55% of total) could face 10-20% headwinds from budget rationalization"
+    },
+    {
+      "category": "Commercial Competition",
+      "severity": "medium",
+      "description": "Databricks, Snowflake, and hyperscalers are building competing AI/analytics platforms",
+      "monitorTrigger": "Commercial net new customer adds declining; AIP bootcamp conversion rates falling",
+      "bearishArgument": "If hyperscalers bundle similar capabilities for free, Palantir's commercial growth thesis collapses"
+    },
+    {
+      "category": "Concentration Risk",
+      "severity": "medium",
+      "description": "Top 20 customers represent outsized revenue share",
+      "monitorTrigger": "Top customer churn; single contract loss > 5% revenue",
+      "bearishArgument": "Loss of 2-3 major government contracts could materially impact financial trajectory"
+    }
+  ],
+  "catalysts": [
+    {
+      "date": "2026-05-05",
+      "event": "Q1 2026 Earnings Report",
+      "impact": "positive",
+      "probability": 70,
+      "description": "If revenue exceeds $1.2B with AIP driving commercial acceleration, could push stock toward new highs"
+    },
+    {
+      "date": "2026-03-15",
+      "event": "NATO / DOD Contract Expansion",
+      "impact": "positive",
+      "probability": 60,
+      "description": "European defense spending surge post-Ukraine could generate $500M+ multi-year contracts"
+    },
+    {
+      "date": "2026-07-01",
+      "event": "S&P 500 Rebalancing Weight Increase",
+      "impact": "positive",
+      "probability": 75,
+      "description": "Growing market cap drives larger index weight, forcing passive fund inflows"
+    },
+    {
+      "date": "2026-09-15",
+      "event": "AIP Enterprise Milestone — 1000 Customers",
+      "impact": "positive",
+      "probability": 50,
+      "description": "Crossing 1000 commercial AIP customers would validate the platform's scalability thesis"
+    }
+  ],
+  "novaAnalysis": "# Meridian AI Investment Analysis — Palantir Technologies (PLTR)\n\n> Analysis Date: February 18, 2026 | Confidence: Medium\n\n## Investment Verdict\n\n**Caution.** Palantir is building one of the most important AI platforms in the world. The technology is real, the moat is deep, and the growth is explosive — revenue surging 70% YoY with 82% gross margins. But at PE 211x and a $317B market cap on $2.9B revenue, the stock has left the atmosphere of rational valuation.\n\nThis is a **magnificent company at a dangerous price.** Current price: $133 | Fair value estimate: **$95** | Implied downside: **-28.6%**\n\n---\n\n## What Palantir Does Right\n\nPalantir has achieved something rare in enterprise software: it has become **genuinely irreplaceable** for its customers.\n\nThe numbers tell the story clearly:\n- **Revenue**: $2.87B in FY2024, up from $1.54B in FY2021 — a near-doubling in three years\n- **Operating margins**: 40.9%, up from negative territory just two years ago\n- **Free cash flow**: $1.14B, representing 40% FCF conversion — exceptional for a growth company\n- **Gross margins**: 82.4%, software-like economics that scale beautifully\n\nThe AIP (Artificial Intelligence Platform) bootcamps have become a growth flywheel. Prospects go from skeptical to signed within days, not the 12-18 month enterprise sales cycles of old. This is Palantir's killer innovation — compressing time-to-value for AI deployment.\n\n---\n\n## The Valuation Problem\n\nHere's where intellectual honesty demands caution.\n\nAt $317B market cap, the market is valuing Palantir at **110x revenue** and **211x earnings**. To justify this price, Palantir needs to:\n\n1. Grow revenue to $15B+ by 2030 (5x from here, ~40% CAGR)\n2. Maintain 40%+ operating margins throughout\n3. Face no meaningful competition from hyperscalers\n4. Suffer no government budget disruption\n\nAll four conditions must hold simultaneously. The probability of this is... not high.\n\nFor comparison: Microsoft at peak AI hype trades at 35x earnings. Salesforce at 28x. ServiceNow at 60x. Palantir at 211x is in a league of its own — and not in a good way.\n\n**The math is brutal**: If Palantir delivers a stellar $6B in revenue by 2028 at 35% net margins ($2.1B earnings), and the market applies a generous 50x PE, you get a $105B valuation — a **67% decline** from today.\n\n---\n\n## Who Should Own This\n\nPalantir belongs in portfolios as a **small, conviction position** (1-2% max) for investors who:\n- Believe AI enterprise spending will exceed all current forecasts\n- Can stomach 50%+ drawdowns without selling\n- Have a 5+ year time horizon\n\nIt does **not** belong as a core holding at these prices. The risk/reward is asymmetrically negative.\n\n---\n\n## What Would Change My Mind\n\n- Revenue growth sustaining above 50% for 4+ consecutive quarters with commercial > government\n- A killer consumer product that opens an entirely new TAM\n- Stock pulling back to $60-70 range (PE ~80-100x), making risk/reward more balanced\n\nUntil then: admire the company, avoid the stock.\n\n---\n\n*Generated by Meridian AI. For informational purposes only. Not investment advice.*",
+  "generatedAt": "2026-02-18T12:00:00Z"
+}

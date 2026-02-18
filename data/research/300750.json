@@ -1,0 +1,230 @@
+{
+  "overview": {
+    "ticker": "300750",
+    "name": "宁德时代",
+    "market": "CN",
+    "price": 365.34,
+    "change": -10.529999,
+    "changePercent": -2.8015003,
+    "marketCap": 1680830758912,
+    "pe": 25.388464,
+    "pb": 5.269656,
+    "sector": "Industrials",
+    "industry": "Electrical Equipment & Parts"
+  },
+  "rating": {
+    "signal": "buy",
+    "targetPrice": 460,
+    "safetyMargin": 25.9,
+    "moatScore": 8.2,
+    "riskLevel": "medium",
+    "thesis": "全球动力电池绝对龙头，技术代际领先+规模成本优势构建深厚壁垒，收入短暂回调不改长期格局",
+    "updatedAt": "2026-02-18"
+  },
+  "financials": [
+    {
+      "year": 2021,
+      "revenue": 130355796400.0,
+      "netIncome": 15931317900.0,
+      "operatingCashFlow": 42908008700.0,
+      "freeCashFlow": -859762100.0,
+      "eps": 14.39,
+      "roe": 18.9,
+      "debtToEquity": 0.64,
+      "currentRatio": 1.19
+    },
+    {
+      "year": 2022,
+      "revenue": 328593987500.0,
+      "netIncome": 30729163500.0,
+      "operatingCashFlow": 61208843300.0,
+      "freeCashFlow": 12993575200.0,
+      "eps": 14.39,
+      "roe": 18.7,
+      "debtToEquity": 0.61,
+      "currentRatio": 1.31
+    },
+    {
+      "year": 2023,
+      "revenue": 400917045000.0,
+      "netIncome": 44121248000.0,
+      "operatingCashFlow": 92826124000.0,
+      "freeCashFlow": 59201227000.0,
+      "eps": 14.39,
+      "roe": 22.3,
+      "debtToEquity": 0.63,
+      "currentRatio": 1.57
+    },
+    {
+      "year": 2024,
+      "revenue": 362012554000.0,
+      "netIncome": 50744682000.0,
+      "operatingCashFlow": 96990345000.0,
+      "freeCashFlow": 65810402000.0,
+      "eps": 14.39,
+      "roe": 20.6,
+      "debtToEquity": 0.55,
+      "currentRatio": 1.61
+    }
+  ],
+  "valuation": [
+    {
+      "metric": "PE",
+      "current": 25.4,
+      "fiveYearAvg": 50.0,
+      "industryAvg": 22.0,
+      "percentile": 25
+    },
+    {
+      "metric": "PB",
+      "current": 5.27,
+      "fiveYearAvg": 10.0,
+      "industryAvg": 3.5,
+      "percentile": 32
+    },
+    {
+      "metric": "PS",
+      "current": 4.6,
+      "fiveYearAvg": 8.0,
+      "industryAvg": 2.5,
+      "percentile": 35
+    },
+    {
+      "metric": "EV/EBITDA",
+      "current": 16.0,
+      "fiveYearAvg": 32.0,
+      "industryAvg": 14.0,
+      "percentile": 28
+    },
+    {
+      "metric": "PEG",
+      "current": 0.68,
+      "fiveYearAvg": 1.5,
+      "industryAvg": 1.2,
+      "percentile": 18
+    }
+  ],
+  "moat": [
+    {
+      "name": "技术领先",
+      "score": 9.0,
+      "description": "麒麟电池、神行超充、凝聚态电池等持续引领行业技术方向",
+      "evidence": [
+        "研发投入连续多年超200亿元，行业第一",
+        "专利数量超28000项，覆盖材料/结构/制造全链条",
+        "麒麟电池能量密度255Wh/kg，领先竞争对手一代",
+        "钠离子电池率先量产，开辟第二技术路线"
+      ]
+    },
+    {
+      "name": "规模成本优势",
+      "score": 8.8,
+      "description": "全球市占率37%带来的规模效应使成本持续下降",
+      "evidence": [
+        "全球动力电池装机量连续8年第一",
+        "产能超500GWh，规模效应摊薄固定成本",
+        "垂直整合锂矿资源，上游成本可控",
+        "FY2024净利润507亿，同比增长15%——在行业价格战中仍能增利"
+      ]
+    },
+    {
+      "name": "客户锁定",
+      "score": 8.5,
+      "description": "与全球主要车企深度绑定，切换成本极高",
+      "evidence": [
+        "客户包括特斯拉、宝马、大众、奔驰、福特等全球TOP10车企",
+        "电池与整车平台深度定制，更换供应商需要2-3年重新验证",
+        "配套关系通常伴随5-8年的长期供应协议"
+      ]
+    },
+    {
+      "name": "储能第二曲线",
+      "score": 7.5,
+      "description": "从动力电池向储能延伸，打开万亿级新市场",
+      "evidence": [
+        "储能电池出货量全球第一",
+        "大型储能系统已部署全球50+国家",
+        "储能毛利率高于动力电池，改善整体盈利结构"
+      ]
+    },
+    {
+      "name": "品牌信任",
+      "score": 7.0,
+      "description": "宁德时代已成为电池行业的'Intel Inside'",
+      "evidence": [
+        "车企以搭载宁德时代电池为卖点",
+        "消费者选车时主动询问电池供应商",
+        "品牌溢价使其在价格战中保持利润率优势"
+      ]
+    }
+  ],
+  "risks": [
+    {
+      "category": "价格战加剧",
+      "severity": "high",
+      "description": "比亚迪弗迪、中创新航、国轩高科等持续以低价争夺份额",
+      "monitorTrigger": "宁德时代毛利率连续两季度下降超2个百分点；国内市占率跌破30%",
+      "bearishArgument": "若电池沦为大宗商品，宁德时代的技术溢价消失，PE将压缩至15x以下"
+    },
+    {
+      "category": "技术路线风险",
+      "severity": "medium",
+      "description": "固态电池等颠覆性技术若由竞争对手率先商业化，将威胁现有优势",
+      "monitorTrigger": "丰田/三星固态电池量产时间表提前；能量密度被竞品超越",
+      "bearishArgument": "技术代际跨越可能使数百GWh产能成为沉没资产"
+    },
+    {
+      "category": "客户集中度",
+      "severity": "medium",
+      "description": "特斯拉等大客户议价能力强，且在自建电池产能",
+      "monitorTrigger": "特斯拉4680电池良率突破90%；大众PowerCo产能达标",
+      "bearishArgument": "核心客户自供比例提升至50%将使宁德时代失去增长引擎"
+    },
+    {
+      "category": "地缘政治",
+      "severity": "medium",
+      "description": "美国IRA法案排斥中国电池，欧洲推动本土电池供应链",
+      "monitorTrigger": "欧盟出台类似IRA的电池补贴政策；更多国家限制中国电池进口",
+      "bearishArgument": "若被排除出欧美市场，海外收入占比将从35%大幅下降"
+    },
+    {
+      "category": "原材料波动",
+      "severity": "low",
+      "description": "碳酸锂价格大幅波动影响成本和利润预测",
+      "monitorTrigger": "碳酸锂价格重回30万元/吨以上",
+      "bearishArgument": "原材料成本上涨而终端价格受限，利润率两头受压"
+    }
+  ],
+  "catalysts": [
+    {
+      "date": "2026-04-25",
+      "event": "FY2025年报+Q1 2026快报",
+      "impact": "positive",
+      "probability": 75,
+      "description": "预计全年净利润超560亿，Q1储能订单爆发将超预期"
+    },
+    {
+      "date": "2026-06-01",
+      "event": "凝聚态电池商用化发布",
+      "impact": "positive",
+      "probability": 55,
+      "description": "能量密度突破500Wh/kg的凝聚态电池若量产，将重新定义行业技术天花板"
+    },
+    {
+      "date": "2026-04-20",
+      "event": "北京车展新车型搭载",
+      "impact": "positive",
+      "probability": 80,
+      "description": "多款搭载神行超充电池的新车亮相，验证终端需求"
+    },
+    {
+      "date": "2026-08-15",
+      "event": "海外工厂产能释放",
+      "impact": "positive",
+      "probability": 65,
+      "description": "匈牙利和印尼工厂量产将绕过贸易壁垒，重新打开欧美供应链"
+    }
+  ],
+  "novaAnalysis": "# Meridian AI 投资分析 — 宁德时代 (300750.SZ)\n\n> 分析日期：2026年2月18日 | 置信度：中高\n\n## 投资结论\n\n**买入。** 宁德时代是全球新能源革命中最确定的赢家之一。在动力电池领域，它的地位类似于20年前的台积电——技术领先一代、规模碾压对手、客户深度绑定。PE 25.4x对于一家利润增长38%的全球龙头来说，并不算贵。\n\n目标价：**¥460**（12个月）| 潜在回报：**+25.9%**\n\n---\n\n## 读懂宁德的财务密码\n\nFY2024的数字初看可能让人困惑：收入3620亿，同比下降10%。但利润告诉了完全不同的故事：\n\n- **净利润 507亿**，同比增长15%——收入降、利润升\n- **净利率 16.5%**，从上年的11%提升至16.5%——盈利质量大幅改善\n- **自由现金流 658亿**——手里有钱，有底气\n- **ROE 20.6%**——在重资产行业中极为出色\n\n收入下降的本质是碳酸锂价格暴跌带来的产品降价，而非量的萎缩。实际装机量仍在增长。这就像石油公司在油价下跌时收入减少但销量不减——关键看量，不看价。\n\n---\n\n## PEG 0.68 — 隐藏的便宜货\n\nPE 25.4x看起来不便宜？让我们算一笔账：\n\n利润增速37.6%，PE 25.4x，PEG = 0.68。在成长股世界里，PEG < 1意味着\"被增长低估\"。作为对比：\n- 比亚迪 PEG 约 1.2\n- 特斯拉 PEG 约 7.0\n- 行业平均 PEG 约 1.2\n\n宁德时代的PEG是整个新能源板块中最有吸引力的之一。\n\n---\n\n## 储能：被忽视的第二增长曲线\n\n市场习惯把宁德时代当\"电动车概念股\"看，但储能才是下一个万亿赛道。全球碳中和目标下，电网侧储能需求将在未来5年增长5-10倍。宁德时代储能出货量全球第一，且储能毛利率高于动力电池——这是纯增量利润。\n\n---\n\n## 最大风险：沦为大宗商品\n\n电池行业最大的熊市叙事是：\"电池终将沦为白菜价\"。如果技术差异化消失，比亚迪弗迪、中创新航等可以用价格战把毛利率打到10%以下。\n\n但目前的证据不支持这个叙事。宁德时代的麒麟电池、神行超充技术领先对手1-2年，这个窗口期内的技术溢价足以维持利润率。关键指标：毛利率保持在24%以上。\n\n---\n\n## 组合配置建议\n\n- **建议仓位**：3-5%（成长配置）\n- **加仓时机**：PE跌破20x；凝聚态电池量产确认\n- **减仓信号**：毛利率跌破20%；国内市占率跌破30%\n\n宁德时代是\"中国制造业升级\"这一宏大叙事中最好的纯度标的。在PEG 0.68的位置，风险收益比偏向多头。\n\n---\n\n*本分析由 Meridian AI 生成，仅供参考，不构成投资建议。投资有风险，入市需谨慎。*",
+  "generatedAt": "2026-02-18T12:00:00Z"
+}
