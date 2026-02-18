@@ -1,21 +1,66 @@
-# Changelog
+# Meridian — Changelog
 
-All notable changes to Meridian will be documented in this file.
+All notable changes to the Meridian platform are documented here.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+---
 
-## [1.0.0] - 2025-02-18
+## 2026-02-18 — Data Architecture Overhaul + Scoring Engine Upgrade
 
-### Added
-- **Cross-Signal Engine v2** — Multi-source smart money confluence scoring
-- **US Market Module** — Congress trades, ARK Invest, Dark Pool, 13F Institutions
-- **HK Market Module** — VMQ (Value-Momentum-Quality) stock picks
-- **CN Market Module** — Trend filter + 12×30 quantitative strategy
-- **Ticker Deep Dive** — Aggregate all signals for any ticker symbol
-- **Dividend Screener** — Cross-market dividend screening (US/HK/CN)
-- **SvelteKit Frontend** — Dark-themed dashboard with command palette (⌘K)
-- **Markdown API Responses** — Agent-friendly `Accept: text/markdown` support
-- **Smart Cache Middleware** — Tiered caching for API endpoints
-- **Docker Compose** — Production-ready containerized deployment
-- **CI/CD Pipeline** — GitHub Actions with lint, test, and deploy stages
+### Data Architecture
+- **Fixed**: Switched from hardlink-based data sharing to direct bind mount of rsnest data dir
+  - Hardlinks break on atomic write (`os.replace`); bind mount is instant and reliable
+- **Fixed**: ARK trade data missing — mounted clawd ark-data directory → 1,477 trades + 6 ETFs restored
+- **Fixed**: Research reports path — separate mount at `/app/research` with `RESEARCH_DIR` env var
+- **Cleaned**: Removed broken symlinks in shared data directory (`json→`, `smartmoney.db→`)
+- **Hardened**: signals, research, ark-data mounted as `:ro` (read-only)
+
+### Scoring Engine
+- **Upgraded**: `/api/signals/confluence` now reads V2 engine (`signals_v2.json`) with conviction-based scoring
+  - V1: 0-4 range, no multi-source detection → V2: 0-100 range, multi-source bonus
+  - e.g. GOOG: 3 sources (ARK + Congress + Institution) → score 100
+- **Fixed**: V2 engine module (`cross_signal_engine_v2.py`) copied to rsnest so crons generate both v1 + v2
+
+### API Fixes
+- **Fixed**: `/api/congress/trades` — `last_updated` was null (wrong nesting path)
+- **Fixed**: `/api/congress/trades` — added `buy_count` / `sell_count` to metadata
+- **Added**: `/api/data-health` — comprehensive data freshness monitoring (16 sources)
+  - Weekend/holiday-aware thresholds
+  - Critical vs non-critical classification
+  - 🟢🟡🔴 three-level status
+
+### Frontend
+- **Added**: Data Health Indicator in sidebar bottom (auto-refreshes every 5 min)
+- **Fixed**: Score bars on ticker detail page — changed from `/3` to `/100` scale (V2 engine)
+- **Fixed**: Congress buy/sell count — handled both "Buy"/"Purchase" and "Sell"/"Sale" trade types
+- **Updated**: CN strategy references from 8x30 → 12x30
+
+### Data Health Sources Monitored
+| Source | Schedule | Critical |
+|--------|----------|----------|
+| Congress Trades | 3x/day | ✅ |
+| ARK Trades (JSON) | 4x/day Mon-Fri | ✅ |
+| ARK Changes (JSONL) | On activity | ✅ |
+| Dark Pool | Daily Tue-Sat | ✅ |
+| Confluence Signals | 2x/day | ✅ |
+| CN 12x30 Portfolio | Daily (trading days) | ✅ |
+| CN Trend State | Daily (trading days) | ✅ |
+| HK Daily Signals | Daily (trading days) | ✅ |
+| Institution 13F | Weekly Monday | |
+| Research Reports | On-demand | |
+| SQLite Database | With collectors | |
+
+### Architecture (Final)
+```
+rsnest crons (smart-money-api)
+  └── writes: signals.json + signals_v2.json + congress/ark/darkpool JSON
+       │  direct bind mount
+       ├── meridian /app/data/:ro
+       ├── clawd ark-data → /app/ark-data/:ro  
+       ├── data/signals → /app/signals/:ro
+       ├── data/research → /app/research/:ro
+       └── data/db → /app/db/ (writable)
+```
+
+---
+
+*Maintained by Nova*

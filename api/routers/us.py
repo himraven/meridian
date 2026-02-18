@@ -224,16 +224,23 @@ def api_signals_confluence(
 ):
     """
     Get confluence signals filtered by score, sources, and recency.
+    
+    Uses V2 conviction-based scoring engine (0-100 scale).
     Query params:
       - min_score: minimum confluence score (default: 6.0)
       - sources: comma-separated source filter (e.g., 'congress,ark')
       - days: only signals with activity in last N days (default: 7)
     """
-    data = smart_money_cache.read("signals.json")
-    if not data or "signals" not in data:
-        return {"data": [], "metadata": {"total": 0, "filtered": 0}}
-    
-    signals = data["signals"]
+    # Primary: V2 engine (conviction-based, 0-100 scale)
+    data = smart_money_cache.read("signals_v2.json")
+    if data and "signals" in data:
+        signals = data["signals"]
+    else:
+        # Fallback: V1 engine
+        data = smart_money_cache.read("signals.json")
+        if not data or "signals" not in data:
+            return {"data": [], "metadata": {"total": 0, "filtered": 0}}
+        signals = data["signals"]
     
     # Filter by min_score
     filtered = [s for s in signals if s.get("score", 0) >= min_score]
@@ -259,12 +266,13 @@ def api_signals_confluence(
         "metadata": {
             "total": len(signals),
             "filtered": len(filtered),
+            "engine": data.get("metadata", {}).get("engine", "v1"),
             "filters": {
                 "min_score": min_score,
                 "sources": sources,
                 "days": days
             },
-            "last_updated": data.get("last_updated")
+            "last_updated": data.get("metadata", {}).get("last_updated", data.get("last_updated"))
         }
     }
     if wants_markdown(request):
@@ -392,11 +400,17 @@ def api_congress_trades(
     # Enrich trades with company names
     ticker_names.enrich_list(trades, ticker_field="ticker", name_field="company")
     
+    # Count buys/sells from filtered results
+    buy_count = sum(1 for t in trades if (t.get("trade_type") or "").lower() in ("buy", "purchase"))
+    sell_count = sum(1 for t in trades if (t.get("trade_type") or "").lower() in ("sell", "sale"))
+
     result = {
         "data": trades,
         "metadata": {
             "total": len(data.get("trades", [])),
             "filtered": len(trades),
+            "buy_count": buy_count,
+            "sell_count": sell_count,
             "filters": {
                 "party": party,
                 "chamber": chamber,
@@ -404,7 +418,7 @@ def api_congress_trades(
                 "min_amount": min_amount,
                 "days": days
             },
-            "last_updated": data.get("last_updated")
+            "last_updated": data.get("metadata", {}).get("last_updated")
         }
     }
     if wants_markdown(request):

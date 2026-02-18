@@ -8,13 +8,18 @@
 	
 	let { data }: { data: PageData } = $props();
 	
-	// Score breakdown visualization
-	const maxScore = 3;
+	// Score breakdown visualization (v2 engine: 0-100 scale)
+	const maxScore = 100;
 	
 	function renderScoreBar(score: number): string {
-		if (score === 0) return '';
-		const percentage = (score / maxScore) * 100;
+		if (score === 0) return '0';
+		const percentage = Math.min((score / maxScore) * 100, 100);
 		return percentage.toFixed(0);
+	}
+
+	function formatScore(score: number): string {
+		if (score === 0) return '0';
+		return score % 1 === 0 ? score.toString() : score.toFixed(1);
 	}
 	
 	const congressColumns = [
@@ -24,7 +29,7 @@
 			return `<span class="px-2 py-1 rounded-full text-xs font-medium ${color}">${v[0]}</span>`;
 		}},
 		{ key: 'trade_type', label: 'Type', sortable: true, render: (v: string) => {
-			const color = v.includes('Purchase') ? 'bg-green/20 text-green' : 'bg-red/20 text-red';
+			const color = ['Buy','Purchase'].some(k => v.includes(k)) ? 'bg-green/20 text-green' : 'bg-red/20 text-red';
 			return `<span class="px-2 py-1 rounded-full text-xs font-medium ${color}">${v}</span>`;
 		}},
 		{ key: 'amount_range', label: 'Amount', sortable: true },
@@ -155,7 +160,7 @@
 						<div>
 							<div class="flex items-center justify-between mb-2">
 								<span class="text-label">Congress</span>
-								<span class="text-data">{signal.congress_score} / {maxScore}</span>
+								<span class="text-data">{formatScore(signal.congress_score)} / {maxScore}</span>
 							</div>
 							<div class="progress-bar">
 								<div 
@@ -169,7 +174,7 @@
 						<div>
 							<div class="flex items-center justify-between mb-2">
 								<span class="text-label">ARK Invest</span>
-								<span class="text-data">{signal.ark_score} / {maxScore}</span>
+								<span class="text-data">{formatScore(signal.ark_score)} / {maxScore}</span>
 							</div>
 							<div class="progress-bar">
 								<div 
@@ -183,7 +188,7 @@
 						<div>
 							<div class="flex items-center justify-between mb-2">
 								<span class="text-label">Dark Pool</span>
-								<span class="text-data">{signal.darkpool_score} / {maxScore}</span>
+								<span class="text-data">{formatScore(signal.darkpool_score)} / {maxScore}</span>
 							</div>
 							<div class="progress-bar">
 								<div 
@@ -197,7 +202,7 @@
 						<div>
 							<div class="flex items-center justify-between mb-2">
 								<span class="text-label">Institutions</span>
-								<span class="text-data">{signal.institution_score} / {maxScore}</span>
+								<span class="text-data">{formatScore(signal.institution_score)} / {maxScore}</span>
 							</div>
 							<div class="progress-bar">
 								<div 

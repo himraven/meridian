@@ -12,6 +12,7 @@ from . import (
     dividend,
     ticker,
     research,
+    data_health,
 )
 
 
@@ -35,3 +36,6 @@ def register_routers(app: FastAPI) -> None:
 
     # Research report routes
     app.include_router(research.router, tags=["research"])
+
+    # Data health monitoring
+    app.include_router(data_health.router, tags=["ops"])

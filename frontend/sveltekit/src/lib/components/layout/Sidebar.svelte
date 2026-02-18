@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import DataHealthIndicator from './DataHealthIndicator.svelte';
 	
 	interface Props {
 		open: boolean;
@@ -77,7 +78,7 @@
 		</button>
 	</div>
 	
-	<!-- Navigation -->
+	<!-- Navigation + Health Indicator wrapper -->
 	<nav class="sidebar-nav">
 		<!-- Dashboard top link -->
 		<a 
@@ -122,6 +123,9 @@
 			</div>
 		{/each}
 	</nav>
+
+	<!-- Data health indicator — pinned to bottom -->
+	<DataHealthIndicator />
 </aside>
 
 <style>
@@ -134,7 +138,8 @@
 		background: var(--bg-surface);
 		border-right: 1px solid var(--border-default);
 		z-index: 40;
-		overflow-y: auto;
+		display: flex;
+		flex-direction: column;
 		transform: translateX(-100%);
 		transition: transform 150ms ease;
 	}
@@ -182,14 +187,20 @@
 	}
 
 	.sidebar-nav {
-		padding: 12px 8px;
+		padding: 16px 10px;
 		display: flex;
 		flex-direction: column;
 		gap: 2px;
+		flex: 1;
+		overflow-y: auto;
 	}
 
 	.sidebar-section {
-		margin-top: 8px;
+		margin-top: 16px;
+	}
+
+	.sidebar-section:first-of-type {
+		margin-top: 12px;
 	}
 
 	.sidebar-section-header {
@@ -197,23 +208,37 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 6px 10px;
+		padding: 0 8px 6px;
 		background: none;
 		border: none;
 		cursor: pointer;
-		border-radius: 6px;
+		border-radius: 0;
 	}
 
-	.sidebar-section-header:hover {
-		background: var(--bg-elevated);
+	/* Override the .text-label from global — make headers smaller, uppercase, distinct */
+	.sidebar-section-header :global(.text-label) {
+		font-size: 10px !important;
+		font-weight: 600 !important;
+		letter-spacing: 0.08em !important;
+		text-transform: uppercase !important;
+		color: var(--text-dimmed) !important;
+	}
+
+	.sidebar-section-header:hover :global(.text-label) {
+		color: var(--text-muted) !important;
 	}
 
 	.sidebar-chevron {
-		width: 12px;
-		height: 12px;
+		width: 10px;
+		height: 10px;
 		color: var(--text-dimmed);
 		transition: transform 150ms;
 		transform: rotate(-90deg);
+		opacity: 0;
+	}
+
+	.sidebar-section-header:hover .sidebar-chevron {
+		opacity: 1;
 	}
 
 	.sidebar-chevron.expanded {
@@ -221,20 +246,23 @@
 	}
 
 	.sidebar-items {
-		margin-top: 2px;
+		margin-top: 1px;
 		display: flex;
 		flex-direction: column;
-		gap: 1px;
+		gap: 0;
+		padding-left: 4px;
+		border-left: 1px solid var(--border-default);
+		margin-left: 10px;
 	}
 
 	.sidebar-link {
 		display: block;
-		padding: 7px 10px;
+		padding: 6px 12px;
 		font-size: 13px;
 		color: var(--text-muted);
 		text-decoration: none;
-		border-radius: 6px;
-		transition: color 150ms;
+		border-radius: 5px;
+		transition: color 120ms, background 120ms;
 	}
 
 	.sidebar-link:hover {
@@ -245,5 +273,6 @@
 	.sidebar-link-active {
 		color: var(--text-primary) !important;
 		font-weight: 500;
+		background: var(--bg-elevated);
 	}
 </style>

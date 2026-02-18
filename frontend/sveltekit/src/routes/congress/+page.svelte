@@ -88,7 +88,7 @@
 				<div class="text-center">
 					<p class="text-label mb-2">Purchases</p>
 					<p class="text-data-lg text-[var(--green)]">
-						{data.data.data.filter(t => t.trade_type.includes('Purchase')).length}
+						{data.data.metadata.buy_count ?? data.data.data.filter(t => ['Buy','Purchase'].some(k => (t.trade_type||'').includes(k))).length}
 					</p>
 				</div>
 			{/snippet}
@@ -98,7 +98,7 @@
 				<div class="text-center">
 					<p class="text-label mb-2">Sales</p>
 					<p class="text-data-lg text-[var(--red)]">
-						{data.data.data.filter(t => t.trade_type.includes('Sale')).length}
+						{data.data.metadata.sell_count ?? data.data.data.filter(t => ['Sell','Sale'].some(k => (t.trade_type||'').includes(k))).length}
 					</p>
 				</div>
 			{/snippet}

@@ -69,7 +69,7 @@
 		{ key: 'representative', label: 'Representative', sortable: true },
 		{ key: 'party', label: 'Party', sortable: true, render: (v: string) => `<span class="px-2 py-1 rounded-full text-xs font-medium ${v === 'Republican' ? 'bg-red/20 text-red' : 'bg-blue/20 text-blue'}">${v[0]}</span>` },
 		{ key: 'ticker', label: 'Ticker', sortable: true, class: 'font-mono font-bold', render: (v: string) => `<a href="/ticker/${v}" class="text-blue hover:underline">${v}</a>` },
-		{ key: 'trade_type', label: 'Type', sortable: true, render: (v: string) => `<span class="px-2 py-1 rounded-full text-xs font-medium ${v.includes('Purchase') ? 'bg-green/20 text-green' : 'bg-red/20 text-red'}">${v}</span>` },
+		{ key: 'trade_type', label: 'Type', sortable: true, render: (v: string) => `<span class="px-2 py-1 rounded-full text-xs font-medium ${['Buy','Purchase'].some(k => v.includes(k)) ? 'bg-green/20 text-green' : 'bg-red/20 text-red'}">${v}</span>` },
 		{ key: 'amount_range', label: 'Amount', sortable: true },
 		{ key: 'transaction_date', label: 'Date', sortable: true, render: (v: string) => formatDate(v) },
 		{ key: 'excess_return_pct', label: 'Excess Return', sortable: true, class: 'text-right', render: (v: number | null) => {
