@@ -78,7 +78,8 @@ CN_UNIVERSE = [
 ]
 
 # ── Cache ─────────────────────────────────────────────────────────────────
-CACHE_DIR = Path(__file__).parent.parent / "data"
+from api.config import DATA_DIR as _CFG_DATA_DIR
+CACHE_DIR = _CFG_DATA_DIR
 CACHE_FILE = CACHE_DIR / "dividend_screener_cache.json"
 CACHE_EXPIRY_HOURS = 168  # 7 days — dividend data is weekly, no need for aggressive expiry
 

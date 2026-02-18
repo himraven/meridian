@@ -24,7 +24,7 @@ CN_8X30_DIR = f"{SIGNALS_DIR}/cn-8x30"
 SECTOR_BT_FILE = f"{BACKTEST_DIR}/sector_neutral_backtest.json"
 SIGNAL_LOG = f"{SIGNALS_DIR}/signal_log.jsonl"
 
-DATA_DIR = Path(__file__).parent / "data"
+from api.config import DATA_DIR
 STATIC_DIR = Path(__file__).parent.parent / "frontend" / "static"
 
 

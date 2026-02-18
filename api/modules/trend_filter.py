@@ -19,7 +19,8 @@ from typing import Dict, Optional, Tuple
 import yfinance as yf
 
 
-CACHE_FILE = Path(__file__).parent.parent / "data" / "trend_cache.json"
+from api.config import DATA_DIR as _CFG_TF_DIR
+CACHE_FILE = _CFG_TF_DIR / "trend_cache.json"
 
 
 def _load_cache() -> dict:

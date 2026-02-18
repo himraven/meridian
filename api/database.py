@@ -12,7 +12,8 @@ from sqlalchemy.orm import sessionmaker, DeclarativeBase
 # ── Database URL ───────────────────────────────────────────────────────────
 # Default: SQLite in data/ directory
 # Override with DATABASE_URL env var for PostgreSQL, etc.
-_default_db_path = Path(__file__).parent.parent / "data" / "smartmoney.db"
+from api.config import DATA_DIR as _CFG_DB_DIR
+_default_db_path = _CFG_DB_DIR / "smartmoney.db"
 DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{_default_db_path}")
 
 # ── Engine ─────────────────────────────────────────────────────────────────
