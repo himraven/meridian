@@ -4,7 +4,7 @@
 // ═══════════════════════════════════════════════════════════════════
 
 const API_BASE = typeof window === 'undefined' 
-	? (process.env.API_URL || 'http://localhost:8501') + '/api'
+	? (process.env.API_URL || 'http://localhost:8502') + '/api'
 	: '/api';
 
 export class ApiError extends Error {
@@ -127,4 +127,10 @@ export const api = {
 	
 	// Dividend
 	dividend: () => fetchApi('/dividend-screener'),
+	
+	// Research
+	research: {
+		list: () => fetchApi('/research'),
+		detail: (ticker: string) => fetchApi(`/research/${ticker}`),
+	},
 };

@@ -153,7 +153,7 @@ def main():
     
     print()
     print("Next steps:")
-    print("1. SCP to Mac Mini: scp data/backfill/darkpool_backfill.parquet macmini:~/nova-workspace/data/")
+    print("1. SCP to Mac Mini: scp data/backfill/darkpool_backfill.parquet macmini:~/meridian-workspace/data/")
     print("2. Import to DuckDB on Mac Mini")
     print("=" * 80)
 

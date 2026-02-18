@@ -11,6 +11,7 @@ from . import (
     cn,
     dividend,
     ticker,
+    research,
 )
 
 
@@ -31,3 +32,6 @@ def register_routers(app: FastAPI) -> None:
 
     # Ticker lookup routes
     app.include_router(ticker.router, tags=["ticker"])
+
+    # Research report routes
+    app.include_router(research.router, tags=["research"])

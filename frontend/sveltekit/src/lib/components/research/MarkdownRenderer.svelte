@@ -16,18 +16,18 @@
   });
 </script>
 
-<div class="nova-prose">
+<div class="meridian-prose">
   {@html html}
 </div>
 
 <style>
-  .nova-prose {
+  .meridian-prose {
     color: var(--text-secondary);
     font-size: 14px;
     line-height: 1.7;
   }
 
-  .nova-prose :global(h1) {
+  .meridian-prose :global(h1) {
     font-size: 20px;
     font-weight: 600;
     color: var(--text-primary);
@@ -37,47 +37,47 @@
     border-bottom: 1px solid var(--border-default);
   }
 
-  .nova-prose :global(h2) {
+  .meridian-prose :global(h2) {
     font-size: 16px;
     font-weight: 600;
     color: var(--text-primary);
     margin: 24px 0 10px;
   }
 
-  .nova-prose :global(h3) {
+  .meridian-prose :global(h3) {
     font-size: 14px;
     font-weight: 500;
     color: var(--text-primary);
     margin: 20px 0 8px;
   }
 
-  .nova-prose :global(p) {
+  .meridian-prose :global(p) {
     margin: 0 0 14px;
     color: var(--text-secondary);
   }
 
-  .nova-prose :global(ul),
-  .nova-prose :global(ol) {
+  .meridian-prose :global(ul),
+  .meridian-prose :global(ol) {
     padding-left: 20px;
     margin: 0 0 14px;
   }
 
-  .nova-prose :global(li) {
+  .meridian-prose :global(li) {
     margin-bottom: 6px;
     color: var(--text-secondary);
   }
 
-  .nova-prose :global(strong) {
+  .meridian-prose :global(strong) {
     font-weight: 600;
     color: var(--text-primary);
   }
 
-  .nova-prose :global(em) {
+  .meridian-prose :global(em) {
     color: var(--text-muted);
     font-style: italic;
   }
 
-  .nova-prose :global(blockquote) {
+  .meridian-prose :global(blockquote) {
     border-left: 3px solid var(--border-hover);
     padding: 8px 16px;
     margin: 16px 0;
@@ -86,7 +86,7 @@
     border-radius: 0 6px 6px 0;
   }
 
-  .nova-prose :global(code) {
+  .meridian-prose :global(code) {
     font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
     background: var(--bg-elevated);
@@ -96,7 +96,7 @@
     color: var(--text-primary);
   }
 
-  .nova-prose :global(pre) {
+  .meridian-prose :global(pre) {
     background: var(--bg-elevated);
     border: 1px solid var(--border-default);
     border-radius: 8px;
@@ -105,13 +105,13 @@
     margin: 16px 0;
   }
 
-  .nova-prose :global(pre code) {
+  .meridian-prose :global(pre code) {
     background: none;
     border: none;
     padding: 0;
   }
 
-  .nova-prose :global(hr) {
+  .meridian-prose :global(hr) {
     border: none;
     border-top: 1px solid var(--border-default);
     margin: 24px 0;

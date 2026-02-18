@@ -13,8 +13,8 @@ from datetime import datetime
 from pathlib import Path
 
 VPS_DATA_FILE = Path("")
-MAC_DUCKDB_PATH = "~/nova-workspace/data/stocks.duckdb"
-MAC_PYTHON_VENV = "~/nova-workspace/.venv/bin/activate"
+MAC_DUCKDB_PATH = "~/meridian-workspace/data/stocks.duckdb"
+MAC_PYTHON_VENV = "~/meridian-workspace/.venv/bin/activate"
 
 def load_vps_data():
     """Load latest darkpool.json from VPS"""

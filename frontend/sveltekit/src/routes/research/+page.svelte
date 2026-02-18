@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { availableReports } from '$lib/data/mock-research';
-
   interface ReportCard {
     ticker: string;
     name: string;
@@ -8,9 +6,11 @@
     signal: string;
   }
 
+  let { data } = $props();
+
   let searchQuery = $state('');
 
-  const allReports: ReportCard[] = availableReports.map(r => ({ ...r }));
+  const allReports: ReportCard[] = (data.reports ?? []).map((r: ReportCard) => ({ ...r }));
 
   const filtered = $derived(
     searchQuery.trim() === ''

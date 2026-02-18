@@ -48,16 +48,16 @@ COPY --chown=appuser:appuser requirements.txt /app/
 # Switch to non-root user
 USER appuser
 
-# Expose port
-EXPOSE 8501
+# Expose port (configurable via PORT env var, default 8502)
+EXPOSE 8502
 
-# Health check
+# Health check — uses PORT env var
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:8501/api/health || exit 1
+    CMD curl -f http://localhost:${PORT:-8502}/api/health || exit 1
 
 # Calculate optimal workers based on CPU cores (2 * cores + 1)
 # Default to 3 workers if can't determine
 ENV WORKERS=3
 
 # Run uvicorn with production settings
-CMD ["sh", "-c", "workers=$(python -c 'import os; print(min(2 * os.cpu_count() + 1, 8) if os.cpu_count() else 3)' 2>/dev/null || echo 3); exec uvicorn api.main:app --host 0.0.0.0 --port 8501 --workers $workers --log-level info --access-log --proxy-headers --forwarded-allow-ips='*'"]
+CMD ["sh", "-c", "workers=$(python -c 'import os; print(min(2 * os.cpu_count() + 1, 8) if os.cpu_count() else 3)' 2>/dev/null || echo 3); exec uvicorn api.main:app --host 0.0.0.0 --port ${PORT:-8502} --workers $workers --log-level info --access-log --proxy-headers --forwarded-allow-ips='*'"]
