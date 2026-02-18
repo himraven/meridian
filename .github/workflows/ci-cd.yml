@@ -1,0 +1,61 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install fastapi uvicorn httpx psutil orjson
+          pip install pytest ruff
+          pip install requests python-dateutil
+
+      - name: Lint (ruff)
+        run: ruff check api/ tests/ --select E,F,W --ignore E501,E402,F841 --exit-zero
+
+      - name: Test
+        run: pytest tests/ -q --tb=short
+        env:
+          TESTING: "1"
+
+  deploy:
+    name: Deploy
+    needs: ci
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd ${{ secrets.DEPLOY_PATH }}
+            git pull origin main
+            docker compose up --build -d
+            sleep 5
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8501/health)
+            if [ "$HTTP_CODE" != "200" ]; then
+              echo "❌ Health check failed (HTTP $HTTP_CODE)"
+              exit 1
+            fi
+            echo "✅ Deploy successful, health check passed"

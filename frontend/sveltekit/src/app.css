@@ -1,0 +1,251 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════════════════
+   Meridian Design Tokens
+   Zinc-based neutral dark. No blue/purple. No glow. No gradients.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Backgrounds — 3 elevation levels only */
+  --bg-base:       #09090b;    /* Page background (zinc-950) */
+  --bg-surface:    #18181b;    /* Cards, panels (zinc-900) */
+  --bg-elevated:   #27272a;    /* Modals, dropdowns, hover states (zinc-800) */
+
+  /* Borders — subtle, functional */
+  --border-default: #27272a;
+  --border-hover:   #3f3f46;
+  --border-focus:   #52525b;
+
+  /* Text — 4 levels */
+  --text-primary:   #fafafa;
+  --text-secondary: #a1a1aa;
+  --text-muted:     #71717a;
+  --text-dimmed:    #52525b;
+
+  /* Semantic — data only */
+  --green:  #22c55e;
+  --red:    #f87171;
+  --amber:  #f59e0b;
+  --blue:   #60a5fa;
+
+  /* A股风格 override */
+}
+
+[data-market-style="cn"] {
+  --green: #ef4444;
+  --red:   #22c55e;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Base
+   ═══════════════════════════════════════════════════════════════════ */
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-secondary);
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Typography Utilities
+   ═══════════════════════════════════════════════════════════════════ */
+
+.text-display {
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.text-heading {
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.text-subhead {
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.text-body {
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.text-caption {
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Section labels, table headers — monospace, uppercase, muted */
+.text-label,
+.label-mono {
+  font-family: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+/* Financial data — monospace, tabular */
+.text-data {
+  font-family: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.text-data-lg {
+  font-family: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', monospace;
+  font-size: 24px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Tabular numbers utility */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Semantic Color Utilities
+   ═══════════════════════════════════════════════════════════════════ */
+
+.color-up,
+.color-green { color: var(--green); }
+.color-down,
+.color-red   { color: var(--red); }
+.color-amber { color: var(--amber); }
+.color-blue  { color: var(--blue); }
+.color-muted { color: var(--text-muted); }
+
+/* Ticker / symbol display */
+.ticker-code {
+  font-family: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', monospace;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.ticker-name {
+  font-size: 12px;
+  color: var(--text-muted);
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Table Styles
+   ═══════════════════════════════════════════════════════════════════ */
+
+.rn-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.rn-table thead tr {
+  border-bottom: 1px solid var(--border-default);
+}
+
+.rn-table thead th {
+  font-family: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  padding: 12px 16px;
+  text-align: left;
+}
+
+.rn-table tbody td {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.rn-table tbody tr:hover td {
+  background: var(--bg-elevated);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Progress Bar
+   ═══════════════════════════════════════════════════════════════════ */
+
+.progress-bar {
+  height: 4px;
+  border-radius: 9999px;
+  transition: width 300ms ease-out;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Scrollbar
+   ═══════════════════════════════════════════════════════════════════ */
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--border-hover);
+  border-radius: 2px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: var(--border-focus);
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Mobile
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  .rn-table {
+    font-size: 12px;
+  }
+
+  .rn-table thead th,
+  .rn-table tbody td {
+    padding: 8px 10px;
+  }
+}

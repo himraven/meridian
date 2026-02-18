@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+*.egg
+.pytest_cache/
+
+# Data (local, not committed)
+data/
+*.db
+*.duckdb
+
+# Environment
+.env
+*.env.local
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+.svelte-kit/
+build/
+
+# Docker
+*.tar
