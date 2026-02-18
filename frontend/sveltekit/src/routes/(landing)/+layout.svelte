@@ -20,9 +20,10 @@
 <style>
 	.landing-root {
 		min-height: 100vh;
-		background: #080910;
-		color: #e2e8f0;
+		background: #09090b;
+		color: #a1a1aa;
 		font-family: 'Inter', -apple-system, system-ui, sans-serif;
 		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
 	}
 </style>

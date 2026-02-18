@@ -82,11 +82,11 @@
 	<nav class="sidebar-nav">
 		<!-- Dashboard top link -->
 		<a 
-			href="/" 
-			class="sidebar-link {$page.url.pathname === '/' ? 'sidebar-link-active' : ''}"
+			href="/dashboard" 
+			class="sidebar-link {$page.url.pathname === '/dashboard' ? 'sidebar-link-active' : ''}"
 			onclick={() => { if (window.innerWidth < 768) onClose(); }}
 		>
-			Home
+			Dashboard
 		</a>
 		
 		<!-- Navigation sections -->

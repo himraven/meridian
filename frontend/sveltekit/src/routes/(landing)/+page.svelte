@@ -80,9 +80,9 @@
 
 	// ── Signal helpers ───────────────────────────────────────────────
 	function getScoreColor(score: number): string {
-		if (score >= 80) return '#06b6d4';
-		if (score >= 65) return '#38bdf8';
-		return '#7dd3fc';
+		if (score >= 80) return '#fafafa';
+		if (score >= 65) return '#a1a1aa';
+		return '#71717a';
 	}
 </script>
 
@@ -115,8 +115,8 @@
 		<svg class="network-svg" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
 			<defs>
 				<radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
-					<stop offset="0%" stop-color="#06b6d4" stop-opacity="0.8"/>
-					<stop offset="100%" stop-color="#06b6d4" stop-opacity="0"/>
+					<stop offset="0%" stop-color="#a1a1aa" stop-opacity="0.5"/>
+					<stop offset="100%" stop-color="#a1a1aa" stop-opacity="0"/>
 				</radialGradient>
 				<filter id="blur4">
 					<feGaussianBlur stdDeviation="4"/>
@@ -125,49 +125,49 @@
 					<feGaussianBlur stdDeviation="2"/>
 				</filter>
 				<linearGradient id="lineGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
-					<stop offset="0%" stop-color="#06b6d4" stop-opacity="0"/>
-					<stop offset="50%" stop-color="#06b6d4" stop-opacity="0.6"/>
-					<stop offset="100%" stop-color="#06b6d4" stop-opacity="0"/>
+					<stop offset="0%" stop-color="#71717a" stop-opacity="0"/>
+					<stop offset="50%" stop-color="#71717a" stop-opacity="0.4"/>
+					<stop offset="100%" stop-color="#71717a" stop-opacity="0"/>
 				</linearGradient>
 				<linearGradient id="lineGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
-					<stop offset="0%" stop-color="#0ea5e9" stop-opacity="0"/>
-					<stop offset="50%" stop-color="#0ea5e9" stop-opacity="0.4"/>
-					<stop offset="100%" stop-color="#0ea5e9" stop-opacity="0"/>
+					<stop offset="0%" stop-color="#52525b" stop-opacity="0"/>
+					<stop offset="50%" stop-color="#52525b" stop-opacity="0.3"/>
+					<stop offset="100%" stop-color="#52525b" stop-opacity="0"/>
 				</linearGradient>
 			</defs>
 
 			<!-- Connection lines (data flows) -->
 			<g class="connections" opacity="0.5">
-				<line x1="180" y1="120" x2="420" y2="200" stroke="#06b6d4" stroke-width="0.5" class="conn-line" style="--delay: 0s"/>
-				<line x1="420" y1="200" x2="640" y2="150" stroke="#06b6d4" stroke-width="0.5" class="conn-line" style="--delay: 0.4s"/>
-				<line x1="640" y1="150" x2="850" y2="220" stroke="#06b6d4" stroke-width="0.5" class="conn-line" style="--delay: 0.8s"/>
-				<line x1="850" y1="220" x2="1050" y2="140" stroke="#06b6d4" stroke-width="0.5" class="conn-line" style="--delay: 1.2s"/>
-				<line x1="420" y1="200" x2="380" y2="380" stroke="#0ea5e9" stroke-width="0.5" class="conn-line" style="--delay: 0.2s"/>
-				<line x1="640" y1="150" x2="680" y2="340" stroke="#0ea5e9" stroke-width="0.5" class="conn-line" style="--delay: 0.6s"/>
-				<line x1="850" y1="220" x2="800" y2="400" stroke="#06b6d4" stroke-width="0.5" class="conn-line" style="--delay: 1.0s"/>
-				<line x1="380" y1="380" x2="680" y2="340" stroke="#06b6d4" stroke-width="0.5" class="conn-line" style="--delay: 0.3s"/>
-				<line x1="680" y1="340" x2="800" y2="400" stroke="#0ea5e9" stroke-width="0.5" class="conn-line" style="--delay: 0.7s"/>
-				<line x1="180" y1="120" x2="380" y2="380" stroke="#06b6d4" stroke-width="0.3" class="conn-line" style="--delay: 1.5s"/>
-				<line x1="800" y1="400" x2="1050" y2="500" stroke="#0ea5e9" stroke-width="0.5" class="conn-line" style="--delay: 0.9s"/>
-				<line x1="380" y1="380" x2="200" y2="520" stroke="#06b6d4" stroke-width="0.3" class="conn-line" style="--delay: 1.1s"/>
-				<line x1="680" y1="340" x2="550" y2="520" stroke="#0ea5e9" stroke-width="0.3" class="conn-line" style="--delay: 1.3s"/>
-				<line x1="1050" y1="140" x2="1100" y2="380" stroke="#06b6d4" stroke-width="0.3" class="conn-line" style="--delay: 0.5s"/>
-				<line x1="1100" y1="380" x2="1050" y2="500" stroke="#0ea5e9" stroke-width="0.3" class="conn-line" style="--delay: 1.4s"/>
+				<line x1="180" y1="120" x2="420" y2="200" stroke="#52525b" stroke-width="0.5" class="conn-line" style="--delay: 0s"/>
+				<line x1="420" y1="200" x2="640" y2="150" stroke="#52525b" stroke-width="0.5" class="conn-line" style="--delay: 0.4s"/>
+				<line x1="640" y1="150" x2="850" y2="220" stroke="#52525b" stroke-width="0.5" class="conn-line" style="--delay: 0.8s"/>
+				<line x1="850" y1="220" x2="1050" y2="140" stroke="#52525b" stroke-width="0.5" class="conn-line" style="--delay: 1.2s"/>
+				<line x1="420" y1="200" x2="380" y2="380" stroke="#3f3f46" stroke-width="0.5" class="conn-line" style="--delay: 0.2s"/>
+				<line x1="640" y1="150" x2="680" y2="340" stroke="#3f3f46" stroke-width="0.5" class="conn-line" style="--delay: 0.6s"/>
+				<line x1="850" y1="220" x2="800" y2="400" stroke="#52525b" stroke-width="0.5" class="conn-line" style="--delay: 1.0s"/>
+				<line x1="380" y1="380" x2="680" y2="340" stroke="#52525b" stroke-width="0.5" class="conn-line" style="--delay: 0.3s"/>
+				<line x1="680" y1="340" x2="800" y2="400" stroke="#3f3f46" stroke-width="0.5" class="conn-line" style="--delay: 0.7s"/>
+				<line x1="180" y1="120" x2="380" y2="380" stroke="#52525b" stroke-width="0.3" class="conn-line" style="--delay: 1.5s"/>
+				<line x1="800" y1="400" x2="1050" y2="500" stroke="#3f3f46" stroke-width="0.5" class="conn-line" style="--delay: 0.9s"/>
+				<line x1="380" y1="380" x2="200" y2="520" stroke="#52525b" stroke-width="0.3" class="conn-line" style="--delay: 1.1s"/>
+				<line x1="680" y1="340" x2="550" y2="520" stroke="#3f3f46" stroke-width="0.3" class="conn-line" style="--delay: 1.3s"/>
+				<line x1="1050" y1="140" x2="1100" y2="380" stroke="#52525b" stroke-width="0.3" class="conn-line" style="--delay: 0.5s"/>
+				<line x1="1100" y1="380" x2="1050" y2="500" stroke="#3f3f46" stroke-width="0.3" class="conn-line" style="--delay: 1.4s"/>
 			</g>
 
 			<!-- Flowing data pulses along connections -->
 			<g class="data-pulses">
-				<circle r="2" fill="#06b6d4" opacity="0.9" class="pulse-dot">
+				<circle r="2" fill="#a1a1aa" opacity="0.9" class="pulse-dot">
 					<animateMotion dur="3s" repeatCount="indefinite" begin="0s">
 						<mpath href="#path1"/>
 					</animateMotion>
 				</circle>
-				<circle r="1.5" fill="#0ea5e9" opacity="0.8" class="pulse-dot">
+				<circle r="1.5" fill="#71717a" opacity="0.8" class="pulse-dot">
 					<animateMotion dur="4s" repeatCount="indefinite" begin="1s">
 						<mpath href="#path2"/>
 					</animateMotion>
 				</circle>
-				<circle r="2" fill="#06b6d4" opacity="0.9" class="pulse-dot">
+				<circle r="2" fill="#a1a1aa" opacity="0.9" class="pulse-dot">
 					<animateMotion dur="3.5s" repeatCount="indefinite" begin="2s">
 						<mpath href="#path3"/>
 					</animateMotion>
@@ -186,64 +186,64 @@
 				<!-- Primary nodes — larger, brighter -->
 				<g class="node primary" style="--pulse-delay: 0s">
 					<circle cx="420" cy="200" r="14" fill="url(#nodeGlow)" filter="url(#blur4)"/>
-					<circle cx="420" cy="200" r="3" fill="#06b6d4" class="node-core"/>
-					<circle cx="420" cy="200" r="6" fill="none" stroke="#06b6d4" stroke-width="0.8" class="node-ring" opacity="0.5"/>
+					<circle cx="420" cy="200" r="3" fill="#a1a1aa" class="node-core"/>
+					<circle cx="420" cy="200" r="6" fill="none" stroke="#52525b" stroke-width="0.8" class="node-ring" opacity="0.5"/>
 				</g>
 				<g class="node primary" style="--pulse-delay: 0.8s">
 					<circle cx="640" cy="150" r="12" fill="url(#nodeGlow)" filter="url(#blur4)"/>
-					<circle cx="640" cy="150" r="3" fill="#06b6d4" class="node-core"/>
-					<circle cx="640" cy="150" r="6" fill="none" stroke="#06b6d4" stroke-width="0.8" class="node-ring" opacity="0.5"/>
+					<circle cx="640" cy="150" r="3" fill="#a1a1aa" class="node-core"/>
+					<circle cx="640" cy="150" r="6" fill="none" stroke="#52525b" stroke-width="0.8" class="node-ring" opacity="0.5"/>
 				</g>
 				<g class="node primary" style="--pulse-delay: 1.4s">
 					<circle cx="680" cy="340" r="16" fill="url(#nodeGlow)" filter="url(#blur4)"/>
-					<circle cx="680" cy="340" r="4" fill="#06b6d4" class="node-core"/>
-					<circle cx="680" cy="340" r="8" fill="none" stroke="#06b6d4" stroke-width="0.8" class="node-ring" opacity="0.5"/>
+					<circle cx="680" cy="340" r="4" fill="#a1a1aa" class="node-core"/>
+					<circle cx="680" cy="340" r="8" fill="none" stroke="#52525b" stroke-width="0.8" class="node-ring" opacity="0.5"/>
 				</g>
 
 				<!-- Secondary nodes -->
 				<g class="node secondary" style="--pulse-delay: 0.3s">
 					<circle cx="180" cy="120" r="8" fill="url(#nodeGlow)" filter="url(#blur2)"/>
-					<circle cx="180" cy="120" r="2" fill="#0ea5e9" class="node-core"/>
+					<circle cx="180" cy="120" r="2" fill="#71717a" class="node-core"/>
 				</g>
 				<g class="node secondary" style="--pulse-delay: 1.1s">
 					<circle cx="850" cy="220" r="10" fill="url(#nodeGlow)" filter="url(#blur2)"/>
-					<circle cx="850" cy="220" r="2.5" fill="#0ea5e9" class="node-core"/>
+					<circle cx="850" cy="220" r="2.5" fill="#71717a" class="node-core"/>
 				</g>
 				<g class="node secondary" style="--pulse-delay: 0.6s">
 					<circle cx="1050" cy="140" r="8" fill="url(#nodeGlow)" filter="url(#blur2)"/>
-					<circle cx="1050" cy="140" r="2" fill="#06b6d4" class="node-core"/>
+					<circle cx="1050" cy="140" r="2" fill="#a1a1aa" class="node-core"/>
 				</g>
 				<g class="node secondary" style="--pulse-delay: 1.7s">
 					<circle cx="380" cy="380" r="10" fill="url(#nodeGlow)" filter="url(#blur2)"/>
-					<circle cx="380" cy="380" r="2.5" fill="#0ea5e9" class="node-core"/>
+					<circle cx="380" cy="380" r="2.5" fill="#71717a" class="node-core"/>
 				</g>
 				<g class="node secondary" style="--pulse-delay: 0.9s">
 					<circle cx="800" cy="400" r="9" fill="url(#nodeGlow)" filter="url(#blur2)"/>
-					<circle cx="800" cy="400" r="2" fill="#06b6d4" class="node-core"/>
+					<circle cx="800" cy="400" r="2" fill="#a1a1aa" class="node-core"/>
 				</g>
 				<g class="node secondary" style="--pulse-delay: 0.2s">
 					<circle cx="1050" cy="500" r="7" fill="url(#nodeGlow)" filter="url(#blur2)"/>
-					<circle cx="1050" cy="500" r="2" fill="#0ea5e9" class="node-core"/>
+					<circle cx="1050" cy="500" r="2" fill="#71717a" class="node-core"/>
 				</g>
 				<g class="node secondary" style="--pulse-delay: 1.3s">
 					<circle cx="200" cy="520" r="6" fill="url(#nodeGlow)" filter="url(#blur2)"/>
-					<circle cx="200" cy="520" r="1.5" fill="#0ea5e9" class="node-core"/>
+					<circle cx="200" cy="520" r="1.5" fill="#71717a" class="node-core"/>
 				</g>
 				<g class="node secondary" style="--pulse-delay: 2.0s">
 					<circle cx="550" cy="520" r="7" fill="url(#nodeGlow)" filter="url(#blur2)"/>
-					<circle cx="550" cy="520" r="2" fill="#06b6d4" class="node-core"/>
+					<circle cx="550" cy="520" r="2" fill="#a1a1aa" class="node-core"/>
 				</g>
 				<g class="node secondary" style="--pulse-delay: 0.5s">
 					<circle cx="1100" cy="380" r="6" fill="url(#nodeGlow)" filter="url(#blur2)"/>
-					<circle cx="1100" cy="380" r="1.5" fill="#0ea5e9" class="node-core"/>
+					<circle cx="1100" cy="380" r="1.5" fill="#71717a" class="node-core"/>
 				</g>
 
 				<!-- Ticker labels near key nodes -->
-				<text x="430" y="188" font-family="JetBrains Mono, monospace" font-size="9" fill="#06b6d4" opacity="0.6" letter-spacing="0.05em">NVDA</text>
-				<text x="650" y="138" font-family="JetBrains Mono, monospace" font-size="9" fill="#06b6d4" opacity="0.6" letter-spacing="0.05em">MSFT</text>
-				<text x="690" y="328" font-family="JetBrains Mono, monospace" font-size="9" fill="#06b6d4" opacity="0.6" letter-spacing="0.05em">AAPL</text>
-				<text x="860" y="208" font-family="JetBrains Mono, monospace" font-size="9" fill="#0ea5e9" opacity="0.5" letter-spacing="0.05em">TSM</text>
-				<text x="390" y="368" font-family="JetBrains Mono, monospace" font-size="9" fill="#0ea5e9" opacity="0.5" letter-spacing="0.05em">META</text>
+				<text x="430" y="188" font-family="JetBrains Mono, monospace" font-size="9" fill="#a1a1aa" opacity="0.6" letter-spacing="0.05em">NVDA</text>
+				<text x="650" y="138" font-family="JetBrains Mono, monospace" font-size="9" fill="#a1a1aa" opacity="0.6" letter-spacing="0.05em">MSFT</text>
+				<text x="690" y="328" font-family="JetBrains Mono, monospace" font-size="9" fill="#a1a1aa" opacity="0.6" letter-spacing="0.05em">AAPL</text>
+				<text x="860" y="208" font-family="JetBrains Mono, monospace" font-size="9" fill="#71717a" opacity="0.5" letter-spacing="0.05em">TSM</text>
+				<text x="390" y="368" font-family="JetBrains Mono, monospace" font-size="9" fill="#71717a" opacity="0.5" letter-spacing="0.05em">META</text>
 			</g>
 		</svg>
 
@@ -326,9 +326,9 @@
 			>
 				<div class="feature-icon">
 					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#06b6d4" stroke-width="1.5" stroke-linejoin="round"/>
-						<path d="M2 17L12 22L22 17" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-						<path d="M2 12L12 17L22 12" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+						<path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#52525b" stroke-width="1.5" stroke-linejoin="round"/>
+						<path d="M2 17L12 22L22 17" stroke="#52525b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+						<path d="M2 12L12 17L22 12" stroke="#52525b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 					</svg>
 				</div>
 				<h3 class="feature-title">Congress Trades</h3>
@@ -346,9 +346,9 @@
 			>
 				<div class="feature-icon">
 					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path d="M21 16V8C21 6.9 20.1 6 19 6H5C3.9 6 3 6.9 3 8V16C3 17.1 3.9 18 5 18H19C20.1 18 21 17.1 21 16Z" stroke="#06b6d4" stroke-width="1.5"/>
-						<path d="M7 12H9M11 12H13" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round"/>
-						<path d="M3 10H21" stroke="#06b6d4" stroke-width="1.5"/>
+						<path d="M21 16V8C21 6.9 20.1 6 19 6H5C3.9 6 3 6.9 3 8V16C3 17.1 3.9 18 5 18H19C20.1 18 21 17.1 21 16Z" stroke="#52525b" stroke-width="1.5"/>
+						<path d="M7 12H9M11 12H13" stroke="#52525b" stroke-width="1.5" stroke-linecap="round"/>
+						<path d="M3 10H21" stroke="#52525b" stroke-width="1.5"/>
 					</svg>
 				</div>
 				<h3 class="feature-title">Dark Pool Flow</h3>
@@ -366,8 +366,8 @@
 			>
 				<div class="feature-icon">
 					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<rect x="3" y="3" width="18" height="18" rx="2" stroke="#06b6d4" stroke-width="1.5"/>
-						<path d="M7 8H17M7 12H14M7 16H11" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round"/>
+						<rect x="3" y="3" width="18" height="18" rx="2" stroke="#52525b" stroke-width="1.5"/>
+						<path d="M7 8H17M7 12H14M7 16H11" stroke="#52525b" stroke-width="1.5" stroke-linecap="round"/>
 					</svg>
 				</div>
 				<h3 class="feature-title">13F Filings</h3>
@@ -385,8 +385,8 @@
 			>
 				<div class="feature-icon">
 					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path d="M5 18L9 14L13 16L19 8" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-						<circle cx="19" cy="8" r="2" stroke="#06b6d4" stroke-width="1.5"/>
+						<path d="M5 18L9 14L13 16L19 8" stroke="#52525b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+						<circle cx="19" cy="8" r="2" stroke="#52525b" stroke-width="1.5"/>
 					</svg>
 				</div>
 				<h3 class="feature-title">ARK Innovation</h3>
@@ -532,17 +532,11 @@
 </footer>
 
 <style>
-	/* ── CSS Variables ──────────────────────────────────────────── */
-	:global(:root) {
-		--cyan: #06b6d4;
-		--cyan-dim: #0891b2;
-		--cyan-glow: rgba(6, 182, 212, 0.15);
-		--cyan-glow-strong: rgba(6, 182, 212, 0.25);
-		--bg-landing: #080910;
-		--bg-card: rgba(15, 17, 26, 0.8);
-		--border-card: rgba(255, 255, 255, 0.06);
-		--border-card-hover: rgba(6, 182, 212, 0.3);
-	}
+	/* ══════════════════════════════════════════════════════════════
+	   Unified with Dashboard Design Tokens
+	   Zinc-based neutral dark. Same palette as app.css.
+	   Accent: only the dashboard's semantic green (#22c55e) sparingly.
+	   ══════════════════════════════════════════════════════════════ */
 
 	/* ── Nav ────────────────────────────────────────────────────── */
 	.landing-nav {
@@ -556,10 +550,10 @@
 		justify-content: space-between;
 		padding: 0 2rem;
 		height: 60px;
-		background: rgba(8, 9, 16, 0.85);
+		background: rgba(9, 9, 11, 0.85);
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
-		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+		border-bottom: 1px solid #27272a;
 	}
 
 	.nav-logo {
@@ -572,7 +566,8 @@
 	.logo-mark {
 		width: 32px;
 		height: 32px;
-		background: linear-gradient(135deg, #06b6d4, #0284c7);
+		background: #27272a;
+		border: 1px solid #3f3f46;
 		border-radius: 8px;
 		display: flex;
 		align-items: center;
@@ -580,7 +575,7 @@
 		font-family: 'Outfit', 'Sora', sans-serif;
 		font-weight: 700;
 		font-size: 16px;
-		color: white;
+		color: #fafafa;
 		letter-spacing: -0.02em;
 		flex-shrink: 0;
 	}
@@ -596,7 +591,7 @@
 		font-family: 'Outfit', 'Sora', sans-serif;
 		font-weight: 600;
 		font-size: 17px;
-		color: #f1f5f9;
+		color: #fafafa;
 		letter-spacing: -0.02em;
 	}
 
@@ -605,19 +600,19 @@
 		align-items: center;
 		gap: 6px;
 		padding: 7px 16px;
-		background: rgba(6, 182, 212, 0.1);
-		border: 1px solid rgba(6, 182, 212, 0.25);
+		background: #18181b;
+		border: 1px solid #3f3f46;
 		border-radius: 8px;
 		font-size: 13px;
 		font-weight: 500;
-		color: #06b6d4;
+		color: #fafafa;
 		text-decoration: none;
 		transition: background 0.2s, border-color 0.2s;
 	}
 
 	.nav-cta:hover {
-		background: rgba(6, 182, 212, 0.18);
-		border-color: rgba(6, 182, 212, 0.45);
+		background: #27272a;
+		border-color: #52525b;
 	}
 
 	/* ── Hero ───────────────────────────────────────────────────── */
@@ -641,8 +636,8 @@
 		position: absolute;
 		inset: 0;
 		background-image:
-			linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
-			linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
+			linear-gradient(rgba(161, 161, 170, 0.03) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(161, 161, 170, 0.03) 1px, transparent 1px);
 		background-size: 60px 60px;
 	}
 
@@ -651,7 +646,7 @@
 		inset: 0;
 		width: 100%;
 		height: 100%;
-		opacity: 0.7;
+		opacity: 0.5;
 	}
 
 	/* Connection line animation */
@@ -661,8 +656,8 @@
 	}
 
 	@keyframes line-pulse {
-		0%, 100% { opacity: 0.3; }
-		50% { opacity: 0.7; }
+		0%, 100% { opacity: 0.15; }
+		50% { opacity: 0.4; }
 	}
 
 	/* Node core pulse */
@@ -677,20 +672,20 @@
 	}
 
 	@keyframes node-breathe {
-		0%, 100% { opacity: 0.8; r: 3px; }
-		50% { opacity: 1; r: 4px; }
+		0%, 100% { opacity: 0.6; r: 3px; }
+		50% { opacity: 0.9; r: 4px; }
 	}
 
 	@keyframes ring-expand {
-		0% { r: 5px; opacity: 0.5; }
-		50% { r: 9px; opacity: 0.15; }
-		100% { r: 5px; opacity: 0.5; }
+		0% { r: 5px; opacity: 0.3; }
+		50% { r: 9px; opacity: 0.08; }
+		100% { r: 5px; opacity: 0.3; }
 	}
 
 	.hero-vignette {
 		position: absolute;
 		inset: 0;
-		background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 20%, #080910 80%);
+		background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 20%, #09090b 80%);
 	}
 
 	/* Hero content */
@@ -707,12 +702,12 @@
 		align-items: center;
 		gap: 8px;
 		padding: 6px 14px;
-		border: 1px solid rgba(6, 182, 212, 0.2);
+		border: 1px solid #3f3f46;
 		border-radius: 999px;
-		background: rgba(6, 182, 212, 0.06);
+		background: #18181b;
 		font-size: 12px;
 		font-weight: 500;
-		color: #67e8f9;
+		color: #a1a1aa;
 		letter-spacing: 0.03em;
 		margin-bottom: 2.5rem;
 	}
@@ -720,15 +715,15 @@
 	.badge-dot {
 		width: 6px;
 		height: 6px;
-		background: #06b6d4;
+		background: #22c55e;
 		border-radius: 50%;
 		animation: dot-pulse 2s ease-in-out infinite;
 		flex-shrink: 0;
 	}
 
 	@keyframes dot-pulse {
-		0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.4); }
-		50% { opacity: 0.8; box-shadow: 0 0 0 4px rgba(6, 182, 212, 0); }
+		0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.3); }
+		50% { opacity: 0.8; box-shadow: 0 0 0 4px rgba(34, 197, 94, 0); }
 	}
 
 	.hero-headline {
@@ -737,20 +732,18 @@
 		font-weight: 800;
 		line-height: 1.05;
 		letter-spacing: -0.03em;
-		color: #f8fafc;
+		color: #fafafa;
 		margin-bottom: 1.5rem;
 	}
 
 	.headline-accent {
-		background: linear-gradient(135deg, #06b6d4 0%, #38bdf8 50%, #7dd3fc 100%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
+		color: #fafafa;
+		-webkit-text-fill-color: #fafafa;
 	}
 
 	.hero-sub {
 		font-size: clamp(1rem, 2.5vw, 1.15rem);
-		color: #94a3b8;
+		color: #71717a;
 		line-height: 1.65;
 		margin-bottom: 2.5rem;
 		max-width: 560px;
@@ -772,20 +765,18 @@
 		align-items: center;
 		gap: 8px;
 		padding: 13px 28px;
-		background: linear-gradient(135deg, #06b6d4, #0284c7);
+		background: #fafafa;
 		border-radius: 10px;
 		font-size: 15px;
 		font-weight: 600;
-		color: white;
+		color: #09090b;
 		text-decoration: none;
-		transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
-		box-shadow: 0 0 24px rgba(6, 182, 212, 0.35);
+		transition: transform 0.15s, opacity 0.15s;
 	}
 
 	.btn-primary:hover {
 		transform: translateY(-1px);
-		box-shadow: 0 0 36px rgba(6, 182, 212, 0.5);
-		opacity: 0.95;
+		opacity: 0.9;
 	}
 
 	.btn-ghost {
@@ -793,18 +784,18 @@
 		align-items: center;
 		gap: 8px;
 		padding: 12px 24px;
-		border: 1px solid rgba(255, 255, 255, 0.1);
+		border: 1px solid #3f3f46;
 		border-radius: 10px;
 		font-size: 15px;
 		font-weight: 500;
-		color: #94a3b8;
+		color: #a1a1aa;
 		text-decoration: none;
 		transition: border-color 0.2s, color 0.2s;
 	}
 
 	.btn-ghost:hover {
-		border-color: rgba(6, 182, 212, 0.3);
-		color: #e2e8f0;
+		border-color: #52525b;
+		color: #fafafa;
 	}
 
 	/* Social proof strip */
@@ -826,13 +817,13 @@
 		font-family: 'Outfit', 'Sora', sans-serif;
 		font-size: 1.5rem;
 		font-weight: 700;
-		color: #f1f5f9;
+		color: #fafafa;
 		letter-spacing: -0.03em;
 	}
 
 	.proof-label {
 		font-size: 11px;
-		color: #475569;
+		color: #52525b;
 		text-transform: uppercase;
 		letter-spacing: 0.06em;
 	}
@@ -840,13 +831,13 @@
 	.proof-divider {
 		width: 1px;
 		height: 32px;
-		background: rgba(255, 255, 255, 0.07);
+		background: #27272a;
 	}
 
 	/* ── Features ───────────────────────────────────────────────── */
 	.features-section {
 		padding: 7rem 0;
-		border-top: 1px solid rgba(255, 255, 255, 0.04);
+		border-top: 1px solid #27272a;
 	}
 
 	.section-container {
@@ -866,7 +857,7 @@
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.12em;
-		color: #06b6d4;
+		color: #71717a;
 		margin-bottom: 1rem;
 	}
 
@@ -876,13 +867,13 @@
 		font-weight: 700;
 		line-height: 1.1;
 		letter-spacing: -0.03em;
-		color: #f1f5f9;
+		color: #fafafa;
 		margin-bottom: 1rem;
 	}
 
 	.section-desc {
 		font-size: 15px;
-		color: #64748b;
+		color: #71717a;
 		max-width: 440px;
 		margin: 0 auto;
 		line-height: 1.65;
@@ -892,14 +883,14 @@
 		display: grid;
 		grid-template-columns: repeat(2, 1fr);
 		gap: 1px;
-		background: rgba(255, 255, 255, 0.05);
-		border: 1px solid rgba(255, 255, 255, 0.05);
+		background: #27272a;
+		border: 1px solid #27272a;
 		border-radius: 16px;
 		overflow: hidden;
 	}
 
 	.feature-card {
-		background: rgba(10, 11, 18, 0.95);
+		background: #18181b;
 		padding: 2.5rem;
 		position: relative;
 		transition: background 0.2s;
@@ -910,13 +901,13 @@
 		content: '';
 		position: absolute;
 		inset: 0;
-		background: radial-gradient(circle at 30% 30%, rgba(6, 182, 212, 0.05) 0%, transparent 60%);
+		background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.02) 0%, transparent 60%);
 		opacity: 0;
 		transition: opacity 0.3s;
 	}
 
 	.feature-card:hover {
-		background: rgba(13, 15, 24, 0.98);
+		background: #1c1c20;
 	}
 
 	.feature-card:hover::after {
@@ -926,12 +917,12 @@
 	.feature-icon {
 		width: 48px;
 		height: 48px;
-		border: 1px solid rgba(6, 182, 212, 0.2);
+		border: 1px solid #3f3f46;
 		border-radius: 12px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: rgba(6, 182, 212, 0.05);
+		background: #27272a;
 		margin-bottom: 1.5rem;
 	}
 
@@ -939,14 +930,14 @@
 		font-family: 'Outfit', 'Sora', sans-serif;
 		font-size: 1.05rem;
 		font-weight: 600;
-		color: #f1f5f9;
+		color: #fafafa;
 		margin-bottom: 0.75rem;
 		letter-spacing: -0.01em;
 	}
 
 	.feature-desc {
 		font-size: 14px;
-		color: #64748b;
+		color: #71717a;
 		line-height: 1.65;
 		margin-bottom: 1.5rem;
 	}
@@ -956,9 +947,9 @@
 		font-size: 10px;
 		font-weight: 600;
 		letter-spacing: 0.08em;
-		color: #06b6d4;
-		background: rgba(6, 182, 212, 0.08);
-		border: 1px solid rgba(6, 182, 212, 0.15);
+		color: #a1a1aa;
+		background: #27272a;
+		border: 1px solid #3f3f46;
 		border-radius: 4px;
 		padding: 3px 8px;
 		display: inline-block;
@@ -967,35 +958,34 @@
 	/* ── Live Signals ───────────────────────────────────────────── */
 	.signals-section {
 		padding: 7rem 0;
-		border-top: 1px solid rgba(255, 255, 255, 0.04);
+		border-top: 1px solid #27272a;
 	}
 
 	.signals-list {
-		background: rgba(10, 11, 18, 0.6);
-		border: 1px solid rgba(255, 255, 255, 0.07);
+		background: #18181b;
+		border: 1px solid #27272a;
 		border-radius: 16px;
 		overflow: hidden;
-		backdrop-filter: blur(8px);
 	}
 
 	.signals-header-row {
 		display: grid;
 		grid-template-columns: 100px 1fr 120px 160px;
 		padding: 12px 24px;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+		border-bottom: 1px solid #27272a;
 		font-family: 'JetBrains Mono', monospace;
 		font-size: 10px;
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
-		color: #334155;
+		color: #52525b;
 	}
 
 	.signal-item {
 		display: grid;
 		grid-template-columns: 100px 1fr 120px 160px;
 		padding: 16px 24px;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+		border-bottom: 1px solid rgba(39, 39, 42, 0.6);
 		align-items: center;
 		transition: background 0.15s;
 	}
@@ -1005,20 +995,20 @@
 	}
 
 	.signal-item:hover {
-		background: rgba(6, 182, 212, 0.03);
+		background: #1c1c20;
 	}
 
 	.sig-ticker {
 		font-family: 'JetBrains Mono', monospace;
 		font-size: 14px;
 		font-weight: 700;
-		color: #06b6d4;
+		color: #fafafa;
 		letter-spacing: 0.04em;
 	}
 
 	.sig-company {
 		font-size: 13px;
-		color: #64748b;
+		color: #71717a;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
@@ -1037,9 +1027,9 @@
 	}
 
 	.direction-badge.bullish {
-		background: rgba(6, 182, 212, 0.1);
-		color: #06b6d4;
-		border: 1px solid rgba(6, 182, 212, 0.2);
+		background: rgba(34, 197, 94, 0.1);
+		color: #22c55e;
+		border: 1px solid rgba(34, 197, 94, 0.2);
 	}
 
 	.badge-arrow {
@@ -1055,7 +1045,7 @@
 	.score-bar-wrap {
 		flex: 1;
 		height: 4px;
-		background: rgba(255, 255, 255, 0.05);
+		background: #27272a;
 		border-radius: 999px;
 		overflow: hidden;
 	}
@@ -1076,8 +1066,7 @@
 
 	.signals-cta-row {
 		padding: 16px 24px;
-		border-top: 1px solid rgba(255, 255, 255, 0.06);
-		background: rgba(6, 182, 212, 0.02);
+		border-top: 1px solid #27272a;
 	}
 
 	.signals-view-all {
@@ -1086,13 +1075,14 @@
 		gap: 6px;
 		font-size: 13px;
 		font-weight: 500;
-		color: #06b6d4;
+		color: #a1a1aa;
 		text-decoration: none;
-		transition: gap 0.2s;
+		transition: gap 0.2s, color 0.2s;
 	}
 
 	.signals-view-all:hover {
 		gap: 10px;
+		color: #fafafa;
 	}
 
 	.signals-empty {
@@ -1102,16 +1092,17 @@
 		justify-content: center;
 		padding: 4rem;
 		gap: 1rem;
-		color: #475569;
+		color: #52525b;
 		font-size: 14px;
 	}
 
 	.empty-pulse {
 		width: 40px;
 		height: 40px;
-		border: 2px solid rgba(6, 182, 212, 0.3);
+		border: 2px solid #3f3f46;
+		border-top-color: #a1a1aa;
 		border-radius: 50%;
-		animation: empty-spin 2s linear infinite;
+		animation: empty-spin 1s linear infinite;
 	}
 
 	@keyframes empty-spin {
@@ -1122,22 +1113,21 @@
 	/* ── Stats ──────────────────────────────────────────────────── */
 	.stats-section {
 		padding: 6rem 0;
-		border-top: 1px solid rgba(255, 255, 255, 0.04);
-		background: linear-gradient(180deg, transparent, rgba(6, 182, 212, 0.02) 50%, transparent);
+		border-top: 1px solid #27272a;
 	}
 
 	.stats-grid {
 		display: grid;
 		grid-template-columns: repeat(4, 1fr);
 		gap: 1px;
-		background: rgba(255, 255, 255, 0.05);
-		border: 1px solid rgba(255, 255, 255, 0.05);
+		background: #27272a;
+		border: 1px solid #27272a;
 		border-radius: 16px;
 		overflow: hidden;
 	}
 
 	.stat-item {
-		background: rgba(10, 11, 18, 0.95);
+		background: #18181b;
 		padding: 2.5rem 2rem;
 		text-align: center;
 	}
@@ -1146,7 +1136,7 @@
 		font-family: 'Outfit', 'Sora', sans-serif;
 		font-size: 3rem;
 		font-weight: 800;
-		color: #06b6d4;
+		color: #fafafa;
 		letter-spacing: -0.04em;
 		line-height: 1;
 		margin-bottom: 0.75rem;
@@ -1166,26 +1156,26 @@
 
 	.stat-plus {
 		font-size: 1.8rem;
-		color: #0891b2;
+		color: #71717a;
 	}
 
 	.stat-label {
 		font-family: 'Outfit', 'Sora', sans-serif;
 		font-size: 14px;
 		font-weight: 600;
-		color: #e2e8f0;
+		color: #a1a1aa;
 		margin-bottom: 0.35rem;
 	}
 
 	.stat-sub {
 		font-size: 12px;
-		color: #475569;
+		color: #52525b;
 		line-height: 1.5;
 	}
 
 	/* ── Footer ─────────────────────────────────────────────────── */
 	.landing-footer {
-		border-top: 1px solid rgba(255, 255, 255, 0.05);
+		border-top: 1px solid #27272a;
 		padding: 2.5rem 0;
 	}
 
@@ -1214,12 +1204,12 @@
 		font-family: 'Outfit', 'Sora', sans-serif;
 		font-weight: 600;
 		font-size: 15px;
-		color: #e2e8f0;
+		color: #a1a1aa;
 	}
 
 	.footer-tagline {
 		font-size: 12px;
-		color: #334155;
+		color: #52525b;
 		font-style: italic;
 	}
 
@@ -1230,18 +1220,18 @@
 
 	.footer-links a {
 		font-size: 13px;
-		color: #475569;
+		color: #52525b;
 		text-decoration: none;
 		transition: color 0.15s;
 	}
 
 	.footer-links a:hover {
-		color: #06b6d4;
+		color: #a1a1aa;
 	}
 
 	.footer-copy {
 		font-size: 12px;
-		color: #334155;
+		color: #3f3f46;
 	}
 
 	/* ── Fade-in animation ──────────────────────────────────────── */

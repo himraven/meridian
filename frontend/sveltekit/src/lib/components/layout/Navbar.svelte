@@ -42,7 +42,7 @@
 				</svg>
 			</button>
 			
-			<a href="/" class="navbar-logo">
+			<a href="/dashboard" class="navbar-logo">
 				Meridian
 			</a>
 		</div>
@@ -75,10 +75,10 @@
 		<!-- Desktop Nav Links -->
 		<div class="hidden lg:flex items-center gap-1">
 			<a 
-				href="/" 
-				class="nav-link {$page.url.pathname === '/' ? 'nav-link-active' : ''}"
+				href="/dashboard" 
+				class="nav-link {$page.url.pathname === '/dashboard' ? 'nav-link-active' : ''}"
 			>
-				Home
+				Dashboard
 			</a>
 			<a 
 				href="/smart-money" 
