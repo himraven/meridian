@@ -157,18 +157,28 @@
 
 			<!-- Flowing data pulses along connections -->
 			<g class="data-pulses">
-				<circle r="2" fill="#a1a1aa" opacity="0.9" class="pulse-dot">
+				<circle r="2.5" fill="#fafafa" opacity="0.7" class="pulse-dot">
 					<animateMotion dur="3s" repeatCount="indefinite" begin="0s">
 						<mpath href="#path1"/>
 					</animateMotion>
 				</circle>
-				<circle r="1.5" fill="#71717a" opacity="0.8" class="pulse-dot">
+				<circle r="2" fill="#a1a1aa" opacity="0.6" class="pulse-dot">
 					<animateMotion dur="4s" repeatCount="indefinite" begin="1s">
 						<mpath href="#path2"/>
 					</animateMotion>
 				</circle>
-				<circle r="2" fill="#a1a1aa" opacity="0.9" class="pulse-dot">
+				<circle r="2.5" fill="#fafafa" opacity="0.7" class="pulse-dot">
 					<animateMotion dur="3.5s" repeatCount="indefinite" begin="2s">
+						<mpath href="#path3"/>
+					</animateMotion>
+				</circle>
+				<circle r="1.5" fill="#a1a1aa" opacity="0.5" class="pulse-dot">
+					<animateMotion dur="5s" repeatCount="indefinite" begin="0.5s">
+						<mpath href="#path1"/>
+					</animateMotion>
+				</circle>
+				<circle r="2" fill="#fafafa" opacity="0.5" class="pulse-dot">
+					<animateMotion dur="4.5s" repeatCount="indefinite" begin="1.5s">
 						<mpath href="#path3"/>
 					</animateMotion>
 				</circle>
@@ -572,7 +582,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-family: 'Outfit', 'Sora', sans-serif;
+		font-family: 'DM Sans', sans-serif;
 		font-weight: 700;
 		font-size: 16px;
 		color: #fafafa;
@@ -588,7 +598,7 @@
 	}
 
 	.logo-text {
-		font-family: 'Outfit', 'Sora', sans-serif;
+		font-family: 'DM Sans', sans-serif;
 		font-weight: 600;
 		font-size: 17px;
 		color: #fafafa;
@@ -646,7 +656,7 @@
 		inset: 0;
 		width: 100%;
 		height: 100%;
-		opacity: 0.5;
+		opacity: 0.65;
 	}
 
 	/* Connection line animation */
@@ -656,8 +666,8 @@
 	}
 
 	@keyframes line-pulse {
-		0%, 100% { opacity: 0.15; }
-		50% { opacity: 0.4; }
+		0%, 100% { opacity: 0.2; }
+		50% { opacity: 0.55; }
 	}
 
 	/* Node core pulse */
@@ -727,7 +737,7 @@
 	}
 
 	.hero-headline {
-		font-family: 'Outfit', 'Sora', -apple-system, sans-serif;
+		font-family: 'DM Sans', -apple-system, sans-serif;
 		font-size: clamp(3rem, 8vw, 5.5rem);
 		font-weight: 800;
 		line-height: 1.05;
@@ -771,12 +781,13 @@
 		font-weight: 600;
 		color: #09090b;
 		text-decoration: none;
-		transition: transform 0.15s, opacity 0.15s;
+		transition: transform 0.15s, box-shadow 0.15s;
+		box-shadow: 0 0 20px rgba(250, 250, 250, 0.15), 0 0 60px rgba(250, 250, 250, 0.05);
 	}
 
 	.btn-primary:hover {
 		transform: translateY(-1px);
-		opacity: 0.9;
+		box-shadow: 0 0 28px rgba(250, 250, 250, 0.25), 0 0 80px rgba(250, 250, 250, 0.08);
 	}
 
 	.btn-ghost {
@@ -814,7 +825,7 @@
 	}
 
 	.proof-num {
-		font-family: 'Outfit', 'Sora', sans-serif;
+		font-family: 'DM Sans', sans-serif;
 		font-size: 1.5rem;
 		font-weight: 700;
 		color: #fafafa;
@@ -862,7 +873,7 @@
 	}
 
 	.section-title {
-		font-family: 'Outfit', 'Sora', sans-serif;
+		font-family: 'DM Sans', sans-serif;
 		font-size: clamp(2rem, 5vw, 3.2rem);
 		font-weight: 700;
 		line-height: 1.1;
@@ -927,7 +938,7 @@
 	}
 
 	.feature-title {
-		font-family: 'Outfit', 'Sora', sans-serif;
+		font-family: 'DM Sans', sans-serif;
 		font-size: 1.05rem;
 		font-weight: 600;
 		color: #fafafa;
@@ -1133,7 +1144,7 @@
 	}
 
 	.stat-number {
-		font-family: 'Outfit', 'Sora', sans-serif;
+		font-family: 'DM Sans', sans-serif;
 		font-size: 3rem;
 		font-weight: 800;
 		color: #fafafa;
@@ -1160,7 +1171,7 @@
 	}
 
 	.stat-label {
-		font-family: 'Outfit', 'Sora', sans-serif;
+		font-family: 'DM Sans', sans-serif;
 		font-size: 14px;
 		font-weight: 600;
 		color: #a1a1aa;
@@ -1201,7 +1212,7 @@
 		align-items: center;
 		gap: 8px;
 		text-decoration: none;
-		font-family: 'Outfit', 'Sora', sans-serif;
+		font-family: 'DM Sans', sans-serif;
 		font-weight: 600;
 		font-size: 15px;
 		color: #a1a1aa;
