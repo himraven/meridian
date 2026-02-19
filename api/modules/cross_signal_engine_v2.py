@@ -669,12 +669,23 @@ class SmartMoneyEngineV2:
             source_count = len(source_convictions)
             multi_bonus = min((source_count - 1) * 20, 40)  # +20 per extra source, cap 40
             
+            # Source diversity cap — single source can't hit 100
+            # Forces multi-source confluence to rank highest
+            if source_count == 1:
+                source_cap = 0.75   # max 75
+            elif source_count == 2:
+                source_cap = 0.85   # max ~92 with bonus
+            elif source_count == 3:
+                source_cap = 0.90   # max ~100 with bonus
+            else:
+                source_cap = 1.0    # 4+ sources uncapped
+            
             # Most recent date
             dates = [d.date for d in details if d.date]
             signal_date = max(dates) if dates else ""
             recency_days = self._days_ago(signal_date) if signal_date else 30
             
-            final_score = min(100, max_conviction + multi_bonus)
+            final_score = min(100, (max_conviction * source_cap) + multi_bonus)
             
             # Get company name from any detail
             company = ""
