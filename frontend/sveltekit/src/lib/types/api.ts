@@ -165,11 +165,19 @@ export interface InsiderTradesResponse {
 
 // ═══ Signals ═══
 
+export interface SignalDetail {
+	source: string;
+	description: string;
+	date: string;
+	conviction?: number;
+	weight?: number;
+}
+
 export interface SignalConfluence {
 	ticker: string;
 	score: number;
 	direction: 'bullish' | 'bearish' | 'mixed';
-	sources: string;
+	sources: string[] | string;
 	source_count: number;
 	signal_date: string;
 	congress_score: number;
@@ -177,7 +185,7 @@ export interface SignalConfluence {
 	darkpool_score: number;
 	institution_score: number;
 	insider_score: number;
-	details: string;
+	details: SignalDetail[] | string;
 	scoring: string;
 	company: string;
 }
@@ -210,9 +218,24 @@ export interface TickerDetailResponse {
 		holdings: InstitutionHolding[];
 		count: number;
 	};
+	insiders: {
+		trades: InsiderTrade[];
+		count: number;
+		has_cluster: boolean;
+	};
 	confluence: {
 		signals: SignalConfluence[];
 		score: number;
+		direction?: string;
+		sources?: string[];
+		source_count?: number;
+		signal_date?: string;
+		congress_score?: number;
+		ark_score?: number;
+		darkpool_score?: number;
+		institution_score?: number;
+		insider_score?: number;
+		details?: SignalDetail[];
 	};
 	metadata: {
 		total_signals: number;

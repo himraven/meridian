@@ -83,6 +83,19 @@
 		{ key: 'pct_portfolio', label: '% Portfolio', sortable: true, class: 'text-right', render: (v: number) => formatPercent(v) },
 		{ key: 'filing_date', label: 'Filed', sortable: true, render: (v: string) => formatDate(v) }
 	];
+	
+	const insiderColumns = [
+		{ key: 'trade_date', label: 'Date', sortable: true, render: (v: string) => formatDate(v) },
+		{ key: 'insider_name', label: 'Insider', sortable: true },
+		{ key: 'title', label: 'Title', sortable: true },
+		{ key: 'transaction_type', label: 'Type', sortable: true, render: (v: string) => {
+			const color = v === 'Buy' ? 'bg-green/20 text-green' : 'bg-red/20 text-red';
+			return `<span class="px-2 py-1 rounded-full text-xs font-medium ${color}">${v}</span>`;
+		}},
+		{ key: 'shares', label: 'Shares', sortable: true, class: 'text-right', render: (v: number) => v?.toLocaleString() ?? '—' },
+		{ key: 'value', label: 'Value', sortable: true, class: 'text-right', render: (v: number) => v ? formatCurrency(v) : '—' },
+		{ key: 'price', label: 'Price', sortable: true, class: 'text-right', render: (v: number) => v ? formatCurrency(v) : '—' }
+	];
 </script>
 
 <svelte:head>
@@ -112,7 +125,7 @@
 		</div>
 		
 		<!-- Overview Stats -->
-		<div class="grid grid-cols-2 md:grid-cols-5 gap-4 pt-4 border-t border-[var(--border-default)]">
+		<div class="grid grid-cols-2 md:grid-cols-6 gap-4 pt-4 border-t border-[var(--border-default)]">
 			<div class="text-center">
 				<p class="text-label mb-1">Congress Trades</p>
 				<p class="text-data-lg">{data.data.congress.count}</p>
@@ -130,6 +143,10 @@
 				<p class="text-data-lg">{data.data.darkpool.count}</p>
 			</div>
 			<div class="text-center">
+				<p class="text-label mb-1">Insider Trades</p>
+				<p class="text-data-lg">{data.data.insiders?.count ?? 0}</p>
+			</div>
+			<div class="text-center">
 				<p class="text-label mb-1">Institutions</p>
 				<p class="text-data-lg">{data.data.institutions.count}</p>
 			</div>
@@ -137,20 +154,22 @@
 	</div>
 	
 	<!-- Confluence Score Breakdown -->
-	{#if data.data.metadata.has_confluence && data.data.confluence.signals.length > 0}
-		{@const signal = data.data.confluence.signals[0]}
+	{#if data.data.metadata.has_confluence}
+		{@const conf = data.data.confluence}
 		<Card title="Signal Confluence Breakdown">
 			{#snippet children()}
 				<div class="space-y-6">
 					<!-- Overall Score -->
 					<div class="text-center pb-4 border-b border-[var(--border-default)]">
 						<p class="text-label mb-2">Total Confluence Score</p>
-						<p class="text-5xl font-bold text-[var(--text-primary)] mb-2">{signal.score}</p>
-						<Badge variant={signal.direction === 'bullish' ? 'bullish' : signal.direction === 'bearish' ? 'bearish' : 'warning'}>
-							{signal.direction.toUpperCase()}
-						</Badge>
+						<p class="text-5xl font-bold text-[var(--text-primary)] mb-2">{formatScore(conf.score ?? 0)}</p>
+						{#if conf.direction}
+							<Badge variant={conf.direction.toLowerCase() === 'bullish' ? 'bullish' : conf.direction.toLowerCase() === 'bearish' ? 'bearish' : 'warning'}>
+								{conf.direction.toUpperCase()}
+							</Badge>
+						{/if}
 						<p class="text-caption text-[var(--text-muted)] mt-2">
-							From {signal.source_count} source{signal.source_count !== 1 ? 's' : ''} · {formatDate(signal.signal_date)}
+							From {conf.source_count ?? 0} source{(conf.source_count ?? 0) !== 1 ? 's' : ''}{conf.signal_date ? ` · ${formatDate(conf.signal_date)}` : ''}
 						</p>
 					</div>
 					
@@ -160,12 +179,12 @@
 						<div>
 							<div class="flex items-center justify-between mb-2">
 								<span class="text-label">Congress</span>
-								<span class="text-data">{formatScore(signal.congress_score)} / {maxScore}</span>
+								<span class="text-data">{formatScore(conf.congress_score ?? 0)} / {maxScore}</span>
 							</div>
 							<div class="progress-bar">
 								<div 
 									class="h-full bg-yellow transition-all duration-500 rounded-full" 
-									style="width: {renderScoreBar(signal.congress_score)}%"
+									style="width: {renderScoreBar(conf.congress_score ?? 0)}%"
 								></div>
 							</div>
 						</div>
@@ -174,12 +193,12 @@
 						<div>
 							<div class="flex items-center justify-between mb-2">
 								<span class="text-label">ARK Invest</span>
-								<span class="text-data">{formatScore(signal.ark_score)} / {maxScore}</span>
+								<span class="text-data">{formatScore(conf.ark_score ?? 0)} / {maxScore}</span>
 							</div>
 							<div class="progress-bar">
 								<div 
 									class="h-full bg-blue transition-all duration-500 rounded-full" 
-									style="width: {renderScoreBar(signal.ark_score)}%"
+									style="width: {renderScoreBar(conf.ark_score ?? 0)}%"
 								></div>
 							</div>
 						</div>
@@ -188,12 +207,26 @@
 						<div>
 							<div class="flex items-center justify-between mb-2">
 								<span class="text-label">Dark Pool</span>
-								<span class="text-data">{formatScore(signal.darkpool_score)} / {maxScore}</span>
+								<span class="text-data">{formatScore(conf.darkpool_score ?? 0)} / {maxScore}</span>
 							</div>
 							<div class="progress-bar">
 								<div 
 									class="h-full bg-purple-500 transition-all duration-500 rounded-full" 
-									style="width: {renderScoreBar(signal.darkpool_score)}%"
+									style="width: {renderScoreBar(conf.darkpool_score ?? 0)}%"
+								></div>
+							</div>
+						</div>
+						
+						<!-- Insiders -->
+						<div>
+							<div class="flex items-center justify-between mb-2">
+								<span class="text-label">Insiders</span>
+								<span class="text-data">{formatScore(conf.insider_score ?? 0)} / {maxScore}</span>
+							</div>
+							<div class="progress-bar">
+								<div 
+									class="h-full bg-orange-500 transition-all duration-500 rounded-full" 
+									style="width: {renderScoreBar(conf.insider_score ?? 0)}%"
 								></div>
 							</div>
 						</div>
@@ -202,21 +235,45 @@
 						<div>
 							<div class="flex items-center justify-between mb-2">
 								<span class="text-label">Institutions</span>
-								<span class="text-data">{formatScore(signal.institution_score)} / {maxScore}</span>
+								<span class="text-data">{formatScore(conf.institution_score ?? 0)} / {maxScore}</span>
 							</div>
 							<div class="progress-bar">
 								<div 
 									class="h-full bg-green transition-all duration-500 rounded-full" 
-									style="width: {renderScoreBar(signal.institution_score)}%"
+									style="width: {renderScoreBar(conf.institution_score ?? 0)}%"
 								></div>
 							</div>
 						</div>
 					</div>
 					
-					<!-- Details -->
-					{#if signal.details}
+					<!-- Details (array of {source, description, date, conviction}) -->
+					{#if conf.details && Array.isArray(conf.details) && conf.details.length > 0}
 						<div class="pt-4 border-t border-[var(--border-default)]">
-							<p class="text-sm text-[var(--text-muted)] whitespace-pre-line">{signal.details}</p>
+							<p class="text-label mb-3">Signal Details</p>
+							<div class="space-y-2">
+								{#each conf.details as detail}
+									<div class="flex items-start gap-3 text-sm">
+										<span class="px-2 py-0.5 rounded text-xs font-medium shrink-0 {
+											detail.source === 'congress' ? 'bg-yellow/20 text-yellow' :
+											detail.source === 'ark' ? 'bg-blue/20 text-blue' :
+											detail.source === 'darkpool' ? 'bg-purple-500/20 text-purple-500' :
+											detail.source === 'insider' ? 'bg-orange-500/20 text-orange-500' :
+											detail.source === 'institution' ? 'bg-green/20 text-green' :
+											'bg-[var(--bg-elevated)] text-[var(--text-muted)]'
+										}">
+											{detail.source}
+										</span>
+										<span class="text-[var(--text-secondary)]">{detail.description}</span>
+										{#if detail.date}
+											<span class="text-[var(--text-muted)] text-xs shrink-0 ml-auto">{formatDate(detail.date)}</span>
+										{/if}
+									</div>
+								{/each}
+							</div>
+						</div>
+					{:else if conf.details && typeof conf.details === 'string'}
+						<div class="pt-4 border-t border-[var(--border-default)]">
+							<p class="text-sm text-[var(--text-muted)] whitespace-pre-line">{conf.details}</p>
 						</div>
 					{/if}
 				</div>
@@ -277,6 +334,20 @@
 		</Card>
 	{/if}
 	
+	<!-- Insider Trades -->
+	{#if data.data.insiders?.count > 0}
+		<Card title="Insider Trades" badge={data.data.insiders.count}>
+			{#snippet children()}
+				{#if data.data.insiders.has_cluster}
+					<p class="text-sm text-orange-500 mb-4">
+						⚡ Cluster activity detected — multiple insiders trading near the same time
+					</p>
+				{/if}
+				<DataTable columns={insiderColumns} data={data.data.insiders.trades} />
+			{/snippet}
+		</Card>
+	{/if}
+	
 	<!-- External Links -->
 	<Card title="External Research Links">
 		{#snippet children()}
@@ -328,7 +399,7 @@
 				<div class="text-center py-12">
 					<h3 class="text-subhead mb-2">No Smart Money Activity</h3>
 					<p class="text-sm text-[var(--text-muted)]">
-						This ticker has no recent activity from Congress, ARK, Dark Pools, or Institutional filings.
+						This ticker has no recent activity from Congress, ARK, Dark Pools, Insiders, or Institutional filings.
 					</p>
 				</div>
 			{/snippet}

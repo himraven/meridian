@@ -63,8 +63,17 @@ def api_ticker_aggregate(request: Request, symbol: str):
         if f.get("ticker", "").upper() == symbol
     ]
     
-    # Confluence signals
-    signals_data = smart_money_cache.read("signals.json")
+    # Insider trades
+    insiders_data = smart_money_cache.read("insiders.json")
+    insider_trades = [
+        t for t in insiders_data.get("trades", [])
+        if t.get("ticker", "").upper() == symbol
+    ]
+    
+    # Confluence signals — prefer V2 engine (richer scoring), fall back to V1
+    signals_data = smart_money_cache.read("signals_v2.json")
+    if not signals_data.get("signals"):
+        signals_data = smart_money_cache.read("signals.json")
     confluence_signals = [
         s for s in signals_data.get("signals", [])
         if s.get("ticker", "").upper() == symbol
@@ -99,6 +108,23 @@ def api_ticker_aggregate(request: Request, symbol: str):
     if not company_name:
         company_name = ticker_names.get(symbol)
     
+    # Build confluence detail from top signal (V2 uses *_score fields directly)
+    signal = confluence_signals[0] if confluence_signals else {}
+    confluence_detail = {
+        "signals": confluence_signals,
+        "score": signal.get("score", 0),
+        "direction": signal.get("direction"),
+        "sources": signal.get("sources", []),
+        "source_count": signal.get("source_count", 0),
+        "signal_date": signal.get("signal_date"),
+        "congress_score": signal.get("congress_conviction", signal.get("congress_score", 0)),
+        "ark_score": signal.get("ark_conviction", signal.get("ark_score", 0)),
+        "darkpool_score": signal.get("darkpool_conviction", signal.get("darkpool_score", 0)),
+        "institution_score": signal.get("institution_conviction", signal.get("institution_score", 0)),
+        "insider_score": signal.get("insider_conviction", signal.get("insider_score", 0)),
+        "details": signal.get("details", []),
+    }
+
     result = {
         "ticker": symbol,
         "company": company_name,
@@ -120,12 +146,14 @@ def api_ticker_aggregate(request: Request, symbol: str):
             "holdings": institution_holdings,
             "count": len(institution_holdings)
         },
-        "confluence": {
-            "signals": confluence_signals,
-            "score": confluence_signals[0].get("score") if confluence_signals else None
+        "insiders": {
+            "trades": insider_trades,
+            "count": len(insider_trades),
+            "has_cluster": any(t.get("is_cluster") for t in insider_trades)
         },
+        "confluence": confluence_detail,
         "metadata": {
-            "total_signals": len(congress_trades) + len(ark_trades) + len(darkpool_anomalies) + len(institution_holdings),
+            "total_signals": len(congress_trades) + len(ark_trades) + len(darkpool_anomalies) + len(institution_holdings) + len(insider_trades),
             "has_confluence": len(confluence_signals) > 0
         }
     }
