@@ -23,6 +23,7 @@ from api.config import DATA_DIR, CACHE_FILES
 from api.modules.cache_manager import CacheManager
 from api.modules.cross_signal_engine import CrossSignalEngine
 from api.modules.cross_signal_engine_v2 import SmartMoneyEngineV2
+from api.modules.cross_signal_engine_v3 import generate_ranking_v3
 
 logger = logging.getLogger(__name__)
 
@@ -120,6 +121,15 @@ def refresh_signals(
         logger.info(f"v2 engine: {len(v2_results)} signals written")
     except Exception as e:
         logger.warning(f"v2 engine failed (v1 still saved): {e}")
+
+    # v3: V7 direction-aware ranking (built on top of V2 conviction scores)
+    try:
+        v3_output = generate_ranking_v3(DATA_DIR)
+        cache.write("ranking_v3.json", v3_output)
+        v3_count = v3_output["metadata"].get("total", 0)
+        logger.info(f"v3 engine (V7 algo): {v3_count} signals written")
+    except Exception as e:
+        logger.warning(f"v3/V7 engine failed (v2 still saved): {e}")
     
     # Dual-write to SQLite
     try:

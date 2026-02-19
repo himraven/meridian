@@ -55,6 +55,8 @@
 		institution: 'bg-[var(--green)]/20 text-[var(--green)]',
 		insider: 'bg-orange-500/20 text-orange-400'
 	};
+
+	let methodologyOpen = $state(false);
 	
 	const sourceLabels: Record<string, string> = {
 		congress: 'GOV',
@@ -116,6 +118,116 @@
 		</Card>
 	</div>
 	
+	<!-- Methodology (collapsible) -->
+	<div class="rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] overflow-hidden">
+		<button
+			onclick={() => (methodologyOpen = !methodologyOpen)}
+			class="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-[var(--bg-elevated)] transition-colors"
+			aria-expanded={methodologyOpen}
+		>
+			<div class="flex items-center gap-2">
+				<span class="text-base font-semibold text-[var(--text-primary)]">How Smart Money Score Works</span>
+				<span class="text-xs text-[var(--text-muted)] bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded px-2 py-0.5">Methodology</span>
+			</div>
+			<svg
+				class="w-4 h-4 text-[var(--text-muted)] transition-transform duration-200 {methodologyOpen ? 'rotate-180' : ''}"
+				fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+			</svg>
+		</button>
+
+		{#if methodologyOpen}
+			<div class="px-5 pb-5 border-t border-[var(--border-default)] space-y-5">
+				<!-- Signal sources -->
+				<div class="pt-4">
+					<p class="text-sm text-[var(--text-secondary)] mb-3">
+						We track <span class="text-[var(--text-primary)] font-semibold">7 independent signal sources</span> where institutional &amp; insider capital flows:
+					</p>
+					<div class="flex flex-wrap gap-2 text-sm text-[var(--text-muted)]">
+						<span class="px-2 py-1 rounded bg-[var(--amber)]/10 border border-[var(--amber)]/20 text-[var(--amber)]">🏛️ Congress Trades</span>
+						<span class="px-2 py-1 rounded bg-orange-500/10 border border-orange-500/20 text-orange-400">👔 Insider Activity</span>
+						<span class="px-2 py-1 rounded bg-[var(--blue)]/10 border border-[var(--blue)]/20 text-[var(--blue)]">🚀 ARK Invest</span>
+						<span class="px-2 py-1 rounded bg-[var(--green)]/10 border border-[var(--green)]/20 text-[var(--green)]">🏦 Institutional 13F</span>
+						<span class="px-2 py-1 rounded bg-purple-500/10 border border-purple-500/20 text-purple-400">🌑 Dark Pool</span>
+						<span class="px-2 py-1 rounded bg-[var(--bg-elevated)] border border-[var(--border-default)] text-[var(--text-muted)]">🎯 Superinvestors</span>
+						<span class="px-2 py-1 rounded bg-[var(--bg-elevated)] border border-[var(--border-default)] text-[var(--text-muted)]">📉 Short Interest</span>
+					</div>
+				</div>
+
+				<!-- Scoring logic -->
+				<div>
+					<h4 class="text-sm font-semibold text-[var(--text-primary)] mb-2">Scoring Logic</h4>
+					<ul class="space-y-1.5 text-sm text-[var(--text-muted)]">
+						<li class="flex gap-2">
+							<span class="text-[var(--text-dimmed)] mt-0.5 flex-shrink-0">•</span>
+							<span>Each source generates a <span class="text-[var(--text-secondary)]">conviction score (0–100)</span> based on signal strength, recency, and quality</span>
+						</li>
+						<li class="flex gap-2">
+							<span class="text-[var(--text-dimmed)] mt-0.5 flex-shrink-0">•</span>
+							<span>The ranking algorithm measures <span class="text-[var(--text-secondary)]">signal confluence</span> — how many sources agree on direction</span>
+						</li>
+						<li class="flex gap-2">
+							<span class="text-[var(--text-dimmed)] mt-0.5 flex-shrink-0">•</span>
+							<span><span class="text-[var(--green)]">Aligned</span> directional signals boost each other; <span class="text-red-400">opposing</span> signals create penalties</span>
+						</li>
+						<li class="flex gap-2">
+							<span class="text-[var(--text-dimmed)] mt-0.5 flex-shrink-0">•</span>
+							<span>Neutral/unknown direction data is <span class="text-[var(--text-secondary)]">discounted</span> to prevent score inflation</span>
+						</li>
+					</ul>
+				</div>
+
+				<!-- Score tiers -->
+				<div>
+					<h4 class="text-sm font-semibold text-[var(--text-primary)] mb-2">Score Tiers</h4>
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+						<div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-[var(--green)]/5 border border-[var(--green)]/20">
+							<span class="text-lg">🔥</span>
+							<div>
+								<span class="font-semibold text-[var(--green)]">60+</span>
+								<span class="text-[var(--text-secondary)] font-medium"> Strong</span>
+								<p class="text-xs text-[var(--text-muted)] mt-0.5">Multiple aligned smart money sources. Worth immediate attention</p>
+							</div>
+						</div>
+						<div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-[var(--blue)]/5 border border-[var(--blue)]/20">
+							<span class="text-lg">✅</span>
+							<div>
+								<span class="font-semibold text-[var(--blue)]">40–60</span>
+								<span class="text-[var(--text-secondary)] font-medium"> Watch</span>
+								<p class="text-xs text-[var(--text-muted)] mt-0.5">Notable activity detected. Add to watchlist</p>
+							</div>
+						</div>
+						<div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-default)]">
+							<span class="text-lg">⚪</span>
+							<div>
+								<span class="font-semibold text-[var(--text-secondary)]">20–40</span>
+								<span class="text-[var(--text-secondary)] font-medium"> Low</span>
+								<p class="text-xs text-[var(--text-muted)] mt-0.5">Some activity, low confluence</p>
+							</div>
+						</div>
+						<div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-default)]">
+							<span class="text-lg">—</span>
+							<div>
+								<span class="font-semibold text-[var(--text-dimmed)]">Below 20</span>
+								<p class="text-xs text-[var(--text-muted)] mt-0.5">Background noise</p>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Disclaimer -->
+				<div class="flex gap-3 px-4 py-3 rounded-lg bg-[var(--amber)]/5 border border-[var(--amber)]/20">
+					<span class="text-[var(--amber)] flex-shrink-0 mt-0.5">⚠️</span>
+					<p class="text-xs text-[var(--text-muted)] leading-relaxed">
+						<span class="font-semibold text-[var(--text-secondary)]">Important:</span>
+						Scores are attention filters, not buy/sell recommendations. A high score means smart money is active and aligned on this ticker — it's a starting point for your own research.
+					</p>
+				</div>
+			</div>
+		{/if}
+	</div>
+
 	<!-- Scoring Info -->
 	<Card>
 		{#snippet children()}
