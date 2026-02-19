@@ -55,6 +55,8 @@ class SmartMoneySignal:
     darkpool_conviction: float = 0.0
     institution_conviction: float = 0.0
     insider_conviction: float = 0.0
+    superinvestor_conviction: float = 0.0
+    short_interest_conviction: float = 0.0
     
     # Breakdown
     max_conviction: float = 0.0
@@ -607,6 +609,361 @@ class SmartMoneyEngineV2:
 
         return results
 
+    def score_superinvestors(self, data: dict) -> List[SignalDetail]:
+        """
+        Superinvestor conviction scoring (Dataroma 13F data):
+        - Manager prestige: Buffett/Soros/Dalio/Ackman/Icahn = top tier (+15)
+        - Activity type: Buy (new) = 85, Add = 60, Reduce = 40, Sell = 30
+        - Manager count: how many superinvestors are buying the same stock
+          1=base, 3+=15, 5+=25, 8+=35, 11+=45
+        - Portfolio impact: larger % of portfolio = stronger signal
+        - Direction: buys are bullish, sells are bearish
+        """
+        if not data:
+            return []
+
+        PRESTIGE_MANAGERS = {
+            "warren buffett", "berkshire hathaway",
+            "bill ackman", "pershing square",
+            "carl icahn", "icahn capital",
+            "david einhorn", "greenlight capital",
+            "seth klarman", "baupost",
+            "david tepper", "appaloosa",
+            "howard marks", "oaktree",
+            "chase coleman", "tiger global",
+            "chris hohn", "tci fund",
+            "li lu", "himalaya capital",
+            "michael burry", "scion asset",
+            "daniel loeb", "third point",
+            "viking global",
+        }
+
+        activity = data.get("activity", [])
+        if not activity:
+            return []
+
+        # Build per-ticker signals from aggregate data
+        ticker_signals: Dict[str, dict] = {}
+
+        for entry in activity:
+            ticker = (entry.get("ticker") or "").upper().strip()
+            if not ticker:
+                continue
+
+            activity_type = entry.get("activity_type", "")
+            source_type = entry.get("source", "")
+
+            if ticker not in ticker_signals:
+                ticker_signals[ticker] = {
+                    "company": entry.get("company", ""),
+                    "buy_managers": 0,
+                    "sell_managers": 0,
+                    "manager_count_buy": entry.get("manager_count", 0) if activity_type in ("Buy", "Add") and source_type == "aggregate" else 0,
+                    "manager_count_sell": entry.get("manager_count", 0) if activity_type in ("Sell", "Reduce") and source_type == "aggregate" else 0,
+                    "portfolio_pct": entry.get("portfolio_pct", 0),
+                    "has_prestige_buy": False,
+                    "has_prestige_sell": False,
+                    "has_new_buy": False,
+                    "has_full_sell": False,
+                    "prestige_names": [],
+                    "activities": [],
+                }
+
+            ts = ticker_signals[ticker]
+
+            # Update company name if empty
+            if not ts["company"] and entry.get("company"):
+                ts["company"] = entry["company"]
+
+            # Track aggregate manager counts
+            if source_type == "aggregate":
+                if activity_type in ("Buy", "Add"):
+                    ts["manager_count_buy"] = max(ts["manager_count_buy"], entry.get("manager_count", 0))
+                elif activity_type in ("Sell", "Reduce"):
+                    ts["manager_count_sell"] = max(ts["manager_count_sell"], entry.get("manager_count", 0))
+                ts["portfolio_pct"] = max(ts["portfolio_pct"], entry.get("portfolio_pct", 0))
+
+            # Track per-manager data
+            if source_type == "per_manager":
+                manager_name = (entry.get("manager") or "").lower()
+                is_prestige = any(p in manager_name for p in PRESTIGE_MANAGERS)
+
+                if activity_type in ("Buy", "Add"):
+                    ts["buy_managers"] += 1
+                    if is_prestige:
+                        ts["has_prestige_buy"] = True
+                        ts["prestige_names"].append(entry.get("manager", ""))
+                    if activity_type == "Buy":
+                        ts["has_new_buy"] = True
+                elif activity_type in ("Sell", "Reduce"):
+                    ts["sell_managers"] += 1
+                    if is_prestige:
+                        ts["has_prestige_sell"] = True
+                    if activity_type == "Sell" and abs(entry.get("change_pct", 0)) >= 99:
+                        ts["has_full_sell"] = True
+
+            ts["activities"].append(entry)
+
+        # Score each ticker
+        results = []
+        for ticker, ts in ticker_signals.items():
+            # Determine direction: net of buy vs sell managers
+            net_buy = ts["manager_count_buy"] - ts["manager_count_sell"]
+            if net_buy == 0:
+                net_buy = ts["buy_managers"] - ts["sell_managers"]
+
+            is_bullish = net_buy > 0
+            manager_count = ts["manager_count_buy"] if is_bullish else ts["manager_count_sell"]
+
+            # Base score from activity type
+            if is_bullish:
+                if ts["has_new_buy"]:
+                    base_score = 45
+                else:
+                    base_score = 35
+            else:
+                if ts["has_full_sell"]:
+                    base_score = 40
+                else:
+                    base_score = 30
+
+            # Manager count bonus (consensus strength)
+            if manager_count >= 11:
+                consensus_bonus = 35
+            elif manager_count >= 8:
+                consensus_bonus = 28
+            elif manager_count >= 5:
+                consensus_bonus = 20
+            elif manager_count >= 3:
+                consensus_bonus = 12
+            elif manager_count >= 2:
+                consensus_bonus = 5
+            else:
+                consensus_bonus = 0
+
+            # Prestige bonus
+            prestige_bonus = 0
+            if is_bullish and ts["has_prestige_buy"]:
+                prestige_bonus = 15
+            elif not is_bullish and ts["has_prestige_sell"]:
+                prestige_bonus = 15
+
+            # Portfolio impact bonus
+            pct = ts["portfolio_pct"]
+            if pct >= 0.3:
+                impact_bonus = 10
+            elif pct >= 0.1:
+                impact_bonus = 5
+            elif pct >= 0.05:
+                impact_bonus = 2
+            else:
+                impact_bonus = 0
+
+            conviction = min(100, base_score + consensus_bonus + prestige_bonus + impact_bonus)
+
+            # Build description
+            direction = "Bullish" if is_bullish else "Bearish"
+            mc = ts["manager_count_buy"] if is_bullish else ts["manager_count_sell"]
+            action = "buying" if is_bullish else "selling"
+            desc = f"{mc} superinvestors {action}"
+            if ts["prestige_names"]:
+                names = sorted(set(ts["prestige_names"]))[:3]
+                desc += f" (incl. {', '.join(names)})"
+            if ts["has_new_buy"]:
+                desc += " [NEW]"
+
+            results.append(SignalDetail(
+                source="superinvestor",
+                ticker=ticker,
+                direction=direction,
+                date=datetime.now().strftime("%Y-%m-%d"),
+                description=desc,
+                conviction=round(conviction, 1),
+                raw_data={
+                    "base_score": base_score,
+                    "consensus_bonus": consensus_bonus,
+                    "prestige_bonus": prestige_bonus,
+                    "impact_bonus": impact_bonus,
+                    "manager_count_buy": ts["manager_count_buy"],
+                    "manager_count_sell": ts["manager_count_sell"],
+                    "portfolio_pct": ts["portfolio_pct"],
+                    "has_prestige_buy": ts["has_prestige_buy"],
+                    "has_new_buy": ts["has_new_buy"],
+                    "company": ts["company"],
+                }
+            ))
+
+        return results
+
+    def score_short_interest(
+        self,
+        tickers: list,
+        insider_data: dict = None,
+        institution_data: dict = None,
+    ) -> List[SignalDetail]:
+        """
+        Short interest conviction scoring.
+        
+        Short interest alone is informational; the real alpha is in cross-referencing:
+        - High SI % + increasing = bearish pressure
+        - High SI + insider buying = potential squeeze (very high conviction)
+        - High SI + institutional accumulation = smart money disagrees with shorts
+        
+        Scoring:
+        - Short % of float tier: >5%=15, >10%=30, >15%=45, >20%=60, >30%=75
+        - Days to cover: >3=+5, >5=+10, >7=+15
+        - Change direction: increasing >10%=+10, >20%=+15
+        - Squeeze signal bonus: insider buying same ticker=+20, institutional accumulation=+15
+        
+        Direction logic:
+        - Default: "Bearish" (heavy shorting = negative sentiment)
+        - If insider buying present: "Squeeze" (potential reversal)
+        """
+        if not tickers:
+            return []
+
+        # Build lookup sets for cross-referencing
+        insider_buy_tickers: set = set()
+        if insider_data:
+            for t in insider_data.get("trades", []):
+                if t.get("transaction_type") == "Buy":
+                    tk = (t.get("ticker") or "").upper().strip()
+                    if tk:
+                        insider_buy_tickers.add(tk)
+            # Also check clusters
+            for c in insider_data.get("clusters", []):
+                tk = (c.get("ticker") or "").upper().strip()
+                if tk:
+                    insider_buy_tickers.add(tk)
+
+        institution_buy_tickers: set = set()
+        if institution_data:
+            for filing in institution_data.get("filings", []):
+                for h in filing.get("holdings", []):
+                    ct = h.get("change_type", "")
+                    cp = h.get("change_pct", 0)
+                    if ct == "New" or (isinstance(cp, (int, float)) and cp > 10):
+                        tk = (h.get("ticker") or "").upper().strip()
+                        if tk:
+                            institution_buy_tickers.add(tk)
+
+        results = []
+        for entry in tickers:
+            ticker = (entry.get("ticker") or "").upper().strip()
+            if not ticker:
+                continue
+
+            short_interest = entry.get("short_interest", 0)
+            short_pct_float = entry.get("short_pct_float", 0)
+            days_to_cover = entry.get("days_to_cover", 0)
+            change_pct = entry.get("change_pct", 0)
+            settlement_date = entry.get("settlement_date", "")
+
+            # Minimum threshold: need either significant SI% or high absolute SI
+            if short_pct_float < 5 and short_interest < 5_000_000:
+                continue
+
+            # Short % of float tier (0-75)
+            if short_pct_float >= 30:
+                si_tier = 75
+            elif short_pct_float >= 20:
+                si_tier = 60
+            elif short_pct_float >= 15:
+                si_tier = 45
+            elif short_pct_float >= 10:
+                si_tier = 30
+            elif short_pct_float >= 5:
+                si_tier = 15
+            else:
+                # Fall back to absolute SI for stocks without float data
+                if short_interest >= 100_000_000:
+                    si_tier = 25
+                elif short_interest >= 50_000_000:
+                    si_tier = 15
+                else:
+                    si_tier = 10
+
+            # Days to cover bonus
+            dtc_bonus = 0
+            if days_to_cover >= 7:
+                dtc_bonus = 15
+            elif days_to_cover >= 5:
+                dtc_bonus = 10
+            elif days_to_cover >= 3:
+                dtc_bonus = 5
+
+            # Change direction bonus (increasing short interest = more conviction)
+            change_bonus = 0
+            if change_pct >= 20:
+                change_bonus = 15
+            elif change_pct >= 10:
+                change_bonus = 10
+            elif change_pct >= 5:
+                change_bonus = 5
+
+            # Cross-reference bonuses (the real alpha!)
+            squeeze_bonus = 0
+            has_insider_buying = ticker in insider_buy_tickers
+            has_institutional_buying = ticker in institution_buy_tickers
+
+            if has_insider_buying:
+                squeeze_bonus += 20  # Strong squeeze signal
+            if has_institutional_buying:
+                squeeze_bonus += 15  # Smart money disagrees with shorts
+
+            conviction = min(100, si_tier + dtc_bonus + change_bonus + squeeze_bonus)
+
+            # Determine direction
+            if has_insider_buying or has_institutional_buying:
+                direction = "Squeeze"
+            else:
+                direction = "Bearish"
+
+            # Build description
+            desc_parts = []
+            if short_pct_float > 0:
+                desc_parts.append(f"SI {short_pct_float:.1f}% of float")
+            else:
+                si_fmt = f"{short_interest / 1e6:.1f}M" if short_interest >= 1e6 else f"{short_interest:,.0f}"
+                desc_parts.append(f"SI {si_fmt} shares")
+
+            if days_to_cover > 0:
+                desc_parts.append(f"DTC {days_to_cover:.1f}")
+
+            if change_pct != 0:
+                desc_parts.append(f"Chg {change_pct:+.1f}%")
+
+            if has_insider_buying and has_institutional_buying:
+                desc_parts.append("⚡ SQUEEZE: insider+institutional buying")
+            elif has_insider_buying:
+                desc_parts.append("⚡ SQUEEZE: insider buying")
+            elif has_institutional_buying:
+                desc_parts.append("📊 institutional accumulation vs shorts")
+
+            results.append(SignalDetail(
+                source="short_interest",
+                ticker=ticker,
+                direction=direction,
+                date=settlement_date,
+                description=" · ".join(desc_parts),
+                conviction=round(conviction, 1),
+                raw_data={
+                    "short_interest": short_interest,
+                    "short_pct_float": short_pct_float,
+                    "days_to_cover": days_to_cover,
+                    "change_pct": change_pct,
+                    "si_tier": si_tier,
+                    "dtc_bonus": dtc_bonus,
+                    "change_bonus": change_bonus,
+                    "squeeze_bonus": squeeze_bonus,
+                    "has_insider_buying": has_insider_buying,
+                    "has_institutional_buying": has_institutional_buying,
+                    "company": "",
+                }
+            ))
+
+        return results
+
     # ── Aggregation ────────────────────────────────────────────────
 
     def generate(
@@ -616,6 +973,8 @@ class SmartMoneyEngineV2:
         darkpool_data: dict = None,
         institution_data: dict = None,
         insider_data: dict = None,
+        superinvestor_data: dict = None,
+        short_interest_data: dict = None,
         ark_holdings: list = None,
         min_score: float = 0,
     ) -> List[SmartMoneySignal]:
@@ -652,6 +1011,18 @@ class SmartMoneyEngineV2:
             for s in self.score_insiders(
                 insider_data.get("trades", insider_data.get("data", [])),
                 insider_data.get("clusters", [])
+            ):
+                all_details.setdefault(s.ticker, []).append(s)
+        
+        if superinvestor_data:
+            for s in self.score_superinvestors(superinvestor_data):
+                all_details.setdefault(s.ticker, []).append(s)
+        
+        if short_interest_data:
+            for s in self.score_short_interest(
+                short_interest_data.get("tickers", []),
+                insider_data=insider_data,
+                institution_data=institution_data,
             ):
                 all_details.setdefault(s.ticker, []).append(s)
         
@@ -707,6 +1078,8 @@ class SmartMoneyEngineV2:
                 darkpool_conviction=round(source_convictions.get("darkpool", 0), 1),
                 institution_conviction=round(source_convictions.get("institution", 0), 1),
                 insider_conviction=round(source_convictions.get("insider", 0), 1),
+                superinvestor_conviction=round(source_convictions.get("superinvestor", 0), 1),
+                short_interest_conviction=round(source_convictions.get("short_interest", 0), 1),
                 max_conviction=round(max_conviction, 1),
                 multi_source_bonus=round(multi_bonus, 1),
                 recency_factor=round(self._recency_decay(recency_days), 3),
@@ -736,6 +1109,8 @@ class SmartMoneyEngineV2:
                 "darkpool_score": r.darkpool_conviction,
                 "institution_score": r.institution_conviction,
                 "insider_score": r.insider_conviction,
+                "superinvestor_score": r.superinvestor_conviction,
+                "short_interest_score": r.short_interest_conviction,
                 "max_conviction": r.max_conviction,
                 "multi_source_bonus": r.multi_source_bonus,
                 "details": [

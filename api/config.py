@@ -1,5 +1,5 @@
 """
-Meridian — Configuration
+Smart Money Intelligence Platform — Configuration
 
 All paths, weights, thresholds, and API settings in one place.
 Environment variables override defaults where applicable.
@@ -13,8 +13,8 @@ from typing import Dict
 
 # ── Paths ──────────────────────────────────────────────────────────────────
 
-PROJECT_ROOT = Path(__file__).parent.parent  # meridian/
-API_ROOT = Path(__file__).parent             # meridian/api/
+PROJECT_ROOT = Path(__file__).parent.parent  # smart-money-platform/
+API_ROOT = Path(__file__).parent             # smart-money-platform/api/
 DATA_DIR = PROJECT_ROOT / "data"
 DATA_DIR.mkdir(exist_ok=True)
 FRONTEND_DIR = PROJECT_ROOT / "frontend" / "static"
@@ -29,6 +29,7 @@ CACHE_FILES = {
     "ark_holdings": "ark_holdings.json",
     "institutions": "institutions.json",
     "insiders": "insiders.json",
+    "superinvestors": "superinvestors.json",
     "signals": "signals.json",
     "congress_backtest": "congress_backtest.json",
     "ticker_metadata": "ticker_metadata.json",
@@ -137,16 +138,16 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 
 
-# ── Data Paths ──────────────────────────────────────────────────────────────
+# ── Existing Data Paths (backward compat with rsnest) ─────────────────────
 # These paths use environment variables for Docker compatibility
 
 LEGACY_ARK_DATA_DIR = os.getenv(
-    "ARK_DATA_DIR",
-    "./data/ark"
+    "CLAWD_ARK_DATA_DIR",
+    "/home/raven/clawd/projects/quant-engine/us-signals/smart-money-tracker/data"
 )
 LEGACY_SIGNAL_LOG = os.getenv(
-    "SIGNALS_DIR",
-    "./data/signals"
+    "CLAWD_SIGNALS_DIR",
+    "/home/raven/clawd/shared/signals"
 ) + "/signal_log.jsonl"
 
 

@@ -52,6 +52,8 @@ def refresh_signals(
         ("ark_trades", "ark_trades.json"),
         ("darkpool", "darkpool.json"),
         ("institutions", "institutions.json"),
+        ("insiders", "insiders.json"),
+        ("superinvestors", "superinvestors.json"),
     ]:
         if cache.exists(filename):
             data = cache.read(filename)
@@ -77,6 +79,7 @@ def refresh_signals(
         ark_data=source_data.get("ark_trades"),
         darkpool_data=source_data.get("darkpool"),
         institution_data=source_data.get("institutions"),
+        insider_data=source_data.get("insiders"),
     )
     
     # Write signals.json (v1 — kept for backward compat)
@@ -98,6 +101,8 @@ def refresh_signals(
             ark_data=source_data.get("ark_trades"),
             darkpool_data=source_data.get("darkpool"),
             institution_data=source_data.get("institutions"),
+            insider_data=source_data.get("insiders"),
+            superinvestor_data=source_data.get("superinvestors"),
             ark_holdings=ark_holdings,
             min_score=0,
         )

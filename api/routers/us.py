@@ -298,6 +298,103 @@ def api_us_insiders(
     }
 
 
+@router.get("/api/us/superinvestors")
+def api_us_superinvestors(
+    request: Request,
+    manager: str = None,
+    ticker: str = None,
+    activity_type: str = None,  # Buy, Sell, Add, Reduce
+    min_managers: int = None,   # minimum manager count (aggregate)
+    source_type: str = None,    # aggregate, per_manager
+):
+    """
+    Get superinvestor portfolio activity from Dataroma (13F filings).
+    
+    Tracks ~80 legendary investors (Buffett, Soros, Ackman, Icahn, etc.)
+    
+    Query params:
+      - manager: filter by manager name (partial match)
+      - ticker: filter by specific ticker
+      - activity_type: Buy, Sell, Add, or Reduce
+      - min_managers: only show stocks with N+ managers buying/selling (aggregate only)
+      - source_type: 'aggregate' (cross-manager) or 'per_manager' (individual)
+    """
+    data = smart_money_cache.read("superinvestors.json")
+    if not data or "activity" not in data:
+        return {"data": [], "holdings": {}, "metadata": {"total": 0, "filtered": 0}}
+    
+    activity = data["activity"]
+    holdings = data.get("holdings", {})
+    
+    # Filter by source_type
+    if source_type:
+        activity = [a for a in activity if a.get("source", "") == source_type]
+    
+    # Filter by activity_type
+    if activity_type:
+        activity = [
+            a for a in activity
+            if a.get("activity_type", "").lower() == activity_type.lower()
+        ]
+    
+    # Filter by ticker
+    if ticker:
+        ticker_upper = ticker.upper()
+        activity = [a for a in activity if a.get("ticker", "").upper() == ticker_upper]
+        # Also filter holdings to show only relevant managers
+        filtered_holdings = {}
+        for code, h in holdings.items():
+            for th in h.get("top_holdings", []):
+                if th.get("ticker", "").upper() == ticker_upper:
+                    filtered_holdings[code] = h
+                    break
+        holdings = filtered_holdings
+    
+    # Filter by manager (partial match on manager name)
+    if manager:
+        manager_lower = manager.lower()
+        activity = [
+            a for a in activity
+            if manager_lower in (a.get("manager") or "").lower()
+        ]
+    
+    # Filter by min_managers (aggregate entries only)
+    if min_managers is not None:
+        activity = [
+            a for a in activity
+            if a.get("manager_count", 0) >= min_managers or a.get("source") != "aggregate"
+        ]
+    
+    # Enrich with company names
+    ticker_names.enrich_list(activity, ticker_field="ticker", name_field="company")
+    
+    # Stats
+    buy_count = sum(1 for a in activity if a.get("activity_type") in ("Buy", "Add"))
+    sell_count = sum(1 for a in activity if a.get("activity_type") in ("Sell", "Reduce"))
+    
+    return {
+        "data": activity,
+        "holdings": holdings,
+        "metadata": {
+            "total": len(data.get("activity", [])),
+            "filtered": len(activity),
+            "buy_count": buy_count,
+            "sell_count": sell_count,
+            "managers_tracked": data.get("metadata", {}).get("manager_count", 0),
+            "holdings_scraped": len(data.get("holdings", {})),
+            "filters": {
+                "manager": manager,
+                "ticker": ticker,
+                "activity_type": activity_type,
+                "min_managers": min_managers,
+                "source_type": source_type,
+            },
+            "source": "dataroma",
+            "last_updated": data.get("metadata", {}).get("last_updated"),
+        }
+    }
+
+
 @router.get("/api/signals/feed")
 def api_signals_feed(
     days: int = 7,
@@ -657,6 +754,7 @@ def api_signals_smart_money(
         darkpool = smart_money_cache.read("darkpool.json")
         institutions = smart_money_cache.read("institutions.json")
         insiders = smart_money_cache.read("insiders.json")
+        superinvestors = smart_money_cache.read("superinvestors.json")
         ark_holdings_data = smart_money_cache.read("ark_holdings.json")
         ark_holdings = ark_holdings_data.get("holdings", ark_holdings_data.get("data", [])) if ark_holdings_data else None
         
@@ -666,6 +764,7 @@ def api_signals_smart_money(
             darkpool_data=darkpool,
             institution_data=institutions,
             insider_data=insiders,
+            superinvestor_data=superinvestors,
             ark_holdings=ark_holdings,
             min_score=0,
         )
