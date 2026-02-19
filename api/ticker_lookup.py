@@ -155,6 +155,11 @@ class TickerNameLookup:
         
         return {t: self._names.get(t.upper()) for t in tickers}
     
+    def get_all(self) -> dict:
+        """Return all ticker→name mappings."""
+        self._ensure_initialized()
+        return dict(self._names)
+
     @property
     def count(self) -> int:
         self._ensure_initialized()

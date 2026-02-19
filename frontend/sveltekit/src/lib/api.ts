@@ -114,6 +114,7 @@ export const api = {
 	// Ticker
 	ticker: {
 		detail: (symbol: string) => fetchApi(`/ticker/${symbol}`),
+		search: (q: string) => fetchApi(`/ticker/search${buildQueryString({ q })}`),
 	},
 	
 	// HK

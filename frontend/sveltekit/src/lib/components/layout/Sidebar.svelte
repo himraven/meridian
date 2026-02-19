@@ -12,7 +12,7 @@
 	// Nav sections — no emoji, clean text labels only
 	const navSections = [
 		{
-			title: 'US Markets',
+			title: 'Sources',
 			items: [
 				{ href: '/smart-money', label: 'Overview' },
 				{ href: '/congress', label: 'Congress' },
@@ -20,7 +20,6 @@
 				{ href: '/darkpool', label: 'Dark Pool' },
 				{ href: '/institutions', label: 'Institutions' },
 				{ href: '/insiders', label: 'Insiders' },
-				{ href: '/ranking', label: 'Ranking' }
 			]
 		},
 		{
@@ -41,7 +40,7 @@
 	];
 	
 	let expandedSections = $state<Record<string, boolean>>({
-		'US Markets': true,
+		'Sources': true,
 		'Asia Markets': true,
 		'Research': true
 	});
@@ -81,13 +80,34 @@
 	
 	<!-- Navigation + Health Indicator wrapper -->
 	<nav class="sidebar-nav">
-		<!-- Dashboard top link -->
+		<!-- Core navigation -->
 		<a 
 			href="/dashboard" 
-			class="sidebar-link {$page.url.pathname === '/dashboard' ? 'sidebar-link-active' : ''}"
+			class="sidebar-link {$page.url.pathname === '/dashboard' || $page.url.pathname === '/' ? 'sidebar-link-active' : ''}"
 			onclick={() => { if (window.innerWidth < 768) onClose(); }}
 		>
 			Dashboard
+		</a>
+		<a 
+			href="/feed" 
+			class="sidebar-link {$page.url.pathname === '/feed' ? 'sidebar-link-active' : ''}"
+			onclick={() => { if (window.innerWidth < 768) onClose(); }}
+		>
+			Feed
+		</a>
+		<a 
+			href="/ranking" 
+			class="sidebar-link {$page.url.pathname.startsWith('/ranking') ? 'sidebar-link-active' : ''}"
+			onclick={() => { if (window.innerWidth < 768) onClose(); }}
+		>
+			Ranking
+		</a>
+		<a 
+			href="/search" 
+			class="sidebar-link {$page.url.pathname === '/search' ? 'sidebar-link-active' : ''}"
+			onclick={() => { if (window.innerWidth < 768) onClose(); }}
+		>
+			Search
 		</a>
 		
 		<!-- Navigation sections -->

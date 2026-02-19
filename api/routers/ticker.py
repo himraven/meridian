@@ -15,6 +15,30 @@ router = APIRouter()
 
 # ── Routes ─────────────────────────────────────────────────────────────
 
+@router.get("/api/ticker/search")
+def api_ticker_search(q: str = ""):
+    """Search tickers by symbol or company name."""
+    q = q.strip().upper()
+    if len(q) < 1:
+        return {"results": []}
+    
+    results = []
+    names = ticker_names.get_all()
+    
+    # Exact symbol matches first
+    for symbol, name in names.items():
+        if symbol == q:
+            results.insert(0, {"ticker": symbol, "company": name or ""})
+        elif q in symbol:
+            results.append({"ticker": symbol, "company": name or ""})
+        elif name and q in name.upper():
+            results.append({"ticker": symbol, "company": name or ""})
+        if len(results) >= 20:
+            break
+    
+    return {"results": results}
+
+
 @router.get("/api/ticker/{symbol}")
 def api_ticker_aggregate(request: Request, symbol: str):
     """
