@@ -210,6 +210,9 @@
 						</div>
 					{/each}
 				{/if}
+
+				<!-- View full feed link -->
+				<a href="/feed" class="feed-view-all">View all signals →</a>
 			</div>
 
 			<!-- ── Right: Meridian Ranking ─────────────────────────────── -->
@@ -483,6 +486,26 @@
 		color: var(--text-muted);
 		margin-top: 2px;
 		line-height: 1.4;
+	}
+
+	/* ── Feed View All ───────────────────────────────────────────── */
+	.feed-view-all {
+		display: block;
+		text-align: center;
+		font-size: 12px;
+		font-weight: 500;
+		color: var(--text-muted);
+		padding: 10px;
+		border: 1px solid var(--border-default);
+		border-radius: 8px;
+		text-decoration: none;
+		margin-top: 4px;
+		transition: color 0.15s ease, border-color 0.15s ease;
+	}
+
+	.feed-view-all:hover {
+		color: var(--text-secondary);
+		border-color: var(--border-hover);
 	}
 
 	/* ── Ranking Panel ───────────────────────────────────────────── */

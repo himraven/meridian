@@ -53,7 +53,9 @@
 		ark: 'bg-[var(--blue)]/20 text-[var(--blue)]',
 		darkpool: 'bg-purple-500/20 text-purple-400',
 		institution: 'bg-[var(--green)]/20 text-[var(--green)]',
-		insider: 'bg-orange-500/20 text-orange-400'
+		insider: 'bg-orange-500/20 text-orange-400',
+		short_interest: 'bg-red-500/20 text-red-400',
+		superinvestor: 'bg-cyan-500/20 text-cyan-400'
 	};
 
 	let methodologyOpen = $state(false);
@@ -63,7 +65,9 @@
 		ark: 'ARK',
 		darkpool: 'DP',
 		institution: '13F',
-		insider: 'INS'
+		insider: 'INS',
+		short_interest: 'SI',
+		superinvestor: 'SUP'
 	};
 
 	// Knowledge Hub slug mapping (source → article slug)
@@ -279,9 +283,9 @@
 			<div>
 				<h3 class="text-subhead mb-2">How Conviction Scoring Works</h3>
 				<p class="text-sm text-[var(--text-muted)] mb-3">
-					Each signal is scored 0-100 based on strength within its source. Multi-source alignment adds +20 bonus per source (max +40).
+					Each signal is scored 0-100 based on conviction strength. Scores are amplified by source confluence — the more independent signals converge on a ticker, the higher it ranks.
 				</p>
-				<div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
+				<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 text-sm">
 					<a href="/knowledge/congress-trading-alpha" class="flex items-center gap-2 group">
 						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.congress} group-hover:opacity-80">GOV</span>
 						<span class="text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]">Amount × Recency × Members</span>
@@ -301,6 +305,14 @@
 					<a href="/knowledge/insider-buying-signals" class="flex items-center gap-2 group">
 						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.insider} group-hover:opacity-80">INS</span>
 						<span class="text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]">Value × Clusters × Recency</span>
+					</a>
+					<a href="/knowledge/short-interest-analysis" class="flex items-center gap-2 group">
+						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.short_interest} group-hover:opacity-80">SI</span>
+						<span class="text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]">SI Ratio × Days to Cover × Float</span>
+					</a>
+					<a href="/knowledge/superinvestor-tracking" class="flex items-center gap-2 group">
+						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.superinvestor} group-hover:opacity-80">SUP</span>
+						<span class="text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]">Managers × Position Size × Conviction</span>
 					</a>
 				</div>
 			</div>
