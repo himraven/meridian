@@ -324,16 +324,23 @@ def _score_v7(
     # ── Step 6: Penalty from opposing ────────────────────────────────
     penalty = sum(abs(c["contribution"]) for c in opposing)
 
-    # ── Step 7: Cap by aligned active count ──────────────────────────
-    # Single-source signals capped harder to prevent obscure tickers dominating
+    # ── Step 7: Cap by source count ────────────────────────────────
+    # Uses BOTH aligned_active and total_sources to set cap
+    # This ensures multi-source tickers aren't penalized just because
+    # direction detection couldn't determine alignment (e.g., mixed buy/sell)
     total_sources = len([c for c in contributions if c["status"] != "opposing"])
-    cap = {0: 40, 1: 55, 2: 85, 3: 95}.get(aligned_active, 100)
-    # Additional penalty: single-source tickers clearly below multi-source
-    if total_sources <= 1:
-        cap = min(cap, 45)
+    cap_by_aligned = {0: 40, 1: 55, 2: 85, 3: 95}.get(aligned_active, 100)
+    cap_by_total = {1: 45, 2: 65, 3: 80, 4: 92, 5: 97}.get(min(total_sources, 5), 100)
+    cap = max(cap_by_aligned, cap_by_total)  # take the more generous cap
+
+    # ── Step 8: Confluence multiplier (multi-source bonus) ──────────
+    # More sources = higher multiplier, smooth stepped curve
+    # This is Meridian's core value prop: signal convergence
+    _confluence_mult = {1: 1.0, 2: 1.08, 3: 1.18, 4: 1.28, 5: 1.35, 6: 1.40, 7: 1.40}
+    confluence = _confluence_mult.get(min(total_sources, 7), 1.40)
 
     # ── Final score ──────────────────────────────────────────────────
-    raw_score = base + extra + dir_bonus - penalty
+    raw_score = (base + extra + dir_bonus - penalty) * confluence
     score = min(float(cap), max(0.0, raw_score))
 
     breakdown = {
@@ -342,6 +349,8 @@ def _score_v7(
         "base": round(base, 2),
         "extra": round(extra, 2),
         "dir_bonus": round(dir_bonus, 2),
+        "confluence_multiplier": confluence,
+        "total_sources": total_sources,
         "penalty": round(penalty, 2),
         "cap": cap,
         "aligned_active": aligned_active,
