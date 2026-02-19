@@ -54,6 +54,7 @@ def refresh_signals(
         ("institutions", "institutions.json"),
         ("insiders", "insiders.json"),
         ("superinvestors", "superinvestors.json"),
+        ("short_interest", "short_interest.json"),
     ]:
         if cache.exists(filename):
             data = cache.read(filename)
@@ -103,6 +104,7 @@ def refresh_signals(
             institution_data=source_data.get("institutions"),
             insider_data=source_data.get("insiders"),
             superinvestor_data=source_data.get("superinvestors"),
+            short_interest_data=source_data.get("short_interest"),
             ark_holdings=ark_holdings,
             min_score=0,
         )

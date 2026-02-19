@@ -33,6 +33,7 @@ CACHE_FILES = {
     "signals": "signals.json",
     "congress_backtest": "congress_backtest.json",
     "ticker_metadata": "ticker_metadata.json",
+    "short_interest": "short_interest.json",
 }
 
 

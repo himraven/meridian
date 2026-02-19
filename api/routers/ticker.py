@@ -122,6 +122,10 @@ def api_ticker_aggregate(request: Request, symbol: str):
         "darkpool_score": signal.get("darkpool_conviction", signal.get("darkpool_score", 0)),
         "institution_score": signal.get("institution_conviction", signal.get("institution_score", 0)),
         "insider_score": signal.get("insider_conviction", signal.get("insider_score", 0)),
+        "superinvestor_score": signal.get("superinvestor_conviction", signal.get("superinvestor_score", 0)),
+        "short_interest_score": signal.get("short_interest_score", 0),
+        "max_conviction": signal.get("max_conviction", 0),
+        "multi_source_bonus": signal.get("multi_source_bonus", 0),
         "details": signal.get("details", []),
     }
 
