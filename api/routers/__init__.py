@@ -13,6 +13,7 @@ from . import (
     ticker,
     research,
     data_health,
+    system,
 )
 
 
@@ -39,3 +40,6 @@ def register_routers(app: FastAPI) -> None:
 
     # Data health monitoring
     app.include_router(data_health.router, tags=["ops"])
+
+    # System status (DuckDB, etc.)
+    app.include_router(system.router, tags=["system"])
