@@ -107,6 +107,8 @@ export const api = {
 			fetchApi(`/signals/confluence${buildQueryString(params || {})}`),
 		smartMoney: (params?: { min_score?: number; source?: string; days?: number }) =>
 			fetchApi(`/signals/smart-money${buildQueryString(params || {})}`),
+		feed: (params?: { days?: number; source?: string; ticker?: string; limit?: number }) =>
+			fetchApi(`/signals/feed${buildQueryString(params || {})}`),
 	},
 	
 	// Ticker

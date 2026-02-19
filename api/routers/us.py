@@ -298,6 +298,272 @@ def api_us_insiders(
     }
 
 
+@router.get("/api/signals/feed")
+def api_signals_feed(
+    days: int = 7,
+    source: str = None,
+    ticker: str = None,
+    limit: int = 50,
+):
+    """
+    Unified event timeline merging all smart money data sources.
+    Returns a chronological feed of congress trades, ARK trades,
+    dark pool anomalies, insider trades, and 13F position changes.
+    """
+    cutoff = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d")
+    events: list[dict] = []
+
+    TOP_FUNDS = {"berkshire hathaway", "renaissance technologies", "bridgewater associates",
+                 "pershing square", "soros fund"}
+
+    # ── Congress trades ──────────────────────────────────────────────
+    if not source or source == "congress":
+        congress_data = smart_money_cache.read("congress.json")
+        if congress_data and "trades" in congress_data:
+            for t in congress_data["trades"]:
+                tx_date = t.get("transaction_date", "")
+                if tx_date < cutoff:
+                    continue
+                if ticker and t.get("ticker", "").upper() != ticker.upper():
+                    continue
+                trade_type = (t.get("trade_type") or "").lower()
+                is_buy = trade_type in ("buy", "purchase")
+                amt_min = t.get("amount_min", 0) or 0
+                amt_max = t.get("amount_max", 0) or 0
+                mid_val = (amt_min + amt_max) / 2 if amt_max else amt_min
+
+                if mid_val > 500000:
+                    sig = "high"
+                elif mid_val > 100000:
+                    sig = "medium"
+                else:
+                    sig = "low"
+
+                rep = t.get("representative", "Unknown")
+                chamber = t.get("chamber", "")
+                party_short = "R" if t.get("party") == "Republican" else "D"
+                action = "bought" if is_buy else "sold"
+                tk = t.get("ticker", "???")
+
+                events.append({
+                    "id": f"congress-{tk}-{tx_date}-{rep[:10]}",
+                    "source": "congress",
+                    "ticker": tk,
+                    "company": "",
+                    "date": tx_date,
+                    "headline": f"{rep} ({party_short}) {action} {tk}",
+                    "description": f"{t.get('amount_range', '')} by {chamber} member",
+                    "value": mid_val,
+                    "sentiment": "bullish" if is_buy else "bearish",
+                    "significance": sig,
+                })
+
+    # ── ARK trades ───────────────────────────────────────────────────
+    if not source or source == "ark":
+        ark_data = smart_money_cache.read("ark_trades.json")
+        if ark_data and "trades" in ark_data:
+            for t in ark_data["trades"]:
+                trade_date = t.get("date", "")
+                if trade_date < cutoff:
+                    continue
+                if ticker and t.get("ticker", "").upper() != ticker.upper():
+                    continue
+                change_type = (t.get("change_type") or "").upper()
+                trade_type = (t.get("trade_type") or "").lower()
+                is_buy = trade_type == "buy"
+                shares = abs(t.get("shares", 0) or 0)
+                etf = t.get("etf", "")
+                tk = t.get("ticker", "???")
+                company = t.get("company", "")
+
+                if change_type in ("NEW_POSITION", "INCREASED"):
+                    sig = "high"
+                elif change_type in ("DECREASED", "SOLD_OUT"):
+                    sig = "medium"
+                else:
+                    sig = "low"
+
+                action = "bought" if is_buy else "sold"
+                shares_fmt = f"{shares:,.0f}" if shares else "?"
+
+                events.append({
+                    "id": f"ark-{tk}-{trade_date}-{etf}",
+                    "source": "ark",
+                    "ticker": tk,
+                    "company": company,
+                    "date": trade_date,
+                    "headline": f"ARK {etf} {action} {tk}",
+                    "description": f"{shares_fmt} shares · {change_type.replace('_', ' ').title()}",
+                    "value": None,
+                    "sentiment": "bullish" if is_buy else "bearish",
+                    "significance": sig,
+                })
+
+    # ── Dark pool anomalies ──────────────────────────────────────────
+    if not source or source == "darkpool":
+        dp_data = smart_money_cache.read("darkpool.json")
+        if dp_data and "tickers" in dp_data:
+            for t in dp_data["tickers"]:
+                dp_date = t.get("date", "")
+                if dp_date < cutoff:
+                    continue
+                if ticker and t.get("ticker", "").upper() != ticker.upper():
+                    continue
+                z = t.get("z_score", 0) or 0
+                if z < 2.0:
+                    continue
+                tk = t.get("ticker", "???")
+                dpi = t.get("dpi", 0) or 0
+
+                if z >= 2.5:
+                    sig = "high"
+                else:
+                    sig = "medium"
+
+                vol = t.get("off_exchange_volume", 0) or 0
+                vol_fmt = f"{vol / 1e6:.1f}M" if vol >= 1e6 else f"{vol / 1e3:.0f}K"
+
+                events.append({
+                    "id": f"darkpool-{tk}-{dp_date}",
+                    "source": "darkpool",
+                    "ticker": tk,
+                    "company": "",
+                    "date": dp_date,
+                    "headline": f"Dark pool anomaly on {tk}",
+                    "description": f"Z-score {z:.1f} · DPI {dpi:.0%} · {vol_fmt} off-exchange vol",
+                    "value": None,
+                    "sentiment": "neutral",
+                    "significance": sig,
+                })
+
+    # ── Insider trades ───────────────────────────────────────────────
+    if not source or source == "insider":
+        insider_data = smart_money_cache.read("insiders.json")
+        if insider_data and "trades" in insider_data:
+            clusters = insider_data.get("clusters", [])
+            cluster_tickers = {c.get("ticker", "").upper() for c in clusters}
+            cluster_map = {c.get("ticker", "").upper(): c for c in clusters}
+            seen_cluster_tickers: set[str] = set()
+
+            for t in insider_data["trades"]:
+                trade_date = t.get("trade_date") or t.get("filing_date", "")
+                if trade_date < cutoff:
+                    continue
+                if ticker and t.get("ticker", "").upper() != ticker.upper():
+                    continue
+                tx_type = (t.get("transaction_type") or "").lower()
+                if tx_type != "buy":
+                    continue
+                tk = t.get("ticker", "???").upper()
+                val = abs(t.get("value", 0) or 0)
+                company = t.get("company", "")
+
+                # Cluster buy → one event per cluster ticker
+                if tk in cluster_tickers and tk not in seen_cluster_tickers:
+                    seen_cluster_tickers.add(tk)
+                    c = cluster_map[tk]
+                    c_val = c.get("total_value", 0)
+                    c_count = c.get("insider_count", 0)
+                    events.append({
+                        "id": f"insider-cluster-{tk}-{c.get('first_date', trade_date)}",
+                        "source": "insider",
+                        "ticker": tk,
+                        "company": company or c.get("company", ""),
+                        "date": c.get("last_date", trade_date),
+                        "headline": f"{c_count} insiders cluster buy {tk}",
+                        "description": f"${c_val / 1e6:.1f}M total · {', '.join(c.get('insiders', [])[:3])}",
+                        "value": c_val,
+                        "sentiment": "bullish",
+                        "significance": "high",
+                    })
+                    continue
+
+                # Skip individual trades that are part of a cluster
+                if tk in cluster_tickers:
+                    continue
+
+                # Individual buy
+                if val > 500000:
+                    sig = "high"
+                elif val > 100000:
+                    sig = "medium"
+                else:
+                    sig = "low"
+
+                insider_name = t.get("insider_name", "Insider")
+                title = t.get("title", "")
+                val_fmt = f"${val / 1e6:.1f}M" if val >= 1e6 else f"${val / 1e3:.0f}K"
+
+                events.append({
+                    "id": f"insider-{tk}-{trade_date}-{insider_name[:10]}",
+                    "source": "insider",
+                    "ticker": tk,
+                    "company": company,
+                    "date": trade_date,
+                    "headline": f"{insider_name} bought {tk}",
+                    "description": f"{val_fmt} · {title}" if title else f"{val_fmt} purchase",
+                    "value": val,
+                    "sentiment": "bullish",
+                    "significance": sig,
+                })
+
+    # ── 13F institution changes ──────────────────────────────────────
+    if not source or source == "institution":
+        inst_data = smart_money_cache.read("institutions.json")
+        if inst_data and "filings" in inst_data:
+            for filing in inst_data["filings"]:
+                fund_name = filing.get("fund_name", "Unknown")
+                filing_date = filing.get("filing_date", "")
+                if filing_date < cutoff:
+                    continue
+                is_top_fund = any(tf in fund_name.lower() for tf in TOP_FUNDS)
+                sig = "high" if is_top_fund else "medium"
+                quarter = filing.get("quarter", "")
+
+                # Top 5 holdings by value for this fund
+                holdings = filing.get("holdings", [])
+                top_5 = sorted(holdings, key=lambda h: h.get("value", 0), reverse=True)[:5]
+
+                for h in top_5:
+                    tk = (h.get("ticker") or "").strip()
+                    if not tk:
+                        # Try to derive ticker from issuer
+                        continue
+                    if ticker and tk.upper() != ticker.upper():
+                        continue
+                    issuer = h.get("issuer", "")
+                    val = h.get("value", 0) or 0
+                    pct = h.get("pct_portfolio", 0)
+                    val_fmt = f"${val / 1e9:.1f}B" if val >= 1e9 else f"${val / 1e6:.0f}M"
+
+                    events.append({
+                        "id": f"institution-{tk}-{fund_name[:15]}-{quarter}",
+                        "source": "institution",
+                        "ticker": tk.upper(),
+                        "company": issuer,
+                        "date": filing_date,
+                        "headline": f"{fund_name} holds {tk.upper()}",
+                        "description": f"{val_fmt} · {pct:.1f}% of portfolio · {quarter}",
+                        "value": val,
+                        "sentiment": "neutral",
+                        "significance": sig,
+                    })
+
+    # ── Enrich company names, sort, limit ────────────────────────────
+    ticker_names.enrich_list(events, ticker_field="ticker", name_field="company")
+
+    events.sort(key=lambda e: e.get("date", ""), reverse=True)
+    events = events[:limit]
+
+    return {
+        "events": events,
+        "metadata": {
+            "total": len(events),
+            "filters": {"days": days, "source": source, "ticker": ticker, "limit": limit},
+        },
+    }
+
+
 @router.get("/api/signals/confluence")
 def api_signals_confluence(
     request: Request,

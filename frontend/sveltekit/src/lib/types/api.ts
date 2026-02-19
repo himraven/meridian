@@ -433,6 +433,29 @@ export interface Cn8x30SensitivityResponse {
 	recommendation: string;
 }
 
+// ═══ Feed ═══
+
+export interface FeedEvent {
+	id: string;
+	source: 'congress' | 'ark' | 'darkpool' | 'insider' | 'institution';
+	ticker: string;
+	company: string;
+	date: string;
+	headline: string;
+	description: string;
+	value: number | null;
+	sentiment: 'bullish' | 'bearish' | 'neutral';
+	significance: 'high' | 'medium' | 'low';
+}
+
+export interface FeedResponse {
+	events: FeedEvent[];
+	metadata: {
+		total: number;
+		filters: Record<string, any>;
+	};
+}
+
 // ═══ System ═══
 
 export interface VpsStatusResponse {
