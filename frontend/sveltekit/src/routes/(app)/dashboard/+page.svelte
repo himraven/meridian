@@ -218,7 +218,7 @@
 				<div class="ranking-panel">
 					{#if sortedSignals.length === 0}
 						<div class="text-center py-6">
-							<p class="text-sm" style="color: var(--text-muted);">No signals available</p>
+							<p class="text-sm" style="color: var(--text-muted);">No rankings yet</p>
 						</div>
 					{:else}
 						<div class="ranking-list">
@@ -249,7 +249,7 @@
 						</div>
 						{#if sortedSignals.length > 20}
 							<a href="/signals" class="ranking-see-all">
-								See all {data.signals?.metadata.total ?? sortedSignals.length} signals →
+								See all rankings →
 							</a>
 						{/if}
 					{/if}

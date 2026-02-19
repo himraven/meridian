@@ -101,7 +101,7 @@
 	];
 	
 	const tabs = [
-		{ id: 'signals', label: 'Signals', count: filteredSignals().length },
+		{ id: 'signals', label: 'Ranked', count: filteredSignals().length },
 		{ id: 'congress', label: 'Congress', count: filteredCongress().length },
 		{ id: 'ark', label: 'ARK', count: filteredArk().length },
 		{ id: 'darkpool', label: 'Dark Pool', count: filteredDarkpool().length },
@@ -167,7 +167,7 @@
 									</select>
 								</div>
 								<div class="flex items-end">
-									<span class="text-sm text-[var(--text-muted)]">Showing {filteredSignals().length} of {data.signals.metadata.total} signals</span>
+									<span class="text-sm text-[var(--text-muted)]">Showing {filteredSignals().length} of {data.signals.metadata.total} stocks</span>
 								</div>
 							</div>
 						{/snippet}
