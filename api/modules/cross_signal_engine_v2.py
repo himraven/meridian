@@ -10,6 +10,7 @@ Each source gets a conviction score 0-100:
   - ARK:         fund count × shares × weight × position type (NEW = bonus)
   - Dark Pool:   z_score × DPI × volume
   - Institutions: position value × change % × fund prestige
+  - Insiders:    value × recency × cluster size × title seniority
 
 Final score = max(source_conviction) + multi_source_bonus
 Multi-source bonus: 20 points per additional source (still rewarded, not required)
@@ -53,6 +54,7 @@ class SmartMoneySignal:
     ark_conviction: float = 0.0
     darkpool_conviction: float = 0.0
     institution_conviction: float = 0.0
+    insider_conviction: float = 0.0
     
     # Breakdown
     max_conviction: float = 0.0
@@ -488,6 +490,123 @@ class SmartMoneyEngineV2:
         
         return results
 
+    def score_insiders(self, trades: list, clusters: list = None) -> List[SignalDetail]:
+        """
+        Insider trading conviction scoring:
+        - Value tier: $50K=15, $100K=30, $500K=50, $1M=65, $5M+=80
+        - Cluster bonus: 3 insiders=+15, 4=+20, 5+=+25
+        - Title seniority: CEO/CFO/COO=+10, VP/Director=+5
+        - Recency: exponential decay (14-day half-life)
+        """
+        if not trades:
+            return []
+
+        # Build cluster lookup
+        cluster_map: Dict[str, dict] = {}
+        if clusters:
+            for c in clusters:
+                ticker = (c.get("ticker") or "").upper().strip()
+                if ticker:
+                    cluster_map[ticker] = c
+
+        signals_by_ticker: Dict[str, List[dict]] = {}
+        for t in trades:
+            if t.get("transaction_type") != "Buy":
+                continue
+
+            date = t.get("filing_date") or t.get("trade_date", "")
+            if self._days_ago(date) > 45:
+                continue
+
+            value = t.get("value", 0)
+            if value < 10_000:  # Very small buys less meaningful
+                continue
+
+            ticker = (t.get("ticker") or "").upper().strip()
+            if not ticker:
+                continue
+
+            if ticker not in signals_by_ticker:
+                signals_by_ticker[ticker] = []
+            signals_by_ticker[ticker].append(t)
+
+        results = []
+        SENIOR_TITLES = {"ceo", "cfo", "coo", "cto", "president", "chairman", "chief"}
+
+        for ticker, ticker_trades in signals_by_ticker.items():
+            # Max value
+            max_value = max(t.get("value", 0) for t in ticker_trades)
+
+            # Value tier (0-80)
+            if max_value >= 5_000_000: val_tier = 80
+            elif max_value >= 1_000_000: val_tier = 65
+            elif max_value >= 500_000: val_tier = 50
+            elif max_value >= 100_000: val_tier = 30
+            elif max_value >= 50_000: val_tier = 15
+            else: val_tier = 10
+
+            # Cluster bonus
+            unique_insiders = set(t.get("insider_name", "") for t in ticker_trades)
+            insider_count = len(unique_insiders)
+            cluster_info = cluster_map.get(ticker, {})
+            # Use the larger of detected vs cluster page count
+            cluster_count = max(insider_count, cluster_info.get("insider_count", 0))
+
+            cluster_bonus = 0
+            if cluster_count >= 5: cluster_bonus = 25
+            elif cluster_count >= 4: cluster_bonus = 20
+            elif cluster_count >= 3: cluster_bonus = 15
+
+            # Title seniority bonus
+            title_bonus = 0
+            for t in ticker_trades:
+                title = (t.get("title") or "").lower()
+                if any(s in title for s in SENIOR_TITLES):
+                    title_bonus = max(title_bonus, 10)
+                elif any(s in title for s in ("vp", "vice president", "director", "svp")):
+                    title_bonus = max(title_bonus, 5)
+
+            # Recency
+            dates = [t.get("trade_date") or t.get("filing_date", "") for t in ticker_trades]
+            days = min(self._days_ago(d) for d in dates if d)
+            recency = self._recency_decay(days)
+
+            conviction = min(100, (val_tier * recency) + cluster_bonus + title_bonus)
+
+            # Build description
+            best_trade = max(ticker_trades, key=lambda t: t.get("value", 0))
+            name = best_trade.get("insider_name", "Unknown")
+            title_str = best_trade.get("title", "")
+            desc = f"{name}"
+            if title_str:
+                desc += f" ({title_str})"
+            desc += f" bought ${max_value:,.0f}"
+            if cluster_count >= 3:
+                desc += f" [{cluster_count} insiders cluster]"
+            elif insider_count > 1:
+                desc += f" + {insider_count - 1} more"
+
+            results.append(SignalDetail(
+                source="insider",
+                ticker=ticker,
+                direction="Bullish",
+                date=best_trade.get("trade_date", ""),
+                description=desc,
+                conviction=round(conviction, 1),
+                raw_data={
+                    "max_value": max_value,
+                    "val_tier": val_tier,
+                    "cluster_bonus": cluster_bonus,
+                    "title_bonus": title_bonus,
+                    "insider_count": insider_count,
+                    "cluster_count": cluster_count,
+                    "recency": round(recency, 3),
+                    "company": best_trade.get("company", ""),
+                }
+            ))
+
+        return results
+
     # ── Aggregation ────────────────────────────────────────────────
 
     def generate(
@@ -496,6 +615,7 @@ class SmartMoneyEngineV2:
         ark_data: dict = None,
         darkpool_data: dict = None,
         institution_data: dict = None,
+        insider_data: dict = None,
         ark_holdings: list = None,
         min_score: float = 0,
     ) -> List[SmartMoneySignal]:
@@ -526,6 +646,13 @@ class SmartMoneyEngineV2:
         
         if institution_data:
             for s in self.score_institutions(institution_data.get("filings", institution_data.get("data", []))):
+                all_details.setdefault(s.ticker, []).append(s)
+        
+        if insider_data:
+            for s in self.score_insiders(
+                insider_data.get("trades", insider_data.get("data", [])),
+                insider_data.get("clusters", [])
+            ):
                 all_details.setdefault(s.ticker, []).append(s)
         
         # Step 2 & 3: Merge and score
@@ -568,6 +695,7 @@ class SmartMoneyEngineV2:
                 ark_conviction=round(source_convictions.get("ark", 0), 1),
                 darkpool_conviction=round(source_convictions.get("darkpool", 0), 1),
                 institution_conviction=round(source_convictions.get("institution", 0), 1),
+                insider_conviction=round(source_convictions.get("insider", 0), 1),
                 max_conviction=round(max_conviction, 1),
                 multi_source_bonus=round(multi_bonus, 1),
                 recency_factor=round(self._recency_decay(recency_days), 3),
@@ -596,6 +724,7 @@ class SmartMoneyEngineV2:
                 "ark_score": r.ark_conviction,
                 "darkpool_score": r.darkpool_conviction,
                 "institution_score": r.institution_conviction,
+                "insider_score": r.insider_conviction,
                 "max_conviction": r.max_conviction,
                 "multi_source_bonus": r.multi_source_bonus,
                 "details": [

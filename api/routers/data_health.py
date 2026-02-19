@@ -93,6 +93,13 @@ SOURCES = [
         "schedule": "Weekly (Monday 12:00 UTC)",
         "critical": False,
     },
+    {
+        "name": "Insider Trading (SEC Form 4)",
+        "path": "/app/data/insiders.json",
+        "max_age_hours": 28,    # 2x daily expected
+        "schedule": "2x/day (with insider collector)",
+        "critical": True,
+    },
 
     # ── CN Market (signals crons → /app/signals/) ──
     {

@@ -28,6 +28,7 @@ CACHE_FILES = {
     "ark_trades": "ark_trades.json",
     "ark_holdings": "ark_holdings.json",
     "institutions": "institutions.json",
+    "insiders": "insiders.json",
     "signals": "signals.json",
     "congress_backtest": "congress_backtest.json",
     "ticker_metadata": "ticker_metadata.json",

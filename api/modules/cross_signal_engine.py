@@ -10,6 +10,8 @@ Signal Sources:
   2. ARK trades (Buy, weight ≥1%, traded ≤30 days)          weight=1.0
   3. Dark Pool anomalies (Z≥2, DPI≥0.4, vol≥500K, ≤7 days)  weight=0.8
   4. 13F Institutions (New/Increased ≥10%, value≥$50M, ≤90d) weight=0.6
+  5. Insider Trading (Buy, value≥$50K, filed ≤30 days)       weight=0.9
+     Cluster buys (3+ insiders) get weight=1.2
 
 Scoring (PRD §2.3):
   Base_Score          = Σ(signal weights)
@@ -59,6 +61,7 @@ class ConfluenceResult:
     ark_score: float = 0.0
     darkpool_score: float = 0.0
     institution_score: float = 0.0
+    insider_score: float = 0.0
     # Scoring breakdown
     base_score: float = 0.0
     recency_multiplier: float = 0.0
@@ -243,6 +246,72 @@ class SignalExtractor:
         
         return signals
 
+    def extract_insiders(self, data: dict) -> List[RawSignal]:
+        """
+        Extract insider trading buy signals.
+
+        Criteria:
+        - transaction_type == "Buy"
+        - value >= $50,000 (meaningful purchase)
+        - Filed within last 30 days
+        - Cluster buys (3+ insiders) get higher weight (1.2 vs 0.9)
+        """
+        signals = []
+        cluster_tickers = set(data.get("metadata", {}).get("cluster_tickers", []))
+        # Also build from clusters list
+        for c in data.get("clusters", []):
+            cluster_tickers.add(c.get("ticker", ""))
+
+        for trade in data.get("trades", []):
+            if trade.get("transaction_type") != "Buy":
+                continue
+
+            value = trade.get("value", 0)
+            if value < 50_000:
+                continue
+
+            date = trade.get("filing_date") or trade.get("trade_date", "")
+            if self._days_ago(date) > 30:
+                continue
+
+            ticker = (trade.get("ticker") or "").upper().strip()
+            if not ticker:
+                continue
+
+            is_cluster = ticker in cluster_tickers or trade.get("is_cluster", False)
+            weight = 1.2 if is_cluster else 0.9
+
+            insider = trade.get("insider_name", "")
+            title = trade.get("title", "")
+            shares = trade.get("shares", 0)
+
+            desc = f"{insider}"
+            if title:
+                desc += f" ({title})"
+            desc += f" bought ${value:,.0f}"
+            if is_cluster:
+                desc += " [CLUSTER]"
+
+            signals.append(RawSignal(
+                ticker=ticker,
+                source="insider",
+                direction="Bullish",
+                date=trade.get("trade_date", date),
+                weight=weight,
+                description=desc,
+                raw_data={
+                    "insider_name": insider,
+                    "title": title,
+                    "value": value,
+                    "shares": shares,
+                    "price": trade.get("price", 0),
+                    "is_cluster": is_cluster,
+                    "company": trade.get("company", ""),
+                },
+            ))
+
+        return signals
+
     def extract_institutions(self, data: dict) -> List[RawSignal]:
         """
         Extract 13F institutional signals.
@@ -344,6 +413,7 @@ class CrossSignalEngine:
         ark_data: Optional[dict] = None,
         darkpool_data: Optional[dict] = None,
         institution_data: Optional[dict] = None,
+        insider_data: Optional[dict] = None,
     ) -> List[RawSignal]:
         """Extract qualifying signals from all available sources."""
         all_signals = []
@@ -366,6 +436,11 @@ class CrossSignalEngine:
         if institution_data:
             signals = self.extractor.extract_institutions(institution_data)
             logger.info(f"Institutions: {len(signals)} qualifying signals")
+            all_signals.extend(signals)
+        
+        if insider_data:
+            signals = self.extractor.extract_insiders(insider_data)
+            logger.info(f"Insiders: {len(signals)} qualifying signals")
             all_signals.extend(signals)
         
         logger.info(f"Total: {len(all_signals)} signals from all sources")
@@ -446,6 +521,9 @@ class CrossSignalEngine:
             elif source == "ark":
                 # Keep all ARK signals (different ETFs = independent decisions)
                 deduped.extend(source_signals)
+            elif source == "insider":
+                # Keep all insider signals (multiple insiders = cluster = stronger)
+                deduped.extend(source_signals)
             else:
                 # For darkpool/institution, keep the strongest signal
                 best = max(source_signals, key=lambda s: s.raw_data.get("z_score", 0) or s.raw_data.get("value", 0) or 0)
@@ -518,6 +596,7 @@ class CrossSignalEngine:
         ark_score = source_weights.get("ark", 0.0) * recency_multiplier
         darkpool_score = source_weights.get("darkpool", 0.0) * recency_multiplier
         institution_score = source_weights.get("institution", 0.0) * recency_multiplier
+        insider_score = source_weights.get("insider", 0.0) * recency_multiplier
 
         # Direction: mostly Bullish for buy signals
         direction = "Bullish"
@@ -535,6 +614,7 @@ class CrossSignalEngine:
             ark_score=round(ark_score, 2),
             darkpool_score=round(darkpool_score, 2),
             institution_score=round(institution_score, 2),
+            insider_score=round(insider_score, 2),
             base_score=round(base_score, 2),
             recency_multiplier=round(recency_multiplier, 3),
             signal_count_bonus=round(signal_count_bonus, 2),
@@ -548,6 +628,7 @@ class CrossSignalEngine:
         ark_data: Optional[dict] = None,
         darkpool_data: Optional[dict] = None,
         institution_data: Optional[dict] = None,
+        insider_data: Optional[dict] = None,
         min_score: Optional[float] = None,
     ) -> List[ConfluenceResult]:
         """
@@ -569,6 +650,7 @@ class CrossSignalEngine:
             ark_data=ark_data,
             darkpool_data=darkpool_data,
             institution_data=institution_data,
+            insider_data=insider_data,
         )
 
         if not all_signals:
@@ -616,6 +698,7 @@ class CrossSignalEngine:
                 "ark_score": r.ark_score,
                 "darkpool_score": r.darkpool_score,
                 "institution_score": r.institution_score,
+                "insider_score": r.insider_score,
                 "details": [
                     {
                         "source": s.source,

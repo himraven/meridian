@@ -209,11 +209,94 @@ def api_us_13f():
 @router.get("/api/us/alpha-research")
 def api_us_alpha_research():
     """US Quiver alpha research results."""
-    report_path = ""
+    report_path = "/home/raven/clawd/projects/quant-engine/us-signals/quiver-alpha-research/results/alpha_research_report.json"
     data = read_json(report_path)
     if not data:
         return {"status": "pending", "message": "Research in progress..."}
     return {"status": "ready", **data}
+
+@router.get("/api/us/insiders")
+def api_us_insiders(
+    request: Request,
+    transaction_type: str = None,  # Buy, Sale
+    ticker: str = None,
+    min_value: float = None,
+    cluster_only: bool = False,
+    days: int = 30,
+):
+    """
+    Get insider trading data from SEC Form 4 filings.
+    
+    Query params:
+      - transaction_type: Buy or Sale (default: all)
+      - ticker: filter by specific ticker
+      - min_value: minimum trade value ($)
+      - cluster_only: only show cluster buys (3+ insiders buying same stock)
+      - days: only trades in last N days (default: 30)
+    """
+    data = smart_money_cache.read("insiders.json")
+    if not data or "trades" not in data:
+        return {"data": [], "clusters": [], "metadata": {"total": 0, "filtered": 0}}
+    
+    trades = data["trades"]
+    clusters = data.get("clusters", [])
+    
+    # Filter by transaction_type
+    if transaction_type:
+        trades = [t for t in trades if t.get("transaction_type", "").lower() == transaction_type.lower()]
+    
+    # Filter by ticker
+    if ticker:
+        ticker_upper = ticker.upper()
+        trades = [t for t in trades if t.get("ticker", "").upper() == ticker_upper]
+        clusters = [c for c in clusters if c.get("ticker", "").upper() == ticker_upper]
+    
+    # Filter by min_value
+    if min_value is not None:
+        trades = [t for t in trades if t.get("value", 0) >= min_value]
+    
+    # Filter cluster_only
+    if cluster_only:
+        cluster_tickers = set(c.get("ticker", "").upper() for c in data.get("clusters", []))
+        cluster_tickers.update(data.get("metadata", {}).get("cluster_tickers", []))
+        trades = [t for t in trades if t.get("ticker", "").upper() in cluster_tickers]
+    
+    # Filter by days
+    if days:
+        cutoff = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d")
+        trades = [
+            t for t in trades
+            if (t.get("trade_date") or t.get("filing_date", "9999")) >= cutoff
+        ]
+    
+    # Enrich with company names
+    ticker_names.enrich_list(trades, ticker_field="ticker", name_field="company")
+    
+    # Stats
+    buy_count = sum(1 for t in trades if t.get("transaction_type") == "Buy")
+    sell_count = sum(1 for t in trades if t.get("transaction_type") == "Sale")
+    
+    return {
+        "data": trades,
+        "clusters": clusters,
+        "metadata": {
+            "total": len(data.get("trades", [])),
+            "filtered": len(trades),
+            "buy_count": buy_count,
+            "sell_count": sell_count,
+            "cluster_count": len(clusters),
+            "filters": {
+                "transaction_type": transaction_type,
+                "ticker": ticker,
+                "min_value": min_value,
+                "cluster_only": cluster_only,
+                "days": days,
+            },
+            "source": data.get("metadata", {}).get("source", "openinsider"),
+            "last_updated": data.get("metadata", {}).get("last_updated"),
+        }
+    }
+
 
 @router.get("/api/signals/confluence")
 def api_signals_confluence(
@@ -224,8 +307,6 @@ def api_signals_confluence(
 ):
     """
     Get confluence signals filtered by score, sources, and recency.
-    
-    Uses V2 conviction-based scoring engine (0-100 scale).
     Query params:
       - min_score: minimum confluence score (default: 6.0)
       - sources: comma-separated source filter (e.g., 'congress,ark')
@@ -266,12 +347,12 @@ def api_signals_confluence(
         "metadata": {
             "total": len(signals),
             "filtered": len(filtered),
-            "engine": data.get("metadata", {}).get("engine", "v1"),
             "filters": {
                 "min_score": min_score,
                 "sources": sources,
                 "days": days
             },
+            "engine": data.get("metadata", {}).get("engine", "v1"),
             "last_updated": data.get("metadata", {}).get("last_updated", data.get("last_updated"))
         }
     }
@@ -309,6 +390,7 @@ def api_signals_smart_money(
         ark = smart_money_cache.read("ark_trades.json")
         darkpool = smart_money_cache.read("darkpool.json")
         institutions = smart_money_cache.read("institutions.json")
+        insiders = smart_money_cache.read("insiders.json")
         ark_holdings_data = smart_money_cache.read("ark_holdings.json")
         ark_holdings = ark_holdings_data.get("holdings", ark_holdings_data.get("data", [])) if ark_holdings_data else None
         
@@ -317,6 +399,7 @@ def api_signals_smart_money(
             ark_data=ark,
             darkpool_data=darkpool,
             institution_data=institutions,
+            insider_data=insiders,
             ark_holdings=ark_holdings,
             min_score=0,
         )
@@ -418,7 +501,7 @@ def api_congress_trades(
                 "min_amount": min_amount,
                 "days": days
             },
-            "last_updated": data.get("metadata", {}).get("last_updated")
+            "last_updated": data.get("last_updated")
         }
     }
     if wants_markdown(request):
@@ -503,11 +586,17 @@ def api_ark_trades(
         cutoff = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d")
         trades = [t for t in trades if t.get("date", "9999-99-99") >= cutoff]
     
+    # Count buys/sells from filtered results
+    buy_count = sum(1 for t in trades if (t.get("trade_type") or "").lower() in ("buy", "purchase"))
+    sell_count = sum(1 for t in trades if (t.get("trade_type") or "").lower() in ("sell", "sale"))
+
     result = {
         "data": trades,
         "metadata": {
             "total": len(data.get("trades", [])),
             "filtered": len(trades),
+            "buy_count": buy_count,
+            "sell_count": sell_count,
             "filters": {
                 "trade_type": trade_type,
                 "etf": etf,
