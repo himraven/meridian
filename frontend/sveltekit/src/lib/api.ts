@@ -142,4 +142,10 @@ export const api = {
 		list: () => fetchApi('/research'),
 		detail: (ticker: string) => fetchApi(`/research/${ticker}`),
 	},
+
+	// Knowledge Hub
+	knowledge: {
+		list: () => fetchApi('/knowledge'),
+		article: (slug: string) => fetchApi(`/knowledge/${slug}`),
+	},
 };

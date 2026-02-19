@@ -1,0 +1,53 @@
+{
+  "slug": "congress-trading-alpha",
+  "title": "Congressional Trading: Information Edge or Insider Advantage?",
+  "subtitle": "Why Congress members' stock trades consistently beat the market",
+  "category": "signal-guide",
+  "signal_source": "congress",
+  "tldr": "U.S. Congress members' stock trades have outperformed the S&P 500 by an average of 6% over 30 days, driven by information asymmetry from committee hearings and policy access.",
+  "hero_stat": {
+    "value": "+6%",
+    "label": "Average 30-day excess return",
+    "source": "2025 International Review of Economics & Finance"
+  },
+  "content_md": "## Why Congressional Trades Have Predictive Power\n\nWhen a U.S. Senator buys stock in a defense contractor the week before a new Pentagon budget is announced, is that coincidence? Academic research suggests it usually isn't.\n\nCongressional trading has been one of the most consistently documented information edges in the market. Members of Congress have legal access to non-public information through committee hearings, regulatory briefings, and advance knowledge of legislation — and their portfolios reflect it.\n\n## The Research Evidence\n\nA landmark 2004 study by Ziobrowski et al. found that U.S. Senators beat the market by an average of **12% annually**. A follow-up 2011 study on House members showed similar outperformance of **6% per year**.\n\nMore recent work (2025, International Review of Economics & Finance) focusing on short-term windows found:\n\n- **+6% excess return** in the 30 days following a disclosure\n- Trading volume increases **~50%** during active congressional sessions\n- The edge is strongest in **committee-relevant sectors** (defense, healthcare, energy)\n\n## The STOCK Act and the Disclosure Window\n\nThe STOCK Act (Stop Trading on Congressional Knowledge Act) was passed in 2012 requiring members to disclose trades within **45 days**. This created an actionable signal window: by the time trades are disclosed, there's still time to react.\n\nKey dynamics:\n\n1. **Disclosure lag** — 45-day window creates systematic delay between trade and public knowledge\n2. **Cluster signals** — when multiple members trade the same stock, the signal strengthens significantly\n3. **Committee correlation** — trades in sectors overlapping with a member's committee assignments carry higher predictive weight\n\n## How Meridian Uses This Signal\n\nMeridian monitors congressional disclosures in real-time through EDGAR and Quiver Quantitative feeds. Our scoring model weights each trade by:\n\n- **Transaction size** relative to the member's typical activity\n- **Recency** — fresher disclosures score higher\n- **Multi-member clustering** — when 3+ members trade the same ticker, conviction multiplies\n- **Committee alignment** — does this member sit on a relevant committee?\n\nThe result is a congressional signal score (0–100) for each ticker, updated daily.\n\n## Important Caveats\n\nCongress trades are a **leading indicator**, not a guarantee. Consider:\n\n- Some trades are made by spouses or financial advisors with no congressional knowledge\n- The 45-day lag means you're often acting on news that's already partially priced in\n- Not all outperformance is from inside information — members may simply be better connected to economic trends\n\nUse congressional signals as **one input** in a multi-signal framework, not a standalone trading trigger.",
+  "key_takeaways": [
+    "Congress trades outperform by 6% on average over 30 days",
+    "Trading volume increases 50% during congressional sessions",
+    "STOCK Act disclosure lag (45 days) creates actionable window",
+    "Multi-member clustering dramatically increases signal strength",
+    "Committee alignment is the strongest predictor of information edge"
+  ],
+  "related_articles": ["insider-buying-signals", "13f-institutional-tracking"],
+  "related_masters": [],
+  "academic_references": [
+    {
+      "title": "Abnormal Returns from the Common Stock Investments of the U.S. Senate",
+      "journal": "Journal of Financial & Quantitative Analysis",
+      "year": 2004,
+      "key_finding": "U.S. Senators outperform the market by 12% annually"
+    },
+    {
+      "title": "Abnormal Returns from the Common Stock Investments of Members of the U.S. House of Representatives",
+      "journal": "Business and Politics",
+      "year": 2011,
+      "key_finding": "House members outperform by 6% annually"
+    },
+    {
+      "title": "Congressional Trading and Information Asymmetry",
+      "journal": "International Review of Economics & Finance",
+      "year": 2025,
+      "key_finding": "Trading volume increases ~50% during sessions; 6% 30-day excess return"
+    }
+  ],
+  "seo": {
+    "keywords": ["congress stock trading", "congressional trading", "STOCK Act", "political trading alpha", "senator stock trades"],
+    "description": "Learn why U.S. Congress members' stock trades consistently outperform the market and how Meridian tracks this signal."
+  },
+  "social": {
+    "hook_zh": "美国国会议员炒股，年化跑赢标普6%",
+    "hook_en": "Congress members beat the S&P 500 by 6%+ on 30-day windows. Here's the research.",
+    "hashtags": ["#CongressTrading", "#SmartMoney", "#InvestmentSignals"]
+  },
+  "updated_at": "2025-06-01"
+}

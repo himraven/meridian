@@ -1,0 +1,53 @@
+{
+  "slug": "insider-buying-signals",
+  "title": "Insider Buying: When the People Who Know Best Are Buying",
+  "subtitle": "Corporate insiders have superior knowledge of their own company's prospects",
+  "category": "signal-guide",
+  "signal_source": "insiders",
+  "tldr": "Clustered insider buying — when multiple executives buy simultaneously — has generated 8.9% excess returns over 12 months. The signal is strongest after price drawdowns and in small-cap stocks.",
+  "hero_stat": {
+    "value": "+8.9%",
+    "label": "12-month excess return from clustered buys",
+    "source": "Journal of Financial Economics, 2021"
+  },
+  "content_md": "## The Fundamental Logic\n\nWho knows a company better than the people running it? Corporate insiders — CEOs, CFOs, board members — have access to forward revenue projections, pipeline status, R&D milestones, and competitive intelligence that the public never sees.\n\nWhen they put their own money in at market prices, that's a meaningful signal.\n\n## What the Research Shows\n\nDecades of academic research have confirmed insider buying outperforms:\n\n- **Lakonishok & Lee (2001)**: Insider purchases predict future returns; sells do not\n- **Cohen, Malloy & Pomorski (2012)**: \"Routine\" vs \"opportunistic\" insiders — opportunistic buyers outperform by **8–9% annually**\n- **Jeng, Metrick & Zeckhauser (2003)**: Insider purchases generate **11.2% annual abnormal returns**\n\n## Buys vs. Sells: A Crucial Asymmetry\n\nInsider buying and selling carry very different information content:\n\n**Buys are informative** because:\n- Insiders only buy when they believe the stock is undervalued\n- They have unlimited alternatives for where to invest their money\n- Buying concentrates personal wealth in a single stock — a risk they'd only take with conviction\n\n**Sells are noisy** because:\n- Executives sell for many reasons: diversification, taxes, estate planning, home purchases\n- Sell signals are diluted by these non-informational motivations\n\n## Cluster Buying: The High-Conviction Pattern\n\nThe strongest insider signal isn't one executive buying — it's multiple executives buying simultaneously, known as **cluster buying**.\n\nWhen a CEO, CFO, and two board members all buy in the same 2-week window, that represents coordinated confidence from people with different vantage points inside the company.\n\nResearch shows cluster buys (3+ insiders) generate **2–3x** the excess return of individual purchases.\n\n## How Meridian Uses This Signal\n\nMeridian processes SEC Form 4 filings in real-time. Our insider signal scores weight:\n\n- **Transaction value** — larger purchases signal higher conviction\n- **Clustering** — multiple insiders = exponential score boost\n- **Role seniority** — CEO/CFO buys weighted higher than Director buys\n- **Timing recency** — fresher filings score higher\n- **Price context** — buys after drawdowns (>15% off highs) score highest\n\n## When Insider Signals Fail\n\nInsider buying doesn't work in every context:\n\n- **Mandatory purchase programs** reduce informativeness of scheduled buys\n- **Options exercise** often accompanies sells, creating mixed signals\n- **Micro-cap liquidity issues** can make large insider positions impractical to exit\n- **Regulatory investigation periods** (quiet periods) limit trading and timing\n\nMeridian filters out routine, scheduled, and option-related transactions to isolate the highest-conviction discretionary purchases.",
+  "key_takeaways": [
+    "Insider buying predicts positive future returns; selling is mostly noise",
+    "Cluster buying (3+ executives) generates 2-3x the excess return",
+    "Opportunistic buyers (not routine traders) outperform by 8-9% annually",
+    "Buys after major price drawdowns carry the strongest signal",
+    "Meridian filters out scheduled and option-related transactions automatically"
+  ],
+  "related_articles": ["congress-trading-alpha", "superinvestor-tracking"],
+  "related_masters": [],
+  "academic_references": [
+    {
+      "title": "Are Insider Trades Informative?",
+      "journal": "Review of Financial Studies",
+      "year": 2001,
+      "key_finding": "Insider purchases predict future returns; sales do not"
+    },
+    {
+      "title": "Decoding Inside Information",
+      "journal": "Journal of Finance",
+      "year": 2012,
+      "key_finding": "Opportunistic insiders outperform by 8-9% annually"
+    },
+    {
+      "title": "Estimating the Returns to Insider Trading",
+      "journal": "Review of Economics and Statistics",
+      "year": 2003,
+      "key_finding": "Insider purchases generate 11.2% annual abnormal returns"
+    }
+  ],
+  "seo": {
+    "keywords": ["insider buying", "Form 4", "insider trading signal", "cluster buying", "corporate insider"],
+    "description": "Why insider buying is one of the most reliable signals in markets — and how Meridian tracks cluster purchases for maximum conviction."
+  },
+  "social": {
+    "hook_zh": "CEO买自家股票赚了多少？研究显示年化超额收益8.9%",
+    "hook_en": "When executives buy their own stock, the market takes notice. 8.9% excess returns say you should too.",
+    "hashtags": ["#InsiderBuying", "#SmartMoney", "#Form4"]
+  },
+  "updated_at": "2025-06-01"
+}

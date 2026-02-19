@@ -14,6 +14,7 @@ from . import (
     research,
     data_health,
     system,
+    knowledge,
 )
 
 
@@ -43,3 +44,6 @@ def register_routers(app: FastAPI) -> None:
 
     # System status (DuckDB, etc.)
     app.include_router(system.router, tags=["system"])
+
+    # Knowledge Hub (educational articles)
+    app.include_router(knowledge.router, tags=["knowledge"])

@@ -34,7 +34,8 @@
 			title: 'Research',
 			items: [
 				{ href: '/research', label: 'Reports' },
-				{ href: '/dividend', label: 'Dividend' }
+				{ href: '/dividend', label: 'Dividend' },
+				{ href: '/knowledge', label: 'Knowledge Hub' }
 			]
 		}
 	];

@@ -65,6 +65,51 @@
 		institution: '13F',
 		insider: 'INS'
 	};
+
+	// Knowledge Hub slug mapping (source → article slug)
+	const knowledgeSlugs: Record<string, string> = {
+		congress: 'congress-trading-alpha',
+		ark: 'ark-disruptive-innovation',
+		darkpool: 'dark-pool-activity',
+		institution: '13f-institutional-tracking',
+		insider: 'insider-buying-signals',
+		insiders: 'insider-buying-signals',
+		short_interest: 'short-interest-analysis',
+		superinvestors: 'superinvestor-tracking',
+	};
+
+	// Tooltip text for signal badge hover
+	const signalTldr: Record<string, string> = {
+		congress: 'Congress trades beat S&P by 6% over 30 days. STOCK Act disclosures = actionable window.',
+		ark: 'ARK Invest conviction buys signal disruptive innovation thesis. High-conviction concentrated positions.',
+		darkpool: 'Anomalous off-exchange volume reveals institutional accumulation. Z-score > 2.5 = actionable.',
+		institution: '13F quarterly filings track hedge fund and institution positioning across the market.',
+		insider: 'Clustered insider buying (3+ executives) generates 8.9% excess returns over 12 months.',
+	};
+
+	// Active tooltip state
+	let tooltipSource = $state<string | null>(null);
+	let tooltipX = $state(0);
+	let tooltipY = $state(0);
+
+	function showTooltip(e: MouseEvent, src: string) {
+		tooltipSource = src;
+		tooltipX = (e.currentTarget as HTMLElement).getBoundingClientRect().left;
+		tooltipY = (e.currentTarget as HTMLElement).getBoundingClientRect().bottom + window.scrollY + 4;
+	}
+
+	function hideTooltip() {
+		tooltipSource = null;
+	}
+
+	function handleBadgeClick(e: MouseEvent, src: string) {
+		e.preventDefault();
+		e.stopPropagation();
+		const slug = knowledgeSlugs[src];
+		if (slug) {
+			goto(`/knowledge/${slug}`);
+		}
+	}
 </script>
 
 <svelte:head>
@@ -237,26 +282,26 @@
 					Each signal is scored 0-100 based on strength within its source. Multi-source alignment adds +20 bonus per source (max +40).
 				</p>
 				<div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
-					<div class="flex items-center gap-2">
-						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.congress}">GOV</span>
-						<span class="text-[var(--text-muted)]">Amount × Recency × Members</span>
-					</div>
-					<div class="flex items-center gap-2">
-						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.ark}">ARK</span>
-						<span class="text-[var(--text-muted)]">Funds × Shares × Position Type</span>
-					</div>
-					<div class="flex items-center gap-2">
-						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.darkpool}">DP</span>
-						<span class="text-[var(--text-muted)]">Z-Score × DPI × Volume</span>
-					</div>
-					<div class="flex items-center gap-2">
-						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.institution}">13F</span>
-						<span class="text-[var(--text-muted)]">Value × Change × Prestige</span>
-					</div>
-					<div class="flex items-center gap-2">
-						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.insider}">INS</span>
-						<span class="text-[var(--text-muted)]">Value × Clusters × Recency</span>
-					</div>
+					<a href="/knowledge/congress-trading-alpha" class="flex items-center gap-2 group">
+						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.congress} group-hover:opacity-80">GOV</span>
+						<span class="text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]">Amount × Recency × Members</span>
+					</a>
+					<a href="/knowledge/ark-disruptive-innovation" class="flex items-center gap-2 group">
+						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.ark} group-hover:opacity-80">ARK</span>
+						<span class="text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]">Funds × Shares × Position Type</span>
+					</a>
+					<a href="/knowledge/dark-pool-activity" class="flex items-center gap-2 group">
+						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.darkpool} group-hover:opacity-80">DP</span>
+						<span class="text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]">Z-Score × DPI × Volume</span>
+					</a>
+					<a href="/knowledge/13f-institutional-tracking" class="flex items-center gap-2 group">
+						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.institution} group-hover:opacity-80">13F</span>
+						<span class="text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]">Value × Change × Prestige</span>
+					</a>
+					<a href="/knowledge/insider-buying-signals" class="flex items-center gap-2 group">
+						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.insider} group-hover:opacity-80">INS</span>
+						<span class="text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]">Value × Clusters × Recency</span>
+					</a>
 				</div>
 			</div>
 		{/snippet}
@@ -335,13 +380,22 @@
 									<span class="text-xs text-[var(--text-muted)] truncate">{signal.company || ''}</span>
 								</div>
 								
-								<!-- Source Tags (with inline scores on mobile) -->
+								<!-- Source Tags (with inline scores on mobile) — clickable → Knowledge Hub -->
 								<div class="flex items-center gap-1.5 flex-wrap">
 									{#each signal.sources as src}
 										{@const srcScore = src === 'congress' ? signal.congress_score : src === 'ark' ? signal.ark_score : src === 'darkpool' ? signal.darkpool_score : src === 'institution' ? signal.institution_score : src === 'insider' ? signal.insider_score : 0}
-										<span class="px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide {sourceColors[src] || 'bg-[var(--bg-elevated)] text-[var(--text-muted)]'}">
+										{@const hasKnowledge = !!knowledgeSlugs[src]}
+										<button
+											class="px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide
+												{sourceColors[src] || 'bg-[var(--bg-elevated)] text-[var(--text-muted)]'}
+												{hasKnowledge ? 'cursor-pointer hover:opacity-80 hover:scale-105 transition-all' : 'cursor-default'}"
+											onmouseenter={(e) => hasKnowledge && showTooltip(e, src)}
+											onmouseleave={hideTooltip}
+											onclick={(e) => hasKnowledge && handleBadgeClick(e, src)}
+											title={hasKnowledge ? `Learn about ${sourceLabels[src] || src} signals` : undefined}
+										>
 											{sourceLabels[src] || src.toUpperCase()}<span class="md:hidden font-normal ml-0.5">{srcScore > 0 ? srcScore.toFixed(0) : ''}</span>
-										</span>
+										</button>
 									{/each}
 									{#if signal.source_count >= 2}
 										<span class="text-[10px] text-[var(--green)] font-semibold ml-1">
@@ -487,4 +541,35 @@
 			message="Adjust filters or check back later"
 		/>
 	{/if}
+
+	<!-- Knowledge Hub link -->
+	<div class="pt-4 border-t border-[var(--border-default)] flex items-center justify-between">
+		<p class="text-xs text-[var(--text-dimmed)]">
+			Tip: click any signal badge (GOV, ARK, DP…) to learn how that signal works.
+		</p>
+		<a href="/knowledge" class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-1">
+			📚 Knowledge Hub
+			<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+			</svg>
+		</a>
+	</div>
 </div>
+
+<!-- Signal badge tooltip (fixed position) -->
+{#if tooltipSource && signalTldr[tooltipSource]}
+	<div
+		class="fixed z-50 max-w-xs pointer-events-none"
+		style="top: {tooltipY}px; left: {Math.min(tooltipX, window.innerWidth - 280)}px;"
+	>
+		<div class="bg-[var(--bg-elevated)] border border-[var(--border-hover)] rounded-lg p-3 shadow-xl">
+			<p class="text-[11px] font-semibold text-[var(--text-primary)] mb-1">
+				{sourceLabels[tooltipSource] ?? tooltipSource.toUpperCase()} Signal
+			</p>
+			<p class="text-xs text-[var(--text-secondary)] leading-relaxed mb-2">
+				{signalTldr[tooltipSource]}
+			</p>
+			<p class="text-[10px] text-[var(--blue)]">Click to learn more →</p>
+		</div>
+	</div>
+{/if}

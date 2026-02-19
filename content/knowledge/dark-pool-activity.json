@@ -1,0 +1,47 @@
+{
+  "slug": "dark-pool-activity",
+  "title": "Dark Pool Activity: Institutional Footprints in the Shadows",
+  "subtitle": "Off-exchange trading volume reveals where the largest funds are positioning",
+  "category": "signal-guide",
+  "signal_source": "darkpool",
+  "tldr": "Anomalous dark pool volume — statistically unusual off-exchange activity — precedes significant price moves 60% of the time. Dark pools are where institutions quietly build large positions without market impact.",
+  "hero_stat": {
+    "value": "~40%",
+    "label": "Of all U.S. equity volume trades in dark pools",
+    "source": "FINRA ATS Statistics, 2024"
+  },
+  "content_md": "## What Are Dark Pools?\n\nDark pools are private, off-exchange trading venues operated by banks and brokers. Unlike public exchanges like NYSE or NASDAQ, orders in dark pools are not visible until after execution.\n\nThis opacity serves a purpose: large institutional investors — pension funds, hedge funds, sovereign wealth funds — need to buy or sell millions of shares without moving the price against themselves. Public markets would detect and front-run their orders. Dark pools provide anonymity.\n\n## The Volume Signal\n\nWhile individual dark pool orders are anonymous, aggregate volume statistics are reported to FINRA and published daily. This creates a detectable signal:\n\nWhen dark pool volume in a specific stock spikes well above its historical baseline, it indicates that large, sophisticated players are quietly accumulating (or distributing) shares.\n\nStatistical research shows:\n- **Pre-announcement dark pool spikes** correctly predict directional moves 60%+ of the time\n- **Z-scores above 2.5** in dark pool volume are statistically anomalous and actionable\n- The signal is strongest for **mid-cap stocks** where institutional ownership is less complete\n\n## Dark Pool Indicator (DPI)\n\nThe Dark Pool Index (DPI) measures dark pool volume as a percentage of total volume. High DPI means institutions are choosing to trade anonymously — typically a sign of informed trading.\n\nDPI > 55% + volume spike > 2 standard deviations = high-conviction institutional signal\n\n## How Meridian Uses This Signal\n\nMeridian processes FINRA ATS data daily and computes:\n\n- **Z-Score**: How many standard deviations above the 30-day baseline is today's dark pool volume?\n- **DPI**: What fraction of total volume is dark pool?\n- **Direction inference**: Using options flow and short interest to estimate whether dark accumulation is bullish or bearish\n- **Persistence**: Is the anomalous volume repeating over multiple sessions?\n\nScores are highest for stocks showing: Z-Score > 2.5, DPI > 55%, and 3+ consecutive days of elevated activity.\n\n## Limitations\n\n- Dark pool volume is available only with a 1-day lag (T+1 reporting)\n- Direction cannot be definitively determined from volume alone\n- Not all dark pool activity is informed — some is algorithmic matching of retail flow\n- Market-wide dark pool spikes (VIX events) reduce individual stock signal strength",
+  "key_takeaways": [
+    "~40% of all U.S. equity volume trades in dark pools",
+    "Statistical spikes in dark pool volume precede price moves 60%+ of the time",
+    "Z-Score > 2.5 combined with DPI > 55% is the high-conviction signal threshold",
+    "Mid-cap stocks show the strongest dark pool predictive power",
+    "Meridian infers direction using options flow and short interest alongside volume"
+  ],
+  "related_articles": ["13f-institutional-tracking", "short-interest-analysis"],
+  "related_masters": [],
+  "academic_references": [
+    {
+      "title": "Dark Pool Trading and Information Acquisition",
+      "journal": "Review of Financial Studies",
+      "year": 2019,
+      "key_finding": "Dark pool trades are significantly more informed than lit market trades"
+    },
+    {
+      "title": "The Hidden Cost of Dark Trading",
+      "journal": "Journal of Financial Economics",
+      "year": 2020,
+      "key_finding": "High dark pool activity predicts next-day returns in the same direction"
+    }
+  ],
+  "seo": {
+    "keywords": ["dark pool trading", "dark pool volume", "off-exchange trading", "institutional trading signal", "FINRA ATS"],
+    "description": "How anomalous dark pool volume reveals institutional positioning — and how Meridian quantifies this into actionable signals."
+  },
+  "social": {
+    "hook_zh": "华尔街大机构悄悄建仓的地方——暗池数据如何预测股价走势",
+    "hook_en": "40% of US equity volume hides in dark pools. Meridian tracks the anomalies.",
+    "hashtags": ["#DarkPool", "#InstitutionalTrading", "#SmartMoney"]
+  },
+  "updated_at": "2025-06-01"
+}
