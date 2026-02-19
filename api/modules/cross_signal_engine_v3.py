@@ -455,6 +455,47 @@ def rank_v7(
             "details": signal.get("details", []),
         })
 
+    # ── Ticker dedup: merge multi-class tickers (GOOG→GOOGL, BRK.B→BRK.A) ──
+    TICKER_CANONICAL = {
+        "GOOG": "GOOGL",       # Alphabet Class C → Class A
+        "BRK.B": "BRK.A",     # Berkshire Hathaway B → A
+        "BRKB": "BRK.A",      # alt format
+        "BRK/B": "BRK.A",     # alt format
+        "FOX": "FOXA",        # Fox Corp Class B → A
+        "NWS": "NWSA",        # News Corp Class B → A
+        "LBTYA": "LBTYK",     # Liberty Global Class A → C
+        "LLYVA": "LLYVK",     # Liberty Live Group
+        "FWONA": "FWONK",     # Liberty Formula One
+        "BELFA": "BELFB",     # Bel Fuse Inc
+        "DISCA": "DISCK",     # Discovery (legacy)
+    }
+
+    merged = {}
+    for r in ranked:
+        canonical = TICKER_CANONICAL.get(r["ticker"], r["ticker"])
+        if canonical in merged:
+            existing = merged[canonical]
+            # Keep higher score, merge sources
+            if r["score"] > existing["score"]:
+                r["ticker"] = canonical
+                # Merge unique sources
+                existing_sources = set(existing.get("sources", []))
+                new_sources = set(r.get("sources", []))
+                r["sources"] = list(existing_sources | new_sources)
+                r["source_count"] = len(r["sources"])
+                merged[canonical] = r
+            else:
+                # Just add any missing sources
+                new_sources = set(r.get("sources", []))
+                existing["sources"] = list(set(existing.get("sources", [])) | new_sources)
+                existing["source_count"] = len(existing["sources"])
+        else:
+            r["ticker"] = canonical
+            merged[canonical] = r
+
+    ranked = list(merged.values())
+    logger.info(f"V7: Deduped to {len(ranked)} tickers (merged multi-class)")
+
     # Sort by V7 score descending, then by source count, then alphabetically
     ranked.sort(key=lambda r: (-r["score"], -r["source_count"], r["ticker"]))
 
