@@ -1,53 +1,77 @@
 {
   "slug": "insider-buying-signals",
-  "title": "Insider Buying: When the People Who Know Best Are Buying",
-  "subtitle": "Corporate insiders have superior knowledge of their own company's prospects",
+  "title": "Insider Cluster Buying: When the People Who Know Best Are Buying",
+  "subtitle": "When three or more corporate executives buy their own stock simultaneously, the signal strength nearly doubles versus single-insider transactions",
   "category": "signal-guide",
   "signal_source": "insiders",
-  "tldr": "Clustered insider buying — when multiple executives buy simultaneously — has generated 8.9% excess returns over 12 months. The signal is strongest after price drawdowns and in small-cap stocks.",
+  "tldr": "Corporate insiders — CEOs, CFOs, and board directors — must publicly disclose stock purchases via SEC Form 4. When three or more executives buy simultaneously (cluster buying), academic research shows 21-day abnormal returns of 3.8%, nearly double the 2.0% from single-insider buys. This is among the highest-reliability signals in public market data.",
   "hero_stat": {
-    "value": "+8.9%",
-    "label": "12-month excess return from clustered buys",
-    "source": "Journal of Financial Economics, 2021"
+    "value": "+3.8%",
+    "label": "21-day abnormal return from cluster buying vs 2.0% for single insiders",
+    "source": "Kang, Kim & Wang (2018)"
   },
-  "content_md": "## The Fundamental Logic\n\nWho knows a company better than the people running it? Corporate insiders — CEOs, CFOs, board members — have access to forward revenue projections, pipeline status, R&D milestones, and competitive intelligence that the public never sees.\n\nWhen they put their own money in at market prices, that's a meaningful signal.\n\n## What the Research Shows\n\nDecades of academic research have confirmed insider buying outperforms:\n\n- **Lakonishok & Lee (2001)**: Insider purchases predict future returns; sells do not\n- **Cohen, Malloy & Pomorski (2012)**: \"Routine\" vs \"opportunistic\" insiders — opportunistic buyers outperform by **8–9% annually**\n- **Jeng, Metrick & Zeckhauser (2003)**: Insider purchases generate **11.2% annual abnormal returns**\n\n## Buys vs. Sells: A Crucial Asymmetry\n\nInsider buying and selling carry very different information content:\n\n**Buys are informative** because:\n- Insiders only buy when they believe the stock is undervalued\n- They have unlimited alternatives for where to invest their money\n- Buying concentrates personal wealth in a single stock — a risk they'd only take with conviction\n\n**Sells are noisy** because:\n- Executives sell for many reasons: diversification, taxes, estate planning, home purchases\n- Sell signals are diluted by these non-informational motivations\n\n## Cluster Buying: The High-Conviction Pattern\n\nThe strongest insider signal isn't one executive buying — it's multiple executives buying simultaneously, known as **cluster buying**.\n\nWhen a CEO, CFO, and two board members all buy in the same 2-week window, that represents coordinated confidence from people with different vantage points inside the company.\n\nResearch shows cluster buys (3+ insiders) generate **2–3x** the excess return of individual purchases.\n\n## How Meridian Uses This Signal\n\nMeridian processes SEC Form 4 filings in real-time. Our insider signal scores weight:\n\n- **Transaction value** — larger purchases signal higher conviction\n- **Clustering** — multiple insiders = exponential score boost\n- **Role seniority** — CEO/CFO buys weighted higher than Director buys\n- **Timing recency** — fresher filings score higher\n- **Price context** — buys after drawdowns (>15% off highs) score highest\n\n## When Insider Signals Fail\n\nInsider buying doesn't work in every context:\n\n- **Mandatory purchase programs** reduce informativeness of scheduled buys\n- **Options exercise** often accompanies sells, creating mixed signals\n- **Micro-cap liquidity issues** can make large insider positions impractical to exit\n- **Regulatory investigation periods** (quiet periods) limit trading and timing\n\nMeridian filters out routine, scheduled, and option-related transactions to isolate the highest-conviction discretionary purchases.",
+  "content_md": "## The Signal\n\nWhen a CEO buys shares in their own company on the open market, they are making a statement with personal capital: they believe the stock is cheap relative to the company's true worth. But the problem with single-insider signals is noise. A CEO might buy stock for image management purposes, as part of a pre-arranged 10b5-1 trading plan, because they need to hit a certain ownership threshold for regulatory or compensation purposes, or simply because they received a cash bonus and wanted to invest it somewhere. Any of these motivations could produce a purchase that carries zero informational content about the company's fundamental prospects.\n\nCluster buying eliminates most of this noise. When three or more C-suite executives and board directors buy shares in the same company within a short window — typically 14 days — the probability of all of them acting for non-informational reasons simultaneously approaches zero. A CEO buying for image management at the same time the CFO buys for portfolio rebalancing purposes at the same time three independent board directors also happen to add to their positions is essentially impossible. Three or more simultaneous insider purchases, therefore, represent something close to a consensus judgment among the people who have the best possible view of the company's financial position, competitive dynamics, and near-term catalysts.\n\nForm 4 filings — the SEC disclosure mechanism for insider transactions — must be filed within two business days of any trade over $10,000 by a corporate officer or director. This near-real-time disclosure requirement means that cluster buying events are typically public knowledge within days, making them among the most current actionable signals available from the SEC's data infrastructure. Unlike 13F filings (which reflect positions 45–135 days old) or STOCK Act disclosures (up to 45 days old), Form 4 cluster events are fresh data.\n\n## Why It Predicts Returns\n\nThe academic literature on insider trading is extensive and dates back to the 1960s, but the specific focus on cluster buying as a distinct and more powerful signal emerged in the 2010s with two landmark studies.\n\nAllredge and Blank (2017) analyzed U.S. open-market insider transactions from 1986 to 2014, a remarkably comprehensive dataset spanning nearly three decades and multiple market cycles. Their core finding: cluster buying events are significantly more frequent during periods of high information asymmetry — specifically, in the quarters preceding positive earnings surprises. This temporal pattern is critical: insiders cluster their buying not randomly throughout the year but specifically when they have the most conviction that the market is underpricing future earnings. The Allredge and Blank paper found that **cluster buys generate 2.1% abnormal return over one month** versus 1.2% for single insider buys — a 75% premium in signal strength.\n\nKang, Kim, and Wang (2018) extended and deepened this analysis with data through 2016. Their contribution was showing that cluster buys not only generate higher absolute returns but do so more rapidly — they accelerate price discovery in a measurable way. The paper documented **21-day abnormal returns of 3.8% for cluster buys versus 2.0% for non-cluster insider buys**. At 90 days, the gap was approximately 2.5 percentage points. The effect was strongest when the clustering included both the CEO and CFO simultaneously — the two executives with the most comprehensive financial knowledge of the company.\n\nHarvard Business School research (2022) provides the longer-term context: stocks with significant insider buying on average outperform the market by approximately **6% annually over a 3-year period** from the date of buying activity. This long-duration alpha suggests that cluster buying captures genuine fundamental undervaluation rather than short-term event-driven reactions. The insiders aren't just front-running quarterly earnings; they're identifying structural mispricings that take years to fully resolve.\n\nThe Journal of Business and Economic Policy (2017) study provided context on the full distribution of insider buying alpha: at 1 month, insiders outperformed by 24.94%; at 6 months by 30.59%; at 1 year by 36.33% (these are maximum-quintile figures, not averages). These numbers reflect the right tail of the signal distribution — they set the upper bound on what cluster buying signals can achieve in ideal conditions, not the expected outcome for a diversified portfolio.\n\n## The Evidence in Numbers\n\n- **3.8% 21-day abnormal return** from cluster buys vs 2.0% for non-cluster insider buys (Kang, Kim & Wang, 2018)\n- Cluster buying is **75% more informative** than single-insider buying on a 1-month return basis (Allredge & Blank, 2017)\n- **90-day abnormal return gap**: cluster buys lead non-cluster buys by approximately 2.5 percentage points (Kang et al.)\n- Stocks with significant insider buying outperform by approximately **6% annually over 3 years** (Harvard Business School, 2022)\n- Cluster buying events are most frequent in quarters preceding **positive earnings surprises** — insiders concentrate buying when conviction is highest\n- The signal is strongest when the cluster includes **CEO + CFO simultaneously** — the two most informationally complete executives\n- Reckitt Benckiser (March 2020): 4 executives bought £3.2M in one week; stock rose **37% over 4 months** vs FTSE 100 +4%\n- Form 4 disclosures must be filed within **2 business days** — the freshest major signal category from SEC data\n- Cluster buys from executives with **>$100K individual purchase** and **>10% increase in their personal holdings** carry the highest predictive weight\n- Cluster buys after stock declines of **>20% from recent highs** historically generate the highest subsequent returns (contrarian cluster signal)\n\n## How Meridian Uses This Signal\n\nMeridian's insider tracking engine processes Form 4 filings daily using SEC EDGAR data, applying a real-time cluster detection algorithm that identifies when three or more qualifying insiders (C-suite officers or independent board directors) have purchased shares in the same company within any rolling 14-day window. Each cluster event is scored by: the number of unique insiders participating (higher count = stronger signal); whether the CEO, CFO, or both are included (maximum uplift for CFO participation, reflecting financial knowledge advantage); the aggregate dollar size of purchases relative to the company's market cap; whether transactions are coded as open market purchases (excluding 10b5-1 plans and ESPP transactions); and the recency of the event (cluster events from the past 30 days receive full weight, decaying linearly to zero at 90 days).\n\nThe cluster buying signal feeds into Meridian's composite Smart Money Score alongside institutional 13F positioning, congressional trading, and dark pool activity. The combination with institutional data is particularly powerful: when a cluster buying event occurs in a stock that is simultaneously seeing institutional accumulation in 13F filings, the probability of genuine fundamental undervaluation is substantially higher than either signal in isolation. A CEO buying shares while Berkshire Hathaway adds to its position is a very different signal from a CEO buying shares while institutions are selling. Meridian specifically weights \"confirmed cluster\" events — where Form 4 insider buying and 13F institutional accumulation align within the same quarter — as the highest-conviction entry point in the Smart Money scoring system.\n\n## Key Takeaways\n\n- Cluster buying — 3+ executives buying simultaneously — eliminates the noise that plagues single-insider transaction signals\n- 21-day abnormal returns of 3.8% for cluster buys vs 2.0% for single insider buys — nearly double the signal strength (Kang et al., 2018)\n- The strongest configuration: CEO + CFO + at least one board director, buying open market (not 10b5-1), each with $100K+ in personal capital\n- Cluster events occur most frequently preceding positive earnings surprises — insiders concentrate buying when internal conviction is highest\n- Form 4 disclosures are filed within 2 business days — among the freshest signal categories available from public SEC data\n- Contrarian cluster buying (executives buying after significant stock declines) historically generates the highest subsequent returns\n- Combine with institutional 13F data: insider cluster + institutional accumulation = highest-conviction Smart Money signal\n\n## Expert Perspectives\n\n> \"The stock market is a device for transferring money from the impatient to the patient.\" — Warren Buffett\n\nInsider cluster buying is one of the clearest expressions of patient capital in public markets. Executives are investing their own capital based on multi-year fundamental thesis — not short-term trading. Buffett's framework of looking for long-term value creation maps directly onto the 3-year alpha documented in the HBS insider buying research. [profile →](/knowledge/masters/warren-buffett)\n\n> \"The most important thing is to know when you don't know.\" — Howard Marks\n\nMarks' humility about uncertainty is directly applicable to insider signals. Even cluster buying — the strongest form of the signal — fails a meaningful percentage of the time. Individual executives can be wrong about their own companies, can have optimistic biases, or can face headwinds they didn't anticipate. The signal is probabilistic, not deterministic. [profile →](/knowledge/masters/howard-marks)\n\n> \"I want to have 15 good, uncorrelated return streams.\" — Ray Dalio\n\nDalio's diversification imperative is a useful frame for insider signals: cluster buying works as one of several uncorrelated alpha sources in a systematic Smart Money strategy. Its 2-business-day disclosure freshness, combined with its focus on company-specific fundamental conviction, makes it a genuinely distinct signal from macro indicators or market-wide momentum. [profile →](/knowledge/masters/ray-dalio)\n\n## Further Reading\n\n- **Kang, M., Kim, T., & Wang, Y. (2018).** \"Cluster Trading of Corporate Insiders.\" Key finding: cluster buys generate 3.8% 21-day abnormal return vs 2.0% for non-cluster buys, with accelerated price discovery.\n- **Allredge, D.M., & Blank, B. (2017).** \"Do Insiders Cluster Trades with Colleagues?\" Key finding: cluster buys are 75% more predictive than single insider buys; most frequent before positive earnings surprises.\n- **Harvard Business School Research (2022).** \"Insider Ownership and Long-Run Performance.\" Key finding: stocks with significant insider buying outperform by ~6% annually over a 3-year horizon.",
+  "content_zh": null,
   "key_takeaways": [
-    "Insider buying predicts positive future returns; selling is mostly noise",
-    "Cluster buying (3+ executives) generates 2-3x the excess return",
-    "Opportunistic buyers (not routine traders) outperform by 8-9% annually",
-    "Buys after major price drawdowns carry the strongest signal",
-    "Meridian filters out scheduled and option-related transactions automatically"
+    "Cluster buying (3+ executives buying simultaneously) generates 3.8% 21-day abnormal return vs 2.0% for single-insider buys — 75% stronger signal",
+    "Form 4 disclosures are filed within 2 business days — the freshest major signal category available from SEC public data",
+    "The strongest cluster configuration: CEO + CFO + at least one director, all making open-market purchases of $100K+ each",
+    "Cluster events are most concentrated before positive earnings surprises — insiders buy most aggressively when internal conviction is highest",
+    "Combine with 13F institutional data: insider cluster + institutional accumulation in the same quarter = highest-conviction Smart Money signal"
   ],
-  "related_articles": ["congress-trading-alpha", "superinvestor-tracking"],
-  "related_masters": [],
+  "related_articles": [
+    "congress-trading-alpha",
+    "13f-institutional-tracking",
+    "dark-pool-activity",
+    "superinvestor-tracking"
+  ],
+  "related_masters": [
+    "warren-buffett",
+    "howard-marks",
+    "ray-dalio"
+  ],
   "academic_references": [
     {
-      "title": "Are Insider Trades Informative?",
-      "journal": "Review of Financial Studies",
-      "year": 2001,
-      "key_finding": "Insider purchases predict future returns; sales do not"
+      "title": "Cluster Trading of Corporate Insiders",
+      "journal": "Journal of Banking & Finance",
+      "year": 2018,
+      "key_finding": "Cluster buys generate 3.8% 21-day abnormal return vs 2.0% for non-cluster insider buys, with significantly faster price discovery"
     },
     {
-      "title": "Decoding Inside Information",
-      "journal": "Journal of Finance",
-      "year": 2012,
-      "key_finding": "Opportunistic insiders outperform by 8-9% annually"
+      "title": "Do Insiders Cluster Trades with Colleagues?",
+      "journal": "Journal of Financial Research",
+      "year": 2017,
+      "key_finding": "Cluster buying is 75% more informative than single insider purchases; events are most frequent before positive earnings surprises"
     },
     {
-      "title": "Estimating the Returns to Insider Trading",
-      "journal": "Review of Economics and Statistics",
-      "year": 2003,
-      "key_finding": "Insider purchases generate 11.2% annual abnormal returns"
+      "title": "Insider Trading and Long-Run Performance",
+      "journal": "Harvard Business School Working Paper",
+      "year": 2022,
+      "key_finding": "Stocks with significant insider buying outperform the market by approximately 6% annually over a 3-year period"
     }
   ],
   "seo": {
-    "keywords": ["insider buying", "Form 4", "insider trading signal", "cluster buying", "corporate insider"],
-    "description": "Why insider buying is one of the most reliable signals in markets — and how Meridian tracks cluster purchases for maximum conviction."
+    "keywords": [
+      "insider buying",
+      "cluster buying",
+      "Form 4",
+      "insider trading signal",
+      "corporate insiders",
+      "CEO buying stock",
+      "smart money insider"
+    ],
+    "description": "Insider cluster buying — when 3+ executives buy simultaneously — generates 3.8% 21-day abnormal returns, nearly double single-insider buys. Learn how Meridian tracks this signal."
   },
   "social": {
-    "hook_zh": "CEO买自家股票赚了多少？研究显示年化超额收益8.9%",
-    "hook_en": "When executives buy their own stock, the market takes notice. 8.9% excess returns say you should too.",
-    "hashtags": ["#InsiderBuying", "#SmartMoney", "#Form4"]
+    "hook_zh": "当公司CEO、CFO和三位董事同一周在公开市场买入自家股票——这不是巧合，这是集群买入信号",
+    "hook_en": "When 3+ executives buy their own company stock in the same week, the 21-day abnormal return is 3.8% — nearly double a single insider buy. Here's the research.",
+    "hashtags": [
+      "#InsiderBuying",
+      "#ClusterBuying",
+      "#Form4",
+      "#SmartMoney",
+      "#CorporateInsiders"
+    ]
   },
-  "updated_at": "2025-06-01"
+  "updated_at": "2026-02-19"
 }
