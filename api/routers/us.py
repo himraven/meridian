@@ -2,6 +2,7 @@
 US market routes - ARK, 13F, Congress, Dark Pool, Institutions
 """
 import json
+import logging
 import os
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -16,6 +17,20 @@ from api.shared import (
 from api.markdown_format import MARKDOWN_FORMATTERS
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
+
+
+def _get_duckdb():
+    """Get DuckDB store, or None if not available."""
+    try:
+        from api.modules.duckdb_store import get_store
+        store = get_store()
+        # Check DB is initialized (file exists and has been populated)
+        if store._initialized or store.table_exists("congress_trades"):
+            return store
+        return None
+    except Exception:
+        return None
 
 # ── Routes ─────────────────────────────────────────────────────────────
 
@@ -226,56 +241,99 @@ def api_us_insiders(
 ):
     """
     Get insider trading data from SEC Form 4 filings.
-    
-    Query params:
-      - transaction_type: Buy or Sale (default: all)
-      - ticker: filter by specific ticker
-      - min_value: minimum trade value ($)
-      - cluster_only: only show cluster buys (3+ insiders buying same stock)
-      - days: only trades in last N days (default: 30)
+    Uses DuckDB query layer with JSON fallback.
     """
+    # ── DuckDB fast path ──────────────────────────────────────────────
+    db = _get_duckdb()
+    if db is not None:
+        try:
+            # Build trades query
+            trade_sql = "SELECT * FROM insider_trades WHERE 1=1"
+            trade_params = []
+
+            if transaction_type:
+                trade_sql += " AND LOWER(transaction_type) = LOWER(?)"
+                trade_params.append(transaction_type)
+            if ticker:
+                trade_sql += " AND UPPER(ticker) = ?"
+                trade_params.append(ticker.upper())
+            if min_value is not None:
+                trade_sql += " AND value >= ?"
+                trade_params.append(min_value)
+            if cluster_only:
+                trade_sql += " AND ticker IN (SELECT ticker FROM insider_clusters)"
+            if days:
+                cutoff = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d")
+                trade_sql += " AND COALESCE(trade_date, filing_date) >= ?"
+                trade_params.append(cutoff)
+
+            trade_sql += " ORDER BY COALESCE(trade_date, filing_date) DESC"
+            trades = db.query(trade_sql, trade_params)
+            total = db.query("SELECT COUNT(*) AS cnt FROM insider_trades")[0]["cnt"]
+
+            # Clusters
+            cluster_sql = "SELECT * FROM insider_clusters"
+            cluster_params = []
+            if ticker:
+                cluster_sql += " WHERE UPPER(ticker) = ?"
+                cluster_params.append(ticker.upper())
+            clusters = db.query(cluster_sql, cluster_params if ticker else None)
+
+            ticker_names.enrich_list(trades, ticker_field="ticker", name_field="company")
+            buy_count = sum(1 for t in trades if t.get("transaction_type") == "Buy")
+            sell_count = sum(1 for t in trades if t.get("transaction_type") == "Sale")
+
+            return {
+                "data": trades,
+                "clusters": clusters,
+                "metadata": {
+                    "total": total,
+                    "filtered": len(trades),
+                    "buy_count": buy_count,
+                    "sell_count": sell_count,
+                    "cluster_count": len(clusters),
+                    "filters": {
+                        "transaction_type": transaction_type, "ticker": ticker,
+                        "min_value": min_value, "cluster_only": cluster_only, "days": days,
+                    },
+                    "source": "duckdb",
+                }
+            }
+
+        except Exception as e:
+            logger.warning(f"[duckdb] insider_trades query failed, falling back to JSON: {e}")
+
+    # ── JSON fallback ─────────────────────────────────────────────────
     data = smart_money_cache.read("insiders.json")
     if not data or "trades" not in data:
         return {"data": [], "clusters": [], "metadata": {"total": 0, "filtered": 0}}
-    
+
     trades = data["trades"]
     clusters = data.get("clusters", [])
-    
-    # Filter by transaction_type
+
     if transaction_type:
         trades = [t for t in trades if t.get("transaction_type", "").lower() == transaction_type.lower()]
-    
-    # Filter by ticker
     if ticker:
         ticker_upper = ticker.upper()
         trades = [t for t in trades if t.get("ticker", "").upper() == ticker_upper]
         clusters = [c for c in clusters if c.get("ticker", "").upper() == ticker_upper]
-    
-    # Filter by min_value
     if min_value is not None:
         trades = [t for t in trades if t.get("value", 0) >= min_value]
-    
-    # Filter cluster_only
     if cluster_only:
         cluster_tickers = set(c.get("ticker", "").upper() for c in data.get("clusters", []))
         cluster_tickers.update(data.get("metadata", {}).get("cluster_tickers", []))
         trades = [t for t in trades if t.get("ticker", "").upper() in cluster_tickers]
-    
-    # Filter by days
     if days:
         cutoff = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d")
         trades = [
             t for t in trades
             if (t.get("trade_date") or t.get("filing_date", "9999")) >= cutoff
         ]
-    
-    # Enrich with company names
+
     ticker_names.enrich_list(trades, ticker_field="ticker", name_field="company")
-    
-    # Stats
     buy_count = sum(1 for t in trades if t.get("transaction_type") == "Buy")
     sell_count = sum(1 for t in trades if t.get("transaction_type") == "Sale")
-    
+
     return {
         "data": trades,
         "clusters": clusters,
@@ -286,11 +344,8 @@ def api_us_insiders(
             "sell_count": sell_count,
             "cluster_count": len(clusters),
             "filters": {
-                "transaction_type": transaction_type,
-                "ticker": ticker,
-                "min_value": min_value,
-                "cluster_only": cluster_only,
-                "days": days,
+                "transaction_type": transaction_type, "ticker": ticker,
+                "min_value": min_value, "cluster_only": cluster_only, "days": days,
             },
             "source": data.get("metadata", {}).get("source", "openinsider"),
             "last_updated": data.get("metadata", {}).get("last_updated"),
@@ -813,42 +868,88 @@ def api_congress_trades(
 ):
     """
     Get Congress trades filtered by party, chamber, type, amount, and recency.
+    Uses DuckDB query layer with JSON fallback.
     """
+    # ── DuckDB fast path ──────────────────────────────────────────────
+    db = _get_duckdb()
+    if db is not None:
+        try:
+            sql = "SELECT * FROM congress_trades WHERE 1=1"
+            params = []
+
+            if party:
+                sql += " AND LOWER(party) = LOWER(?)"
+                params.append(party)
+            if chamber:
+                sql += " AND LOWER(chamber) = LOWER(?)"
+                params.append(chamber)
+            if trade_type:
+                # Normalize Sale/Sell
+                norm = trade_type.lower().replace("sale", "sell")
+                sql += " AND LOWER(REPLACE(trade_type, 'Sale', 'Sell')) = ?"
+                params.append(norm)
+            if min_amount is not None:
+                sql += " AND amount_min >= ?"
+                params.append(min_amount)
+            if days:
+                cutoff = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d")
+                sql += " AND transaction_date >= ?"
+                params.append(cutoff)
+
+            sql += " ORDER BY transaction_date DESC"
+            trades = db.query(sql, params)
+
+            # Total count (unfiltered)
+            total = db.query("SELECT COUNT(*) AS cnt FROM congress_trades")[0]["cnt"]
+
+            ticker_names.enrich_list(trades, ticker_field="ticker", name_field="company")
+            buy_count = sum(1 for t in trades if (t.get("trade_type") or "").lower() in ("buy", "purchase"))
+            sell_count = sum(1 for t in trades if (t.get("trade_type") or "").lower() in ("sell", "sale"))
+
+            result = {
+                "data": trades,
+                "metadata": {
+                    "total": total,
+                    "filtered": len(trades),
+                    "buy_count": buy_count,
+                    "sell_count": sell_count,
+                    "filters": {"party": party, "chamber": chamber, "trade_type": trade_type,
+                                "min_amount": min_amount, "days": days},
+                    "source": "duckdb",
+                }
+            }
+            if wants_markdown(request):
+                from api.markdown_format import format_congress_trades
+                return markdown_response(result, format_congress_trades)
+            return result
+
+        except Exception as e:
+            logger.warning(f"[duckdb] congress_trades query failed, falling back to JSON: {e}")
+
+    # ── JSON fallback ─────────────────────────────────────────────────
     data = smart_money_cache.read("congress.json")
     if not data or "trades" not in data:
         return {"data": [], "metadata": {"total": 0, "filtered": 0}}
-    
+
     trades = data["trades"]
-    
-    # Filter by party
+
     if party:
         trades = [t for t in trades if t.get("party", "").lower() == party.lower()]
-    
-    # Filter by chamber
     if chamber:
         trades = [t for t in trades if t.get("chamber", "").lower() == chamber.lower()]
-    
-    # Filter by trade_type (handle both "Sale" and "Sell")
     if trade_type:
         normalized_type = trade_type.lower().replace("sale", "sell")
         trades = [
             t for t in trades
             if t.get("trade_type", "").lower().replace("sale", "sell") == normalized_type
         ]
-    
-    # Filter by min_amount
     if min_amount is not None:
         trades = [t for t in trades if t.get("amount_min", 0) >= min_amount]
-    
-    # Filter by days
     if days:
         cutoff = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d")
         trades = [t for t in trades if t.get("transaction_date", "9999-99-99") >= cutoff]
-    
-    # Enrich trades with company names
+
     ticker_names.enrich_list(trades, ticker_field="ticker", name_field="company")
-    
-    # Count buys/sells from filtered results
     buy_count = sum(1 for t in trades if (t.get("trade_type") or "").lower() in ("buy", "purchase"))
     sell_count = sum(1 for t in trades if (t.get("trade_type") or "").lower() in ("sell", "sale"))
 
@@ -859,14 +960,10 @@ def api_congress_trades(
             "filtered": len(trades),
             "buy_count": buy_count,
             "sell_count": sell_count,
-            "filters": {
-                "party": party,
-                "chamber": chamber,
-                "trade_type": trade_type,
-                "min_amount": min_amount,
-                "days": days
-            },
-            "last_updated": data.get("last_updated")
+            "filters": {"party": party, "chamber": chamber, "trade_type": trade_type,
+                        "min_amount": min_amount, "days": days},
+            "last_updated": data.get("last_updated"),
+            "source": "json",
         }
     }
     if wants_markdown(request):
@@ -883,38 +980,66 @@ def api_darkpool_analytics(
 ):
     """
     Get dark pool anomalies filtered by Z-score, DPI, and recency.
+    Uses DuckDB query layer with JSON fallback.
     """
+    # ── DuckDB fast path ──────────────────────────────────────────────
+    db = _get_duckdb()
+    if db is not None:
+        try:
+            sql = "SELECT * FROM darkpool_tickers WHERE z_score >= ? AND dpi >= ?"
+            params = [min_zscore, min_dpi]
+
+            if days:
+                cutoff = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d")
+                sql += " AND date >= ?"
+                params.append(cutoff)
+
+            sql += " ORDER BY z_score DESC"
+            filtered = db.query(sql, params)
+            total = db.query("SELECT COUNT(*) AS cnt FROM darkpool_tickers")[0]["cnt"]
+
+            ticker_names.enrich_list(filtered, ticker_field="ticker", name_field="company")
+
+            result = {
+                "data": filtered,
+                "metadata": {
+                    "total": total,
+                    "filtered": len(filtered),
+                    "filters": {"min_zscore": min_zscore, "min_dpi": min_dpi, "days": days},
+                    "source": "duckdb",
+                }
+            }
+            if wants_markdown(request):
+                from api.markdown_format import format_darkpool
+                return markdown_response(result, format_darkpool)
+            return result
+
+        except Exception as e:
+            logger.warning(f"[duckdb] darkpool_tickers query failed, falling back to JSON: {e}")
+
+    # ── JSON fallback ─────────────────────────────────────────────────
     data = smart_money_cache.read("darkpool.json")
     if not data or "tickers" not in data:
         return {"data": [], "metadata": {"total": 0, "filtered": 0}}
-    
+
     tickers = data["tickers"]
-    
-    # Filter by min_zscore
     filtered = [t for t in tickers if t.get("z_score", 0) >= min_zscore]
-    
-    # Filter by min_dpi
     filtered = [t for t in filtered if t.get("dpi", 0) >= min_dpi]
-    
-    # Filter by days
+
     if days:
         cutoff = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d")
         filtered = [t for t in filtered if t.get("date", "9999-99-99") >= cutoff]
-    
-    # Enrich with company names
+
     ticker_names.enrich_list(filtered, ticker_field="ticker", name_field="company")
-    
+
     result = {
         "data": filtered,
         "metadata": {
             "total": len(tickers),
             "filtered": len(filtered),
-            "filters": {
-                "min_zscore": min_zscore,
-                "min_dpi": min_dpi,
-                "days": days
-            },
-            "last_updated": data.get("metadata", {}).get("last_updated")
+            "filters": {"min_zscore": min_zscore, "min_dpi": min_dpi, "days": days},
+            "last_updated": data.get("metadata", {}).get("last_updated"),
+            "source": "json",
         }
     }
     if wants_markdown(request):
@@ -931,27 +1056,67 @@ def api_ark_trades(
 ):
     """
     Get ARK trades filtered by type, ETF, and recency.
+    Uses DuckDB query layer with JSON fallback.
     """
+    # ── DuckDB fast path ──────────────────────────────────────────────
+    db = _get_duckdb()
+    if db is not None:
+        try:
+            sql = "SELECT * FROM ark_trades WHERE 1=1"
+            params = []
+
+            if trade_type:
+                sql += " AND LOWER(trade_type) = LOWER(?)"
+                params.append(trade_type)
+            if etf:
+                sql += " AND UPPER(etf) = UPPER(?)"
+                params.append(etf)
+            if days:
+                cutoff = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d")
+                sql += " AND date >= ?"
+                params.append(cutoff)
+
+            sql += " ORDER BY date DESC"
+            trades = db.query(sql, params)
+            total = db.query("SELECT COUNT(*) AS cnt FROM ark_trades")[0]["cnt"]
+
+            buy_count = sum(1 for t in trades if (t.get("trade_type") or "").lower() in ("buy", "purchase"))
+            sell_count = sum(1 for t in trades if (t.get("trade_type") or "").lower() in ("sell", "sale"))
+
+            result = {
+                "data": trades,
+                "metadata": {
+                    "total": total,
+                    "filtered": len(trades),
+                    "buy_count": buy_count,
+                    "sell_count": sell_count,
+                    "filters": {"trade_type": trade_type, "etf": etf, "days": days},
+                    "source": "duckdb",
+                }
+            }
+            if wants_markdown(request):
+                from api.markdown_format import format_ark_trades
+                return markdown_response(result, format_ark_trades)
+            return result
+
+        except Exception as e:
+            logger.warning(f"[duckdb] ark_trades query failed, falling back to JSON: {e}")
+
+    # ── JSON fallback ─────────────────────────────────────────────────
     data = smart_money_cache.read("ark_trades.json")
     if not data or "trades" not in data:
         return {"data": [], "metadata": {"total": 0, "filtered": 0}}
-    
+
     trades = data["trades"]
-    
-    # Filter by trade_type
+
     if trade_type:
         trades = [t for t in trades if t.get("trade_type", "").lower() == trade_type.lower()]
-    
-    # Filter by etf
     if etf:
         trades = [t for t in trades if t.get("etf", "").upper() == etf.upper()]
-    
-    # Filter by days
     if days:
         cutoff = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d")
         trades = [t for t in trades if t.get("date", "9999-99-99") >= cutoff]
-    
-    # Count buys/sells from filtered results
+
     buy_count = sum(1 for t in trades if (t.get("trade_type") or "").lower() in ("buy", "purchase"))
     sell_count = sum(1 for t in trades if (t.get("trade_type") or "").lower() in ("sell", "sale"))
 
@@ -962,12 +1127,9 @@ def api_ark_trades(
             "filtered": len(trades),
             "buy_count": buy_count,
             "sell_count": sell_count,
-            "filters": {
-                "trade_type": trade_type,
-                "etf": etf,
-                "days": days
-            },
-            "last_updated": data.get("last_updated")
+            "filters": {"trade_type": trade_type, "etf": etf, "days": days},
+            "last_updated": data.get("last_updated"),
+            "source": "json",
         }
     }
     if wants_markdown(request):
@@ -1019,45 +1181,98 @@ def api_institutions_filings(
     """
     Get 13F institutional filings filtered by fund and position size.
     Returns both fund-level summary and flattened top holdings.
+    Uses DuckDB query layer with JSON fallback.
     """
+    # ── DuckDB fast path ──────────────────────────────────────────────
+    db = _get_duckdb()
+    if db is not None:
+        try:
+            # Fund-level summary
+            filing_sql = "SELECT cik, fund_name, company_name, filing_date, quarter, total_value, holdings_count FROM institution_filings WHERE 1=1"
+            filing_params = []
+            if fund:
+                filing_sql += " AND LOWER(fund_name) LIKE ?"
+                filing_params.append(f"%{fund.lower()}%")
+
+            filings_summary = db.query(filing_sql, filing_params if filing_params else None)
+            total_filings = db.query("SELECT COUNT(*) AS cnt FROM institution_filings")[0]["cnt"]
+
+            # Top holdings (flattened)
+            holding_sql = """
+                SELECT ticker, issuer, fund_name AS institution, cik,
+                       shares, value, pct_portfolio, cusip, filing_date, quarter
+                FROM institution_holdings
+                WHERE ticker IS NOT NULL AND ticker != ''
+            """
+            holding_params = []
+            if fund:
+                holding_sql += " AND LOWER(fund_name) LIKE ?"
+                holding_params.append(f"%{fund.lower()}%")
+            if min_value is not None:
+                holding_sql += " AND value >= ?"
+                holding_params.append(min_value)
+
+            holding_sql += " ORDER BY value DESC LIMIT 100"
+            top_holdings = db.query(holding_sql, holding_params if holding_params else None)
+
+            total_value = sum(f.get("total_value") or 0 for f in filings_summary)
+            unique_tickers = db.query("SELECT COUNT(DISTINCT ticker) AS cnt FROM institution_holdings WHERE ticker != ''")[0]["cnt"]
+
+            result = {
+                "data": filings_summary,
+                "top_holdings": top_holdings,
+                "summary": {
+                    "total_value": total_value,
+                    "unique_tickers": unique_tickers,
+                    "filings_count": len(filings_summary),
+                },
+                "metadata": {
+                    "total": total_filings,
+                    "filtered": len(filings_summary),
+                    "filters": {"fund": fund, "min_value": min_value},
+                    "source": "duckdb",
+                }
+            }
+            if wants_markdown(request):
+                from api.markdown_format import format_institutions
+                return markdown_response(result, format_institutions)
+            return result
+
+        except Exception as e:
+            logger.warning(f"[duckdb] institution_filings query failed, falling back to JSON: {e}")
+
+    # ── JSON fallback ─────────────────────────────────────────────────
     data = smart_money_cache.read("institutions.json")
     if not data or "filings" not in data:
         return {"data": [], "summary": {"total_value": 0, "unique_tickers": 0, "filings_count": 0}, "top_holdings": [], "metadata": {"total": 0, "filtered": 0}}
-    
+
     filings = data["filings"]
-    
-    # Filter by fund (institution name)
+
     if fund:
         filings = [f for f in filings if fund.lower() in f.get("fund_name", "").lower()]
-    
-    # Calculate summary stats from raw filings (which have nested holdings)
+
     total_value = sum(f.get("total_value", 0) for f in filings)
-    
-    # Collect all unique tickers from nested holdings
+
     all_tickers = set()
     for f in filings:
         for h in f.get("holdings", []):
             ticker = h.get("ticker", "").strip()
             if ticker:
                 all_tickers.add(ticker)
-    
-    # Flatten holdings across all filings for top holdings table
+
     flattened = []
     for filing in filings:
         fund_name = filing.get("fund_name", "Unknown")
         filing_date = filing.get("filing_date", "")
         quarter = filing.get("quarter", "")
-        
+
         for holding in filing.get("holdings", []):
             ticker = holding.get("ticker", "").strip()
             if not ticker:
                 continue
-            
-            # Calculate % of portfolio for this fund
             fund_total = filing.get("total_value", 1)
             holding_value = holding.get("value", 0)
             pct_portfolio = (holding_value / fund_total * 100) if fund_total > 0 else 0
-            
             flattened.append({
                 "ticker": ticker,
                 "issuer": holding.get("issuer", ""),
@@ -1070,16 +1285,11 @@ def api_institutions_filings(
                 "filing_date": filing_date,
                 "quarter": quarter,
             })
-    
-    # Sort by value and get top 100
+
     top_holdings = sorted(flattened, key=lambda x: x.get("value", 0), reverse=True)[:100]
-    
-    # Filter by min_value if specified
     if min_value is not None:
         top_holdings = [h for h in top_holdings if h.get("value", 0) >= min_value]
-    
-    # Strip nested holdings from fund-level data to reduce payload
-    # (was 4MB → ~5KB without holdings; frontend only needs fund name + AUM)
+
     filings_summary = []
     for f in filings:
         filings_summary.append({
@@ -1093,8 +1303,8 @@ def api_institutions_filings(
         })
 
     result = {
-        "data": filings_summary,  # Fund-level summary (no nested holdings)
-        "top_holdings": top_holdings,  # Flattened top 100 holdings
+        "data": filings_summary,
+        "top_holdings": top_holdings,
         "summary": {
             "total_value": total_value,
             "unique_tickers": len(all_tickers),
@@ -1103,11 +1313,9 @@ def api_institutions_filings(
         "metadata": {
             "total": len(data.get("filings", [])),
             "filtered": len(filings),
-            "filters": {
-                "fund": fund,
-                "min_value": min_value
-            },
-            "last_updated": data.get("last_updated")
+            "filters": {"fund": fund, "min_value": min_value},
+            "last_updated": data.get("last_updated"),
+            "source": "json",
         }
     }
     if wants_markdown(request):

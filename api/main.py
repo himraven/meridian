@@ -90,6 +90,19 @@ def init_database():
 
 
 @app.on_event("startup")
+def init_duckdb():
+    """Initialize DuckDB query layer on startup (runs in background thread)."""
+    def _run():
+        try:
+            from api.modules.db_init import init_duckdb as _init
+            _init()
+        except Exception as e:
+            print(f"[duckdb] Startup init failed (API will use JSON fallback): {e}")
+
+    threading.Thread(target=_run, daemon=True, name="duckdb-init").start()
+
+
+@app.on_event("startup")
 def bootstrap_ticker_names():
     """Pre-populate ticker names from all data sources + yfinance on startup."""
     def _bootstrap():
