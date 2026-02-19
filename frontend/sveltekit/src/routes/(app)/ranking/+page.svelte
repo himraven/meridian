@@ -285,35 +285,21 @@
 				<p class="text-sm text-[var(--text-muted)] mb-3">
 					Each signal is scored 0-100 based on conviction strength. Scores are amplified by source confluence — the more independent signals converge on a ticker, the higher it ranks.
 				</p>
-				<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 text-sm">
-					<a href="/knowledge/congress-trading-alpha" class="flex items-center gap-2 group">
-						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.congress} group-hover:opacity-80">GOV</span>
-						<span class="text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]">Amount × Recency × Members</span>
-					</a>
-					<a href="/knowledge/ark-disruptive-innovation" class="flex items-center gap-2 group">
-						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.ark} group-hover:opacity-80">ARK</span>
-						<span class="text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]">Funds × Shares × Position Type</span>
-					</a>
-					<a href="/knowledge/dark-pool-activity" class="flex items-center gap-2 group">
-						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.darkpool} group-hover:opacity-80">DP</span>
-						<span class="text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]">Z-Score × DPI × Volume</span>
-					</a>
-					<a href="/knowledge/13f-institutional-tracking" class="flex items-center gap-2 group">
-						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.institution} group-hover:opacity-80">13F</span>
-						<span class="text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]">Value × Change × Prestige</span>
-					</a>
-					<a href="/knowledge/insider-buying-signals" class="flex items-center gap-2 group">
-						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.insider} group-hover:opacity-80">INS</span>
-						<span class="text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]">Value × Clusters × Recency</span>
-					</a>
-					<a href="/knowledge/short-interest-analysis" class="flex items-center gap-2 group">
-						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.short_interest} group-hover:opacity-80">SI</span>
-						<span class="text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]">SI Ratio × Days to Cover × Float</span>
-					</a>
-					<a href="/knowledge/superinvestor-tracking" class="flex items-center gap-2 group">
-						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.superinvestor} group-hover:opacity-80">SUP</span>
-						<span class="text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]">Managers × Position Size × Conviction</span>
-					</a>
+				<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 text-sm">
+					{#each [
+						{ href: '/knowledge/congress-trading-alpha', label: 'GOV', color: sourceColors.congress, desc: 'Amount × Recency × Members' },
+						{ href: '/knowledge/ark-disruptive-innovation', label: 'ARK', color: sourceColors.ark, desc: 'Funds × Shares × Position' },
+						{ href: '/knowledge/dark-pool-activity', label: 'DP', color: sourceColors.darkpool, desc: 'Z-Score × DPI × Volume' },
+						{ href: '/knowledge/13f-institutional-tracking', label: '13F', color: sourceColors.institution, desc: 'Value × Change × Prestige' },
+						{ href: '/knowledge/insider-buying-signals', label: 'INS', color: sourceColors.insider, desc: 'Value × Clusters × Recency' },
+						{ href: '/knowledge/short-interest-analysis', label: 'SI', color: sourceColors.short_interest, desc: 'SI Ratio × Days to Cover' },
+						{ href: '/knowledge/superinvestor-tracking', label: 'SUP', color: sourceColors.superinvestor, desc: 'Managers × Position × Size' },
+					] as item}
+						<a href={item.href} class="flex items-start gap-2 group p-2 rounded-lg hover:bg-[var(--bg-hover)] transition-colors">
+							<span class="px-2 py-0.5 rounded text-xs font-bold {item.color} shrink-0 min-w-[2.5rem] text-center">{item.label}</span>
+							<span class="text-xs text-[var(--text-muted)] group-hover:text-[var(--text-secondary)] leading-tight">{item.desc}</span>
+						</a>
+					{/each}
 				</div>
 			</div>
 		{/snippet}
