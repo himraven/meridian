@@ -450,6 +450,112 @@ def api_us_superinvestors(
     }
 
 
+@router.get("/api/us/short-interest")
+def api_us_short_interest(
+    ticker: str = None,
+    min_short_ratio: float = None,
+    min_days_to_cover: float = None,
+    sort_by: str = "short_interest",   # short_ratio | days_to_cover | short_volume
+    limit: int = 100,
+):
+    """
+    Short interest data from FINRA (8,600+ tickers).
+    DuckDB fast path with JSON fallback.
+    """
+    # normalise sort_by alias
+    sort_col_map = {
+        "short_ratio": "short_pct_float",
+        "days_to_cover": "days_to_cover",
+        "short_volume": "short_interest",
+        "short_interest": "short_interest",
+    }
+    sort_col = sort_col_map.get(sort_by, "short_interest")
+
+    # ── DuckDB fast path ──────────────────────────────────────────────
+    db = _get_duckdb()
+    if db is not None and db.table_exists("short_interest"):
+        try:
+            sql = "SELECT * FROM short_interest WHERE 1=1"
+            params = []
+
+            if ticker:
+                sql += " AND UPPER(ticker) = ?"
+                params.append(ticker.upper())
+            if min_short_ratio is not None:
+                sql += " AND short_pct_float >= ?"
+                params.append(min_short_ratio)
+            if min_days_to_cover is not None:
+                sql += " AND days_to_cover >= ?"
+                params.append(min_days_to_cover)
+
+            total_sql = "SELECT COUNT(*) AS cnt FROM short_interest"
+            total = db.query(total_sql)[0]["cnt"]
+
+            sql += f" ORDER BY {sort_col} DESC NULLS LAST LIMIT ?"
+            params.append(limit)
+
+            rows = db.query(sql, params)
+            ticker_names.enrich_list(rows, ticker_field="ticker", name_field="company")
+
+            return {
+                "data": rows,
+                "metadata": {
+                    "total": total,
+                    "filtered": len(rows),
+                    "sort_by": sort_by,
+                    "filters": {
+                        "ticker": ticker,
+                        "min_short_ratio": min_short_ratio,
+                        "min_days_to_cover": min_days_to_cover,
+                    },
+                    "source": "duckdb",
+                },
+            }
+        except Exception as e:
+            logger.warning(f"[duckdb] short_interest query failed, falling back to JSON: {e}")
+
+    # ── JSON fallback ─────────────────────────────────────────────────
+    raw = read_json(os.path.join(DATA_DIR, "short_interest.json")) or {}
+    tickers_list: list = raw.get("tickers", [])
+    meta = raw.get("metadata", {})
+
+    if ticker:
+        tickers_list = [r for r in tickers_list if r.get("ticker", "").upper() == ticker.upper()]
+    if min_short_ratio is not None:
+        tickers_list = [r for r in tickers_list if (r.get("short_pct_float") or 0) >= min_short_ratio]
+    if min_days_to_cover is not None:
+        tickers_list = [r for r in tickers_list if (r.get("days_to_cover") or 0) >= min_days_to_cover]
+
+    # sort
+    reverse_key = {
+        "short_ratio": "short_pct_float",
+        "days_to_cover": "days_to_cover",
+        "short_volume": "short_interest",
+        "short_interest": "short_interest",
+    }.get(sort_by, "short_interest")
+    tickers_list = sorted(tickers_list, key=lambda r: r.get(reverse_key) or 0, reverse=True)
+
+    total_all = len(raw.get("tickers", []))
+    filtered = tickers_list[:limit]
+    ticker_names.enrich_list(filtered, ticker_field="ticker", name_field="company")
+
+    return {
+        "data": filtered,
+        "metadata": {
+            "total": total_all,
+            "filtered": len(filtered),
+            "sort_by": sort_by,
+            "filters": {
+                "ticker": ticker,
+                "min_short_ratio": min_short_ratio,
+                "min_days_to_cover": min_days_to_cover,
+            },
+            "settlement_date": meta.get("settlement_date"),
+            "last_updated": meta.get("last_updated"),
+            "source": "json",
+        },
+    }
+
 @router.get("/api/ranking/feed")
 def api_ranking_feed(
     days: int = 7,
