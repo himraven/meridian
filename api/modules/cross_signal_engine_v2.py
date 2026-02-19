@@ -1038,18 +1038,34 @@ class SmartMoneyEngineV2:
             
             max_conviction = max(source_convictions.values())
             source_count = len(source_convictions)
-            multi_bonus = min((source_count - 1) * 20, 40)  # +20 per extra source, cap 40
             
-            # Source diversity cap — single source can't hit 100
-            # Forces multi-source confluence to rank highest
-            if source_count == 1:
-                source_cap = 0.75   # max 75
-            elif source_count == 2:
-                source_cap = 0.85   # max ~92 with bonus
-            elif source_count == 3:
-                source_cap = 0.90   # max ~100 with bonus
+            # ── Tiered source weighting ──────────────────────────────
+            # "Active" sources (require deliberate human action) vs
+            # "Passive" sources (exist for most large-cap stocks)
+            active_sources = {'congress', 'ark', 'darkpool', 'insider', 'institution'}
+            passive_sources = {'short_interest', 'superinvestor'}
+            
+            active_count = len(set(source_convictions.keys()) & active_sources)
+            passive_count = len(set(source_convictions.keys()) & passive_sources)
+            
+            # Multi-source bonus: active sources worth more
+            # Active: +15 each (cap 45), Passive: +5 each (cap 10)
+            active_bonus = min(max(active_count - 1, 0) * 15, 45)
+            passive_bonus = min(passive_count * 5, 10)
+            multi_bonus = min(active_bonus + passive_bonus, 45)
+            
+            # Source diversity cap — based on ACTIVE source count
+            # This prevents stocks with only passive signals from ranking high
+            if active_count == 0:
+                source_cap = 0.50   # passive-only: max ~35
+            elif active_count == 1:
+                source_cap = 0.75   # single active: max 75
+            elif active_count == 2:
+                source_cap = 0.85   # two active: max ~85
+            elif active_count == 3:
+                source_cap = 0.92   # three active: max ~95
             else:
-                source_cap = 1.0    # 4+ sources uncapped
+                source_cap = 1.0    # 4+ active sources: uncapped
             
             # Most recent date
             dates = [d.date for d in details if d.date]
