@@ -176,7 +176,7 @@
 							{#each data.data.data as trade}
 								{@const isBuy = trade.transaction_type === 'Buy'}
 								<tr class="border-b border-[var(--border-default)]/50 hover:bg-[var(--bg-elevated)]/50 transition-colors {trade.is_cluster ? 'bg-orange-500/5' : ''}">
-									<td class="py-3 px-3 text-[var(--text-muted)] whitespace-nowrap">{formatDate(trade.date)}</td>
+									<td class="py-3 px-3 text-[var(--text-muted)] whitespace-nowrap">{formatDate(trade.trade_date || trade.filing_date)}</td>
 									<td class="py-3 px-3">
 										<a href="/ticker/{trade.ticker}" class="ticker-code text-[var(--blue)] hover:underline">{trade.ticker}</a>
 									</td>

@@ -223,11 +223,12 @@
 									<span class="text-xs text-[var(--text-muted)] truncate">{signal.company || ''}</span>
 								</div>
 								
-								<!-- Source Tags -->
+								<!-- Source Tags (with inline scores on mobile) -->
 								<div class="flex items-center gap-1.5 flex-wrap">
 									{#each signal.sources as src}
+										{@const srcScore = src === 'congress' ? signal.congress_score : src === 'ark' ? signal.ark_score : src === 'darkpool' ? signal.darkpool_score : src === 'institution' ? signal.institution_score : src === 'insider' ? signal.insider_score : 0}
 										<span class="px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide {sourceColors[src] || 'bg-[var(--bg-elevated)] text-[var(--text-muted)]'}">
-											{sourceLabels[src] || src.toUpperCase()}
+											{sourceLabels[src] || src.toUpperCase()}<span class="md:hidden font-normal ml-0.5">{srcScore > 0 ? srcScore.toFixed(0) : ''}</span>
 										</span>
 									{/each}
 									{#if signal.source_count >= 2}
