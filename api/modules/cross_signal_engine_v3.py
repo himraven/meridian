@@ -325,7 +325,12 @@ def _score_v7(
     penalty = sum(abs(c["contribution"]) for c in opposing)
 
     # ── Step 7: Cap by aligned active count ──────────────────────────
-    cap = {0: 50, 1: 78, 2: 90, 3: 97}.get(aligned_active, 100)
+    # Single-source signals capped harder to prevent obscure tickers dominating
+    total_sources = len([c for c in contributions if c["status"] != "opposing"])
+    cap = {0: 40, 1: 55, 2: 85, 3: 95}.get(aligned_active, 100)
+    # Additional penalty: single-source tickers clearly below multi-source
+    if total_sources <= 1:
+        cap = min(cap, 45)
 
     # ── Final score ──────────────────────────────────────────────────
     raw_score = base + extra + dir_bonus - penalty
