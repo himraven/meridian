@@ -904,9 +904,13 @@ def api_ranking_smart_money(
     
     Multi-source bonus: +20 per additional source (max +40).
     """
-    data = smart_money_cache.read("ranking_v2.json")
+    # Primary: V3/V7 direction-aware ranking
+    data = smart_money_cache.read("ranking_v3.json")
     if not data or "signals" not in data:
-        # Fallback: generate on-the-fly
+        # Fallback: V2 engine
+        data = smart_money_cache.read("ranking_v2.json")
+    if not data or "signals" not in data:
+        # Last resort: generate on-the-fly with V2
         from api.modules.cross_signal_engine_v2 import SmartMoneyEngineV2
         engine = SmartMoneyEngineV2()
         
