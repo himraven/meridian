@@ -19,6 +19,7 @@
 				{ href: '/ark', label: 'ARK Invest' },
 				{ href: '/darkpool', label: 'Dark Pool' },
 				{ href: '/institutions', label: 'Institutions' },
+				{ href: '/insiders', label: 'Insiders' },
 				{ href: '/signals', label: 'Signals' }
 			]
 		},

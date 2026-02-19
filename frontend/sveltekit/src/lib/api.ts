@@ -95,6 +95,12 @@ export const api = {
 		filings: () => fetchApi('/institutions/filings'),
 	},
 	
+	// Insiders
+	insiders: {
+		trades: (params?: { days?: number; transaction_type?: string; ticker?: string; min_value?: number; cluster_only?: boolean }) =>
+			fetchApi(`/us/insiders${buildQueryString(params || {})}`),
+	},
+	
 	// Signals
 	signals: {
 		confluence: (params?: { min_score?: number; direction?: string; ticker?: string }) =>

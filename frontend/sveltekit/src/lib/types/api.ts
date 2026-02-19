@@ -136,6 +136,33 @@ export interface InstitutionsFilingsResponse {
 	metadata: ApiMetadata;
 }
 
+// ═══ Insiders ═══
+
+export interface InsiderTrade {
+	ticker: string;
+	company: string;
+	insider_name: string;
+	title: string;
+	transaction_type: 'Buy' | 'Sale';
+	shares: number;
+	value: number;
+	price_per_share: number;
+	date: string;
+	filing_date: string;
+	is_cluster: boolean;
+	cluster_count?: number;
+}
+
+export interface InsiderTradesResponse {
+	data: InsiderTrade[];
+	metadata: ApiMetadata & {
+		buy_count?: number;
+		sell_count?: number;
+		cluster_count?: number;
+		total_value?: number;
+	};
+}
+
 // ═══ Signals ═══
 
 export interface SignalConfluence {
@@ -149,6 +176,7 @@ export interface SignalConfluence {
 	ark_score: number;
 	darkpool_score: number;
 	institution_score: number;
+	insider_score: number;
 	details: string;
 	scoring: string;
 	company: string;

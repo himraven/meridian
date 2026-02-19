@@ -52,14 +52,16 @@
 		congress: 'bg-[var(--amber)]/20 text-[var(--amber)]',
 		ark: 'bg-[var(--blue)]/20 text-[var(--blue)]',
 		darkpool: 'bg-purple-500/20 text-purple-400',
-		institution: 'bg-[var(--green)]/20 text-[var(--green)]'
+		institution: 'bg-[var(--green)]/20 text-[var(--green)]',
+		insider: 'bg-orange-500/20 text-orange-400'
 	};
 	
 	const sourceLabels: Record<string, string> = {
 		congress: 'GOV',
 		ark: 'ARK',
 		darkpool: 'DP',
-		institution: '13F'
+		institution: '13F',
+		insider: 'INS'
 	};
 </script>
 
@@ -71,7 +73,7 @@
 	<!-- Header -->
 	<div>
 		<h1 class="text-heading mb-1">Smart Money Signals</h1>
-		<p class="text-[var(--text-secondary)]">Conviction-scored signals from Congress, ARK, Dark Pools & Institutions</p>
+		<p class="text-[var(--text-secondary)]">Conviction-scored signals from Congress, ARK, Dark Pools, Institutions & Insiders</p>
 		<p class="text-caption text-[var(--text-dimmed)] mt-2">
 			Engine v2 · {formatDate(data.data.metadata.last_updated)}
 		</p>
@@ -122,7 +124,7 @@
 				<p class="text-sm text-[var(--text-muted)] mb-3">
 					Each signal is scored 0-100 based on strength within its source. Multi-source alignment adds +20 bonus per source (max +40).
 				</p>
-				<div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+				<div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
 					<div class="flex items-center gap-2">
 						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.congress}">GOV</span>
 						<span class="text-[var(--text-muted)]">Amount × Recency × Members</span>
@@ -138,6 +140,10 @@
 					<div class="flex items-center gap-2">
 						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.institution}">13F</span>
 						<span class="text-[var(--text-muted)]">Value × Change × Prestige</span>
+					</div>
+					<div class="flex items-center gap-2">
+						<span class="px-2 py-0.5 rounded text-xs font-bold {sourceColors.insider}">INS</span>
+						<span class="text-[var(--text-muted)]">Value × Clusters × Recency</span>
 					</div>
 				</div>
 			</div>
@@ -168,6 +174,7 @@
 						<option value="ark">ARK</option>
 						<option value="darkpool">Dark Pool</option>
 						<option value="institution">Institutions</option>
+						<option value="insider">Insiders</option>
 					</select>
 				</div>
 				<div>
@@ -269,6 +276,15 @@
 										<div class="text-[10px] text-[var(--text-muted)] mt-0.5">{signal.institution_score.toFixed(0)}</div>
 									</div>
 								{/if}
+								{#if signal.insider_score > 0}
+									<div class="w-16 text-center">
+										<div class="text-[10px] text-[var(--text-dimmed)] mb-0.5">INS</div>
+										<div class="h-1.5 bg-[var(--bg-elevated)] rounded-full overflow-hidden">
+											<div class="h-full bg-orange-400 rounded-full transition-all" style="width: {convictionBar(signal.insider_score)}"></div>
+										</div>
+										<div class="text-[10px] text-[var(--text-muted)] mt-0.5">{signal.insider_score.toFixed(0)}</div>
+									</div>
+								{/if}
 							</div>
 							
 							<!-- Date -->
@@ -320,6 +336,17 @@
 									</div>
 									<div class="h-1 bg-[var(--bg-elevated)] rounded-full overflow-hidden">
 										<div class="h-full bg-[var(--green)] rounded-full" style="width: {convictionBar(signal.institution_score)}"></div>
+									</div>
+								</div>
+							{/if}
+							{#if signal.insider_score > 0}
+								<div class="flex-1">
+									<div class="flex items-center justify-between text-[10px] mb-0.5">
+										<span class="text-orange-400">INS</span>
+										<span class="text-[var(--text-muted)]">{signal.insider_score.toFixed(0)}</span>
+									</div>
+									<div class="h-1 bg-[var(--bg-elevated)] rounded-full overflow-hidden">
+										<div class="h-full bg-orange-400 rounded-full" style="width: {convictionBar(signal.insider_score)}"></div>
 									</div>
 								</div>
 							{/if}
