@@ -66,14 +66,14 @@
 </script>
 
 <svelte:head>
-	<title>Smart Money Signals — Meridian</title>
+	<title>Meridian Ranking — Smart Money Conviction Scores</title>
 </svelte:head>
 
 <div class="space-y-6">
 	<!-- Header -->
 	<div>
-		<h1 class="text-heading mb-1">Smart Money Signals</h1>
-		<p class="text-[var(--text-secondary)]">Conviction-scored signals from Congress, ARK, Dark Pools, Institutions & Insiders</p>
+		<h1 class="text-heading mb-1">Meridian Ranking</h1>
+		<p class="text-[var(--text-secondary)]">Multi-source conviction scoring — the more signals converge, the higher the rank</p>
 		<p class="text-caption text-[var(--text-dimmed)] mt-2">
 			Engine v2 · {formatDate(data.data.metadata.last_updated)}
 		</p>
@@ -84,7 +84,7 @@
 		<Card hover>
 			{#snippet children()}
 				<div class="text-center">
-					<p class="text-label mb-2">Total Signals</p>
+					<p class="text-label mb-2">Total Ranked</p>
 					<p class="text-data-lg">{data.data.metadata.filtered}</p>
 				</div>
 			{/snippet}
@@ -371,7 +371,7 @@
 		</div>
 	{:else}
 		<EmptyState 
-			title="No Signals Found" 
+			title="No Rankings Found" 
 			message="Adjust filters or check back later"
 		/>
 	{/if}
