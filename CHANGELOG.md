@@ -4,6 +4,42 @@ All notable changes to the Meridian platform are documented here.
 
 ---
 
+## 2026-02-19 — Knowledge Hub Launch
+
+### New Feature: Knowledge Hub
+- **API**: `GET /api/knowledge` — lists all articles (slug, title, tldr, hero_stat, etc.)
+- **API**: `GET /api/knowledge/{slug}` — full article with `content_md`, academic references, SEO
+- **Content**: 3 seed articles in `content/knowledge/` (JSON schema):
+  - `congress-trading-alpha.json` — Congressional trading alpha (+6% 30-day)
+  - `insider-buying-signals.json` — Insider cluster buying (+8.9% 12-month)
+  - `dark-pool-activity.json` — Dark pool volume anomalies (~40% of US equity volume)
+- **Docker**: Mounted `./content:/app/content:ro` in API service
+- **Cache**: In-memory cache with 60s mtime-based file refresh (no restart needed)
+
+### Frontend: Knowledge Hub Pages
+- `/knowledge` — Index page: hero section, category filter pills, responsive card grid
+  - Category filter: All | Signal Guides | Deep Dives | Masters
+  - Each card: badge, title, tldr, hero_stat number, "Read →" link
+- `/knowledge/[slug]` — Article page:
+  - Auto-generated table of contents from h2 headings
+  - Rendered markdown via `marked` library
+  - Hero stat (big featured number), TL;DR callout
+  - Key takeaways sidebar (desktop) + mobile collapsible
+  - Academic references section
+  - Related articles (card links)
+  - "How Meridian Uses This Signal" section
+  - Full SEO meta tags (title, description, keywords, og:*)
+- Sidebar: Added "Knowledge Hub" under Research section
+- Synced `knowledge.py` router to rsnest
+
+### Ranking Page Enhancements
+- Signal badges (GOV, ARK, DP, 13F, INS) now **clickable** → `/knowledge/{slug}`
+- Hover tooltip on badges shows signal tldr + "Click to learn more"
+- Scoring table source labels now link to corresponding knowledge articles
+- Footer tip: "Click any signal badge to learn how that signal works" + Knowledge Hub link
+
+---
+
 ## 2026-02-18 — Data Architecture Overhaul + Scoring Engine Upgrade
 
 ### Data Architecture
