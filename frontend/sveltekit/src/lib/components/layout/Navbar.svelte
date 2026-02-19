@@ -87,7 +87,7 @@
 					 $page.url.pathname.startsWith('/ark') ||
 					 $page.url.pathname.startsWith('/darkpool') ||
 					 $page.url.pathname.startsWith('/institutions') ||
-					 $page.url.pathname.startsWith('/signals') ? 'nav-link-active' : ''}"
+					 $page.url.pathname.startsWith('/ranking') ? 'nav-link-active' : ''}"
 			>
 				Markets
 			</a>

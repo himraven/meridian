@@ -35,7 +35,7 @@
     { name: 'ARK Invest',      path: '/ark',         hint: 'ARK' },
     { name: 'Dark Pool',       path: '/darkpool',    hint: 'DP' },
     { name: 'Institutions',    path: '/institutions', hint: '13F' },
-    { name: 'Signals',         path: '/signals',     hint: 'SIG' },
+    { name: 'Ranking',         path: '/ranking',     hint: 'RNK' },
     { name: 'HK Market',       path: '/hk',          hint: 'HK' },
     { name: 'CN Strategy',     path: '/cn',          hint: 'CN' },
     { name: 'Research',        path: '/research',    hint: 'RES' },

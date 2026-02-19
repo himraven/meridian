@@ -71,9 +71,9 @@ def api_ticker_aggregate(request: Request, symbol: str):
     ]
     
     # Confluence signals — prefer V2 engine (richer scoring), fall back to V1
-    signals_data = smart_money_cache.read("signals_v2.json")
+    signals_data = smart_money_cache.read("ranking_v2.json")
     if not signals_data.get("signals"):
-        signals_data = smart_money_cache.read("signals.json")
+        signals_data = smart_money_cache.read("ranking.json")
     confluence_signals = [
         s for s in signals_data.get("signals", [])
         if s.get("ticker", "").upper() == symbol

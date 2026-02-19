@@ -80,8 +80,8 @@ SOURCES = [
         "weekday_only": True,
     },
     {
-        "name": "Confluence Signals",
-        "path": "/app/data/signals.json",
+        "name": "Confluence Ranking",
+        "path": "/app/data/ranking.json",
         "max_age_hours": 16,    # 2x daily: 01:00, 14:00 UTC
         "schedule": "2x/day (01:00, 14:00 UTC)",
         "critical": True,

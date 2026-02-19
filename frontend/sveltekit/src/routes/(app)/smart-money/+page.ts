@@ -9,7 +9,7 @@ import type {
 
 export async function load({ fetch }) {
 	const [signals, congress, ark, darkpool, institutions] = await Promise.all([
-		api.signals.confluence({ min_score: 0 }) as Promise<SignalsConfluenceResponse>,
+		api.ranking.confluence({ min_score: 0 }) as Promise<SignalsConfluenceResponse>,
 		api.congress.trades({ days: 30 }) as Promise<CongressTradesResponse>,
 		api.ark.holdings() as Promise<ArkHoldingsResponse>,
 		api.darkpool.analytics({ days: 7 }) as Promise<DarkpoolAnalyticsResponse>,

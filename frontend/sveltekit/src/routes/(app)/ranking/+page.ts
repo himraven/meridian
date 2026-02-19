@@ -5,7 +5,7 @@ export async function load({ url }) {
 	const source = url.searchParams.get('source') || '';
 	const days = parseInt(url.searchParams.get('days') || '30');
 	
-	const data = await api.signals.smartMoney({ 
+	const data = await api.ranking.smartMoney({ 
 		min_score, 
 		source: source || undefined,
 		days,

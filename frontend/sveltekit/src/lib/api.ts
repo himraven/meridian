@@ -101,14 +101,14 @@ export const api = {
 			fetchApi(`/us/insiders${buildQueryString(params || {})}`),
 	},
 	
-	// Signals
-	signals: {
+	// Ranking
+	ranking: {
 		confluence: (params?: { min_score?: number; direction?: string; ticker?: string }) =>
-			fetchApi(`/signals/confluence${buildQueryString(params || {})}`),
+			fetchApi(`/ranking/confluence${buildQueryString(params || {})}`),
 		smartMoney: (params?: { min_score?: number; source?: string; days?: number }) =>
-			fetchApi(`/signals/smart-money${buildQueryString(params || {})}`),
+			fetchApi(`/ranking/smart-money${buildQueryString(params || {})}`),
 		feed: (params?: { days?: number; source?: string; ticker?: string; limit?: number }) =>
-			fetchApi(`/signals/feed${buildQueryString(params || {})}`),
+			fetchApi(`/ranking/feed${buildQueryString(params || {})}`),
 	},
 	
 	// Ticker

@@ -531,7 +531,7 @@
 		</div>
 		<div class="footer-links">
 			<a href="/dashboard">Dashboard</a>
-			<a href="/signals">Signals</a>
+			<a href="/ranking">Ranking</a>
 			<a href="/congress">Congress</a>
 			<a href="/darkpool">Dark Pool</a>
 		</div>

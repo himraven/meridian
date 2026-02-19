@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Signal Refresh — Runs the CrossSignalEngine and writes data/signals.json.
+Signal Refresh — Runs the CrossSignalEngine and writes data/ranking.json.
 
 Called:
 1. After each data collector completes
@@ -8,7 +8,7 @@ Called:
 3. As standalone cron job
 
 Pipeline:
-  Read data/*.json → Extract signals → Cluster → Score → Write signals.json
+  Read data/*.json → Extract signals → Cluster → Score → Write ranking.json
 """
 
 import json
@@ -37,7 +37,7 @@ def refresh_signals(
     
     1. Load all source data files
     2. Run CrossSignalEngine.generate_signals()
-    3. Write signals.json
+    3. Write ranking.json
     4. Return status report
     """
     cache = CacheManager(cache_dir)
@@ -83,9 +83,9 @@ def refresh_signals(
         insider_data=source_data.get("insiders"),
     )
     
-    # Write signals.json (v1 — kept for backward compat)
+    # Write ranking.json (v1 — kept for backward compat)
     output = engine.to_json(results)
-    cache.write("signals.json", output)
+    cache.write("ranking.json", output)
     
     # v2: Conviction-based scoring
     try:
@@ -116,7 +116,7 @@ def refresh_signals(
                 "last_updated": datetime.now().isoformat(),
             }
         }
-        cache.write("signals_v2.json", v2_output)
+        cache.write("ranking_v2.json", v2_output)
         logger.info(f"v2 engine: {len(v2_results)} signals written")
     except Exception as e:
         logger.warning(f"v2 engine failed (v1 still saved): {e}")
@@ -175,7 +175,7 @@ if __name__ == "__main__":
             print(f"  ❌ {source}: missing")
     
     # Show top signals
-    with open(str(DATA_DIR / "signals.json")) as f:
+    with open(str(DATA_DIR / "ranking.json")) as f:
         signals = json.load(f)
     
     if signals["signals"]:

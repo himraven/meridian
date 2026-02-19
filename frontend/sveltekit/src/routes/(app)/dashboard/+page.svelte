@@ -248,7 +248,7 @@
 							{/each}
 						</div>
 						{#if sortedSignals.length > 20}
-							<a href="/signals" class="ranking-see-all">
+							<a href="/ranking" class="ranking-see-all">
 								See all rankings →
 							</a>
 						{/if}

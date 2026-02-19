@@ -30,7 +30,7 @@ CACHE_FILES = {
     "institutions": "institutions.json",
     "insiders": "insiders.json",
     "superinvestors": "superinvestors.json",
-    "signals": "signals.json",
+    "signals": "ranking.json",
     "congress_backtest": "congress_backtest.json",
     "ticker_metadata": "ticker_metadata.json",
     "short_interest": "short_interest.json",

@@ -395,8 +395,8 @@ def api_us_superinvestors(
     }
 
 
-@router.get("/api/signals/feed")
-def api_signals_feed(
+@router.get("/api/ranking/feed")
+def api_ranking_feed(
     days: int = 7,
     source: str = None,
     ticker: str = None,
@@ -661,8 +661,8 @@ def api_signals_feed(
     }
 
 
-@router.get("/api/signals/confluence")
-def api_signals_confluence(
+@router.get("/api/ranking/confluence")
+def api_ranking_confluence(
     request: Request,
     min_score: float = 6.0,
     sources: str = None,  # comma-separated: congress,ark,darkpool,institutions
@@ -676,12 +676,12 @@ def api_signals_confluence(
       - days: only signals with activity in last N days (default: 7)
     """
     # Primary: V2 engine (conviction-based, 0-100 scale)
-    data = smart_money_cache.read("signals_v2.json")
+    data = smart_money_cache.read("ranking_v2.json")
     if data and "signals" in data:
         signals = data["signals"]
     else:
         # Fallback: V1 engine
-        data = smart_money_cache.read("signals.json")
+        data = smart_money_cache.read("ranking.json")
         if not data or "signals" not in data:
             return {"data": [], "metadata": {"total": 0, "filtered": 0}}
         signals = data["signals"]
@@ -725,8 +725,8 @@ def api_signals_confluence(
     return result
 
 
-@router.get("/api/signals/smart-money")
-def api_signals_smart_money(
+@router.get("/api/ranking/smart-money")
+def api_ranking_smart_money(
     request: Request,
     min_score: float = 0,
     source: str = None,
@@ -743,7 +743,7 @@ def api_signals_smart_money(
     
     Multi-source bonus: +20 per additional source (max +40).
     """
-    data = smart_money_cache.read("signals_v2.json")
+    data = smart_money_cache.read("ranking_v2.json")
     if not data or "signals" not in data:
         # Fallback: generate on-the-fly
         from api.modules.cross_signal_engine_v2 import SmartMoneyEngineV2

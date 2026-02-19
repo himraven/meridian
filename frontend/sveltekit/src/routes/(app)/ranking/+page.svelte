@@ -17,7 +17,7 @@
 		if (minScore > 0) params.set('min_score', minScore.toString());
 		if (source) params.set('source', source);
 		if (days !== 30) params.set('days', days.toString());
-		goto(`/signals?${params.toString()}`, { replaceState: true });
+		goto(`/ranking?${params.toString()}`, { replaceState: true });
 	}
 	
 	// Stats

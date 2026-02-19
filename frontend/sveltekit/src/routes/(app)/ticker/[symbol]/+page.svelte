@@ -105,7 +105,7 @@
 <div class="space-y-6">
 	<!-- Back Button -->
 	<div>
-		<a href="/signals" class="text-blue hover:text-blue/80 text-sm transition-colors">
+		<a href="/ranking" class="text-blue hover:text-blue/80 text-sm transition-colors">
 			← Back to Signals
 		</a>
 	</div>
@@ -250,22 +250,49 @@
 					{#if conf.details && Array.isArray(conf.details) && conf.details.length > 0}
 						<div class="pt-4 border-t border-[var(--border-default)]">
 							<p class="text-label mb-3">Signal Details</p>
-							<div class="space-y-2">
+							<div class="space-y-1.5">
 								{#each conf.details as detail}
-									<div class="flex items-start gap-3 text-sm">
-										<span class="px-2 py-0.5 rounded text-xs font-medium shrink-0 {
-											detail.source === 'congress' ? 'bg-yellow/20 text-yellow' :
-											detail.source === 'ark' ? 'bg-blue/20 text-blue' :
-											detail.source === 'darkpool' ? 'bg-purple-500/20 text-purple-500' :
-											detail.source === 'insider' ? 'bg-orange-500/20 text-orange-500' :
-											detail.source === 'institution' ? 'bg-green/20 text-green' :
-											'bg-[var(--bg-elevated)] text-[var(--text-muted)]'
-										}">
-											{detail.source}
-										</span>
-										<span class="text-[var(--text-secondary)]">{detail.description}</span>
-										{#if detail.date}
-											<span class="text-[var(--text-muted)] text-xs shrink-0 ml-auto">{formatDate(detail.date)}</span>
+									{@const sourceColors = {
+										congress: { bg: 'rgba(234, 179, 8, 0.12)', text: 'rgb(234, 179, 8)', border: 'rgba(234, 179, 8, 0.2)' },
+										ark: { bg: 'rgba(59, 130, 246, 0.12)', text: 'rgb(96, 165, 250)', border: 'rgba(59, 130, 246, 0.2)' },
+										darkpool: { bg: 'rgba(168, 85, 247, 0.12)', text: 'rgb(192, 132, 252)', border: 'rgba(168, 85, 247, 0.2)' },
+										insider: { bg: 'rgba(249, 115, 22, 0.12)', text: 'rgb(251, 146, 60)', border: 'rgba(249, 115, 22, 0.2)' },
+										institution: { bg: 'rgba(34, 197, 94, 0.12)', text: 'rgb(74, 222, 128)', border: 'rgba(34, 197, 94, 0.2)' },
+										superinvestor: { bg: 'rgba(236, 72, 153, 0.12)', text: 'rgb(244, 114, 182)', border: 'rgba(236, 72, 153, 0.2)' },
+										short_interest: { bg: 'rgba(148, 163, 184, 0.12)', text: 'rgb(148, 163, 184)', border: 'rgba(148, 163, 184, 0.2)' },
+									}}
+									{@const colors = sourceColors[detail.source] ?? { bg: 'rgba(148, 163, 184, 0.08)', text: 'rgb(148, 163, 184)', border: 'rgba(148, 163, 184, 0.15)' }}
+									{@const sourceLabels = {
+										congress: 'Congress',
+										ark: 'ARK Invest',
+										darkpool: 'Dark Pool',
+										insider: 'Insider',
+										institution: 'Institution',
+										superinvestor: 'Superinvestor',
+										short_interest: 'Short Interest',
+									}}
+									<div
+										class="rounded-lg px-3 py-2.5 flex items-center gap-3"
+										style="background: {colors.bg}; border: 1px solid {colors.border}"
+									>
+										<div class="flex-1 min-w-0">
+											<div class="flex items-center gap-2 mb-0.5">
+												<span
+													class="text-[11px] font-semibold uppercase tracking-wide"
+													style="color: {colors.text}"
+												>
+													{sourceLabels[detail.source] ?? detail.source}
+												</span>
+												{#if detail.date}
+													<span class="text-[11px] text-[var(--text-muted)]">{formatDate(detail.date)}</span>
+												{/if}
+											</div>
+											<p class="text-sm text-[var(--text-primary)] leading-snug">{detail.description}</p>
+										</div>
+										{#if detail.conviction}
+											<div class="shrink-0 text-right">
+												<span class="text-lg font-bold" style="color: {colors.text}">{Math.round(detail.conviction)}</span>
+											</div>
 										{/if}
 									</div>
 								{/each}
