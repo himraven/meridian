@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  /* ══════════════════════════════════════════════════════════════
+     Meridian × 小红书 Card System
+     1080 × 1440px (3:4 ratio, XHS optimal)
+     Dark theme aligned with Meridian brand
+     ══════════════════════════════════════════════════════════════ */
+  
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-base:       #09090b;
+    --bg-surface:    #18181b;
+    --bg-elevated:   #27272a;
+    --border:        #27272a;
+    --border-hover:  #3f3f46;
+    --text-primary:  #fafafa;
+    --text-secondary:#a1a1aa;
+    --text-muted:    #71717a;
+    --text-dimmed:   #52525b;
+    --green:         #22c55e;
+    --red:           #f87171;
+    --amber:         #f59e0b;
+    --blue:          #60a5fa;
+    --purple:        #a78bfa;
+    
+    /* Source colors */
+    --congress:      #f59e0b;
+    --ark:           #a78bfa;
+    --darkpool:      #60a5fa;
+    --insider:       #22c55e;
+    --institution:   #06b6d4;
+    --superinvestor: #f472b6;
+    --short:         #f87171;
+  }
+
+  body {
+    width: 1080px;
+    height: 1440px;
+    background: var(--bg-base);
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    color: var(--text-primary);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ── Subtle grid texture ── */
+  body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  /* ── Card container ── */
+  .card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 64px 56px;
+    display: flex;
+    flex-direction: column;
+    z-index: 1;
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .brand-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #22c55e 0%, #06b6d4 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 20px;
+    color: #09090b;
+  }
+
+  .brand-name {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--text-secondary);
+    letter-spacing: -0.01em;
+  }
+
+  .date-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--text-muted);
+    background: var(--bg-surface);
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  /* ── Title Section ── */
+  .title-section {
+    margin-bottom: 44px;
+  }
+
+  .category-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--green);
+    margin-bottom: 16px;
+  }
+
+  .title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+  }
+
+  .subtitle {
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* ── Hero Stat ── */
+  .hero-stat {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 44px;
+    padding: 32px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 72px;
+    font-weight: 700;
+    color: var(--green);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hero-label {
+    font-size: 20px;
+    color: var(--text-secondary);
+    max-width: 400px;
+    line-height: 1.4;
+  }
+
+  /* ── Signal List ── */
+  .signal-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .signal-row {
+    display: flex;
+    align-items: center;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    gap: 20px;
+  }
+
+  .signal-rank {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-dimmed);
+    width: 32px;
+    text-align: center;
+  }
+
+  .signal-ticker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    width: 100px;
+  }
+
+  .signal-score {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    min-width: 70px;
+    text-align: right;
+  }
+
+  .signal-sources {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+    flex-wrap: wrap;
+  }
+
+  .source-pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .source-congress      { background: rgba(245,158,11,0.15); color: var(--congress); }
+  .source-ark           { background: rgba(167,139,250,0.15); color: var(--ark); }
+  .source-darkpool      { background: rgba(96,165,250,0.15); color: var(--darkpool); }
+  .source-insider       { background: rgba(34,197,94,0.15); color: var(--insider); }
+  .source-institution   { background: rgba(6,182,212,0.15); color: var(--institution); }
+  .source-superinvestor { background: rgba(244,114,182,0.15); color: var(--superinvestor); }
+  .source-short_interest { background: rgba(248,113,113,0.15); color: var(--short); }
+
+  .signal-direction {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 4px 14px;
+    border-radius: 6px;
+  }
+
+  .dir-bullish { background: rgba(34,197,94,0.12); color: var(--green); }
+  .dir-bearish { background: rgba(248,113,113,0.12); color: var(--red); }
+
+  /* ── Score bar ── */
+  .score-bar-bg {
+    width: 120px;
+    height: 6px;
+    background: var(--bg-elevated);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    margin-top: auto;
+    padding-top: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border);
+  }
+
+  .footer-left {
+    font-size: 15px;
+    color: var(--text-muted);
+  }
+
+  .footer-right {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--text-dimmed);
+  }
+
+  .footer-url {
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  /* ── Accent glow (subtle brand touch) ── */
+  .glow-top {
+    position: absolute;
+    top: -200px;
+    right: -100px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(34,197,94,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* ── Utilities ── */
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .dimmed { color: var(--text-dimmed); }
+  .muted { color: var(--text-muted); }
+  .secondary { color: var(--text-secondary); }
+  .primary { color: var(--text-primary); }
+  .green { color: var(--green); }
+  .red { color: var(--red); }
+  .amber { color: var(--amber); }
+  .blue { color: var(--blue); }
+
+  /* ── Knowledge Card variant ── */
+  .knowledge-card .title { font-size: 46px; }
+  .knowledge-card .content-preview {
+    font-size: 18px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 32px;
+  }
+
+  .takeaway-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .takeaway-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+
+  .takeaway-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .takeaway-text {
+    font-size: 17px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* ── Congress Trade Card ── */
+  .trade-row {
+    display: flex;
+    align-items: center;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 28px;
+    gap: 20px;
+    margin-bottom: 12px;
+  }
+
+  .trade-member {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+  }
+
+  .trade-party {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 6px;
+  }
+
+  .party-r { background: rgba(248,113,113,0.15); color: var(--red); }
+  .party-d { background: rgba(96,165,250,0.15); color: var(--blue); }
+
+  .trade-amount {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--green);
+  }
+
+  .trade-ticker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+</style>
+</head>
+<body>
+  <div class="glow-top"></div>
+  <div class="card" id="card">
+    {{CONTENT}}
+  </div>
+</body>
+</html>
