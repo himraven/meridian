@@ -77,6 +77,83 @@ class SmartCacheMiddleware(BaseHTTPMiddleware):
 app.add_middleware(SmartCacheMiddleware)
 
 
+# ── Lightweight API Metrics (no Prometheus, just in-memory + log slow requests) ──
+import time
+from collections import deque
+
+_request_metrics: deque = deque(maxlen=5000)  # rolling window
+_SLOW_THRESHOLD_MS = 300  # log requests slower than this
+
+class MetricsMiddleware(BaseHTTPMiddleware):
+    """Track request latency, log slow requests, expose /api/metrics."""
+
+    async def dispatch(self, request: Request, call_next):
+        if request.url.path in ("/api/metrics", "/health", "/api/health"):
+            return await call_next(request)
+        
+        start = time.monotonic()
+        response = await call_next(request)
+        elapsed_ms = (time.monotonic() - start) * 1000
+
+        path = request.url.path
+        if path.startswith("/api/"):
+            _request_metrics.append({
+                "path": path,
+                "method": request.method,
+                "status": response.status_code,
+                "ms": round(elapsed_ms, 1),
+                "ts": time.time(),
+            })
+            if elapsed_ms > _SLOW_THRESHOLD_MS:
+                logger.warning(f"[slow] {request.method} {path} → {elapsed_ms:.0f}ms (status {response.status_code})")
+        
+        response.headers["X-Response-Time"] = f"{elapsed_ms:.0f}ms"
+        return response
+
+
+app.add_middleware(MetricsMiddleware)
+
+
+@app.get("/api/metrics")
+def api_metrics():
+    """Lightweight request metrics — no external dependencies."""
+    now = time.time()
+    recent = [m for m in _request_metrics if now - m["ts"] < 3600]  # last hour
+    
+    if not recent:
+        return {"requests_1h": 0, "avg_ms": 0, "slow_requests": [], "top_endpoints": []}
+    
+    # Aggregate by endpoint
+    endpoints: dict = {}
+    for m in recent:
+        p = m["path"]
+        if p not in endpoints:
+            endpoints[p] = {"count": 0, "total_ms": 0, "max_ms": 0, "errors": 0}
+        endpoints[p]["count"] += 1
+        endpoints[p]["total_ms"] += m["ms"]
+        endpoints[p]["max_ms"] = max(endpoints[p]["max_ms"], m["ms"])
+        if m["status"] >= 400:
+            endpoints[p]["errors"] += 1
+    
+    top = sorted(
+        [{"path": k, "count": v["count"], "avg_ms": round(v["total_ms"]/v["count"], 1), 
+          "max_ms": v["max_ms"], "errors": v["errors"]} 
+         for k, v in endpoints.items()],
+        key=lambda x: x["count"], reverse=True
+    )[:20]
+    
+    slow = [m for m in recent if m["ms"] > _SLOW_THRESHOLD_MS][-20:]
+    
+    return {
+        "requests_1h": len(recent),
+        "avg_ms": round(sum(m["ms"] for m in recent) / len(recent), 1),
+        "p95_ms": round(sorted(m["ms"] for m in recent)[int(len(recent)*0.95)], 1) if len(recent) > 1 else 0,
+        "slow_requests": len(slow),
+        "top_endpoints": top,
+        "recent_slow": slow,
+    }
+
+
 # ── Startup Event ──────────────────────────────────────────────────────────
 @app.on_event("startup")
 def init_database():
