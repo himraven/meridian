@@ -76,9 +76,12 @@ def _get_all() -> list[dict[str, Any]]:
             "subtitle": article.get("subtitle", ""),
             "category": article.get("category", ""),
             "signal_source": article.get("signal_source", ""),
+            "layer": article.get("layer", "L1"),
+            "parent_article": article.get("parent_article"),
             "tldr": article.get("tldr", ""),
             "hero_stat": article.get("hero_stat"),
             "key_takeaways": article.get("key_takeaways", []),
+            "related_articles": article.get("related_articles", []),
             "updated_at": article.get("updated_at", ""),
         })
     summaries.sort(key=lambda x: x.get("updated_at", ""), reverse=True)

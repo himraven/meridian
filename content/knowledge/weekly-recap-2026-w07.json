@@ -1,0 +1,51 @@
+{
+  "slug": "weekly-recap-2026-w07",
+  "title": "Weekly Smart Money Recap: Feb 16 – Feb 22, 2026",
+  "subtitle": "Congress trades, ARK moves, dark pool anomalies, and insider buying — all in one view.",
+  "category": "weekly-recap",
+  "signal_source": "all",
+  "layer": "recurring",
+  "tldr": "This week saw 0 congressional buys, 0 ARK purchases, 197 dark pool anomalies, and 78 insider buys. Top conviction signal: MSFT (88/100).",
+  "hero_stat": {
+    "value": "10",
+    "label": "High-conviction signals this week",
+    "source": "Meridian V7 Engine, Feb 16 – Feb 22, 2026"
+  },
+  "content_md": "# Weekly Smart Money Recap: Feb 16 – Feb 22, 2026\n\nThis week's smart money activity across all 1 tracked sources.\n\n## 🔥 Top Conviction Signals This Week\n\nStocks where multiple smart money sources converge:\n\n**1. MSFT** — Score: 88/100 (BULLISH)\n   Sources: Congress, Insider, Institution, Short_Interest, Superinvestor (5 signals converging)\n\n**2. GOOGL** — Score: 77/100 (BEARISH)\n   Sources: Short_Interest, Superinvestor, Congress, Institution, Ark (5 signals converging)\n\n**3. AMZN** — Score: 76/100 (BEARISH)\n   Sources: Ark, Congress, Institution, Short_Interest, Superinvestor (5 signals converging)\n\n**4. AMD** — Score: 73/100 (BEARISH)\n   Sources: Ark, Short_Interest, Superinvestor (3 signals converging)\n\n**5. SHOP** — Score: 67/100 (BEARISH)\n   Sources: Ark, Darkpool, Short_Interest, Superinvestor (4 signals converging)\n\n## 🏛️ Congressional Trading\n\n**0 buys** and **0 sells** this week.\n\n## 🦅 ARK Invest Trades\n\n**0 buys** and **0 sells** across all ARK ETFs.\n\n## 🌑 Dark Pool Anomalies\n\n**197 tickers** with unusual dark pool activity.\n\nHighest z-score anomalies:\n- **TTD**: z-score -3.3, DPI 14.7%\n- **GTLB**: z-score -3.3, DPI 24.3%\n- **SHOP**: z-score 3.1, DPI 74.4%\n- **PSTG**: z-score -3.1, DPI 26.4%\n- **XLV**: z-score -3.1, DPI 43.6%\n\n## 👔 Insider Trading\n\n**78 insider buys** this week.\n\nLargest insider purchases:\n- **WRB** — Mitsui Sumitomo Insurance Co Ltd (10%) bought $40,166,492\n- **KKR** — 4 insiders (cluster) (Cluster Buy) bought $35,367,546\n- **KKR** — Nuttall Scott C (Co-CEO) bought $12,833,087\n- **KKR** — Bae Joseph Y (Co-CEO) bought $12,773,530\n- **KKR** — Cohler Matt (Dir) bought $4,514,429\n\n---\n\n*Data sourced from SEC EDGAR, FINRA, and public filings. Conviction scores calculated using Meridian's V7 multi-source engine. [Learn more about our methodology](/knowledge/confluence-signals-explained).*",
+  "content_zh": "本周聪明钱动向：国会0笔买入、ARK 0笔买入、197只暗池异常、78笔内部人买入。最强信号：MSFT（88/100）。",
+  "key_takeaways": [
+    "Top conviction signal: MSFT with score 88/100 from 5 sources",
+    "Congress: 0 buys, 0 sells",
+    "ARK: 0 buys, 0 sells",
+    "Dark pool: 197 anomalies detected",
+    "Insider buying: 78 open-market purchases"
+  ],
+  "related_articles": [
+    "confluence-signals-explained",
+    "congress-trading-alpha",
+    "dark-pool-activity"
+  ],
+  "seo": {
+    "keywords": [
+      "smart money signals february 2026",
+      "weekly stock signals",
+      "congress stock trades this week",
+      "dark pool activity today",
+      "insider buying this week",
+      "smart money tracker"
+    ],
+    "description": "Weekly smart money recap for Feb 16 – Feb 22, 2026. Track Congress trades, ARK moves, dark pool anomalies, and insider buying all in one view."
+  },
+  "social": {
+    "hook_en": "This week: 0 Congress buys, 0 ARK trades, 197 dark pool anomalies. Here's where smart money is moving.",
+    "hook_zh": "本周聪明钱：国会0笔买入、ARK 0笔操作、197只暗池异常。",
+    "hashtags": [
+      "#SmartMoney",
+      "#CongressTrading",
+      "#DarkPool",
+      "#InsiderBuying",
+      "#Meridian"
+    ]
+  },
+  "updated_at": "2026-02-20"
+}
