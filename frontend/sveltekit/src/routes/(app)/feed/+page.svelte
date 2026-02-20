@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Card from '$lib/components/ui/Card.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
+	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { formatDate } from '$lib/utils/format';
 	import type { PageData } from './$types';
 	import type { FeedEvent } from '$lib/types/api';
@@ -22,13 +23,13 @@
 	];
 
 	const sourceColors: Record<string, string> = {
-		congress: 'source-congress',
-		ark: 'source-ark',
-		darkpool: 'source-darkpool',
-		insider: 'source-insider',
-		institution: 'source-institution',
-		superinvestor: 'source-superinvestor',
-		short_interest: 'source-short',
+		congress: 'bg-[var(--amber)]/20 text-[var(--amber)]',
+		ark: 'bg-[var(--blue)]/20 text-[var(--blue)]',
+		darkpool: 'bg-purple-500/20 text-purple-400',
+		insider: 'bg-orange-500/20 text-orange-400',
+		institution: 'bg-[var(--green)]/20 text-[var(--green)]',
+		superinvestor: 'bg-cyan-500/20 text-cyan-400',
+		short_interest: 'bg-red-500/20 text-red-400',
 	};
 
 	const sourceLabels: Record<string, string> = {
@@ -37,8 +38,8 @@
 		darkpool: 'DP',
 		insider: 'INS',
 		institution: '13F',
-		superinvestor: 'SUPER',
-		short_interest: 'SHORT',
+		superinvestor: 'SUP',
+		short_interest: 'SI',
 	};
 
 	let filteredEvents = $derived(
@@ -69,28 +70,33 @@
 		return groups;
 	});
 
-	function sigDotColor(sig: string): string {
-		if (sig === 'high') return 'var(--amber)';
-		if (sig === 'medium') return 'var(--blue)';
-		return 'var(--text-dimmed)';
+	function sigStyle(sig: string): string {
+		if (sig === 'high') return 'border-left: 3px solid var(--amber)';
+		if (sig === 'medium') return 'border-left: 3px solid var(--blue)';
+		return 'border-left: 3px solid transparent';
 	}
+
+	// Stats
+	const highSigCount = $derived(() => filteredEvents.filter(e => e.significance === 'high').length);
+	const bullishCount = $derived(() => filteredEvents.filter(e => e.sentiment === 'bullish').length);
+	const bearishCount = $derived(() => filteredEvents.filter(e => e.sentiment === 'bearish').length);
+
+	let guideOpen = $state(false);
 </script>
 
 <svelte:head>
 	<title>Smart Money Feed — Meridian</title>
 </svelte:head>
 
-<div class="feed-page">
+<div class="space-y-6">
 
 	<!-- Header -->
-	<div class="feed-header">
-		<div>
-			<h1 class="feed-title">Smart Money Feed</h1>
-			<p class="feed-subtitle">Real-time actions from congress, institutions, and insiders</p>
-		</div>
-		<div class="feed-meta">
-			<span class="feed-count">{filteredEvents.length} events</span>
-		</div>
+	<div>
+		<h1 class="text-heading mb-1">Smart Money Feed</h1>
+		<p class="text-[var(--text-secondary)]">Real-time actions from congress, institutions, and insiders</p>
+		<p class="text-caption text-[var(--text-dimmed)] mt-2">
+			{filteredEvents.length} events · Last 30 days
+		</p>
 	</div>
 
 	<!-- Error state -->
@@ -98,18 +104,154 @@
 		<Card>
 			{#snippet children()}
 				<div class="text-center py-8">
-					<p class="error-text">Error loading feed</p>
-					<p class="error-detail">{data.error}</p>
+					<p class="text-[var(--color-down)] font-medium mb-2">Error loading feed</p>
+					<p class="text-sm text-[var(--text-muted)]">{data.error}</p>
 				</div>
 			{/snippet}
 		</Card>
 	{:else}
 
+		<!-- Stats -->
+		<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+			<Card hover>
+				{#snippet children()}
+					<div class="text-center">
+						<p class="text-label mb-2">Total Events</p>
+						<p class="text-data-lg">{filteredEvents.length}</p>
+					</div>
+				{/snippet}
+			</Card>
+			<Card hover>
+				{#snippet children()}
+					<div class="text-center">
+						<p class="text-label mb-2">High Signal</p>
+						<p class="text-data-lg text-[var(--amber)]">{highSigCount()}</p>
+					</div>
+				{/snippet}
+			</Card>
+			<Card hover>
+				{#snippet children()}
+					<div class="text-center">
+						<p class="text-label mb-2">Bullish</p>
+						<p class="text-data-lg text-[var(--green)]">{bullishCount()}</p>
+					</div>
+				{/snippet}
+			</Card>
+			<Card hover>
+				{#snippet children()}
+					<div class="text-center">
+						<p class="text-label mb-2">Bearish</p>
+						<p class="text-data-lg text-[var(--color-down)]">{bearishCount()}</p>
+					</div>
+				{/snippet}
+			</Card>
+		</div>
+
+		<!-- Reading Guide (collapsible) -->
+		<div class="rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] overflow-hidden">
+			<button
+				onclick={() => (guideOpen = !guideOpen)}
+				class="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-[var(--bg-elevated)] transition-colors"
+				aria-expanded={guideOpen}
+			>
+				<div class="flex items-center gap-2">
+					<span class="text-base font-semibold text-[var(--text-primary)]">How to Read the Feed</span>
+					<span class="text-xs text-[var(--text-muted)] bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded px-2 py-0.5">Guide</span>
+				</div>
+				<svg
+					class="w-4 h-4 text-[var(--text-muted)] transition-transform duration-200 {guideOpen ? 'rotate-180' : ''}"
+					fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+				>
+					<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+				</svg>
+			</button>
+
+			{#if guideOpen}
+				<div class="px-5 pb-5 border-t border-[var(--border-default)] space-y-5">
+					<!-- Source badges -->
+					<div class="pt-4">
+						<h4 class="text-sm font-semibold text-[var(--text-primary)] mb-2">Source Badges</h4>
+						<p class="text-xs text-[var(--text-muted)] mb-3">Each event is tagged with where the signal originated. Tap any badge to learn more:</p>
+						<div class="flex flex-wrap gap-2 text-sm">
+							<a href="/knowledge/congress-trading-alpha" class="px-2 py-1 rounded bg-[var(--amber)]/10 border border-[var(--amber)]/20 text-[var(--amber)] hover:bg-[var(--amber)]/20 transition-colors">🏛️ GOV — Congress trades →</a>
+							<a href="/knowledge/ark-disruptive-innovation" class="px-2 py-1 rounded bg-[var(--blue)]/10 border border-[var(--blue)]/20 text-[var(--blue)] hover:bg-[var(--blue)]/20 transition-colors">🚀 ARK — ARK Invest →</a>
+							<a href="/knowledge/dark-pool-activity" class="px-2 py-1 rounded bg-purple-500/10 border border-purple-500/20 text-purple-400 hover:bg-purple-500/20 transition-colors">🌑 DP — Dark Pool →</a>
+							<a href="/knowledge/insider-buying-signals" class="px-2 py-1 rounded bg-orange-500/10 border border-orange-500/20 text-orange-400 hover:bg-orange-500/20 transition-colors">👔 INS — Insider trades →</a>
+							<a href="/knowledge/13f-institutional-tracking" class="px-2 py-1 rounded bg-[var(--green)]/10 border border-[var(--green)]/20 text-[var(--green)] hover:bg-[var(--green)]/20 transition-colors">🏦 13F — Institutional filings →</a>
+							<a href="/knowledge/superinvestor-tracking" class="px-2 py-1 rounded bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 hover:bg-cyan-500/20 transition-colors">💎 SUP — Superinvestors →</a>
+							<a href="/knowledge/short-interest-analysis" class="px-2 py-1 rounded bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors">📉 SI — Short Interest →</a>
+						</div>
+					</div>
+
+					<!-- Signal strength -->
+					<div>
+						<h4 class="text-sm font-semibold text-[var(--text-primary)] mb-2">Signal Strength</h4>
+						<p class="text-xs text-[var(--text-muted)] mb-3">The colored dot and left border indicate how significant the event is:</p>
+						<div class="space-y-2 text-sm">
+							<div class="flex items-center gap-3">
+								<span class="w-3 h-3 rounded-full bg-[var(--amber)] flex-shrink-0"></span>
+								<div>
+									<span class="text-[var(--amber)] font-medium">High</span>
+									<span class="text-[var(--text-muted)]"> — Large volume, unusual activity, or high-profile actor. Amber left border.</span>
+								</div>
+							</div>
+							<div class="flex items-center gap-3">
+								<span class="w-3 h-3 rounded-full bg-[var(--blue)] flex-shrink-0"></span>
+								<div>
+									<span class="text-[var(--blue)] font-medium">Medium</span>
+									<span class="text-[var(--text-muted)]"> — Notable but not extreme. Blue left border.</span>
+								</div>
+							</div>
+							<div class="flex items-center gap-3">
+								<span class="w-3 h-3 rounded-full bg-[var(--text-dimmed)] flex-shrink-0"></span>
+								<div>
+									<span class="text-[var(--text-secondary)] font-medium">Low</span>
+									<span class="text-[var(--text-muted)]"> — Routine activity, included for completeness.</span>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Sentiment arrows -->
+					<div>
+						<h4 class="text-sm font-semibold text-[var(--text-primary)] mb-2">Sentiment Direction</h4>
+						<p class="text-xs text-[var(--text-muted)] mb-3">The arrow badge shows the directional bias of the event:</p>
+						<div class="space-y-2 text-sm">
+							<div class="flex items-center gap-3">
+								<span class="px-2 py-0.5 rounded text-xs font-bold bg-[var(--green)]/20 text-[var(--green)]">↑</span>
+								<span class="text-[var(--text-muted)]"><span class="text-[var(--green)] font-medium">Bullish</span> — Buying activity, accumulation, or positive positioning</span>
+							</div>
+							<div class="flex items-center gap-3">
+								<span class="px-2 py-0.5 rounded text-xs font-bold bg-[var(--color-down)]/20 text-[var(--color-down)]">↓</span>
+								<span class="text-[var(--text-muted)]"><span class="text-[var(--color-down)] font-medium">Bearish</span> — Selling, reduction, or negative positioning</span>
+							</div>
+							<div class="flex items-center gap-3">
+								<span class="text-xs text-[var(--text-dimmed)] px-2">—</span>
+								<span class="text-[var(--text-muted)]"><span class="text-[var(--text-secondary)] font-medium">Neutral</span> — No clear directional bias (no arrow shown)</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- Tip -->
+					<div class="flex gap-3 px-4 py-3 rounded-lg bg-[var(--blue)]/5 border border-[var(--blue)]/20">
+						<span class="text-[var(--blue)] flex-shrink-0 mt-0.5">💡</span>
+						<p class="text-xs text-[var(--text-muted)] leading-relaxed">
+							<span class="font-semibold text-[var(--text-secondary)]">Tip:</span>
+							Click any event card to view the full ticker detail page with all smart money signals, conviction scores, and data tables.
+						</p>
+					</div>
+				</div>
+			{/if}
+		</div>
+
 		<!-- Source filter pills -->
-		<div class="feed-filters">
+		<div class="flex gap-2 flex-wrap">
 			{#each sourceFilters as f}
 				<button
-					class="feed-filter-pill {activeSource === f.key ? 'active' : ''}"
+					class="text-xs font-medium px-3.5 py-1.5 rounded-full border transition-all
+						{activeSource === f.key 
+							? 'bg-[var(--bg-elevated)] border-[var(--border-hover)] text-[var(--text-primary)]' 
+							: 'bg-[var(--bg-surface)] border-[var(--border-default)] text-[var(--text-muted)] hover:border-[var(--border-hover)] hover:text-[var(--text-primary)]'}"
 					onclick={() => (activeSource = f.key)}
 				>
 					{f.label}
@@ -119,38 +261,72 @@
 
 		<!-- Feed events grouped by date -->
 		{#if filteredEvents.length === 0}
-			<div class="feed-empty">
-				<p>No events found</p>
-				<p class="feed-empty-sub">Try changing the filter or check back later</p>
-			</div>
+			<EmptyState 
+				title="No Events Found" 
+				message="Try changing the filter or check back later"
+			/>
 		{:else}
 			{#each groupedEvents() as group}
-				<div class="feed-date-group">
-					<div class="feed-date-header">{group.label}</div>
+				<div class="space-y-3">
+					<!-- Date header -->
+					<div class="text-xs font-semibold text-[var(--text-secondary)] pl-1">
+						{group.label}
+					</div>
+					
 					{#each group.events as event}
-						<a href="/ticker/{event.ticker}" class="feed-card {event.significance === 'high' ? 'feed-card-high' : ''}">
-							<div class="feed-card-top">
-								<div class="feed-card-left">
-									<span class="feed-source-badge {sourceColors[event.source]}">{sourceLabels[event.source] || event.source.toUpperCase()}</span>
-									<span class="feed-ticker">{event.ticker}</span>
-									{#if event.company}
-										<span class="feed-company">{event.company}</span>
+						<a href="/ticker/{event.ticker}" class="block">
+							<div class="p-4 rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)]
+								hover:border-[var(--border-hover)] transition-all
+								{event.has_score === false && event.significance === 'low' ? 'opacity-60' : ''}"
+								style={sigStyle(event.significance)}>
+								
+								<div class="flex items-center gap-4">
+									<!-- Source badge -->
+									<div class="flex-shrink-0">
+										<span class="px-2 py-0.5 rounded text-[10px] font-bold tracking-wide
+											{sourceColors[event.source] || 'bg-[var(--bg-elevated)] text-[var(--text-muted)]'}">
+											{sourceLabels[event.source] || event.source.toUpperCase()}
+										</span>
+									</div>
+									
+									<!-- Ticker + Company -->
+									<div class="flex-1 min-w-0">
+										<div class="flex items-center gap-2 flex-wrap">
+											<span class="ticker-code text-base flex-shrink-0">{event.ticker}</span>
+											{#if event.company}
+												<span class="text-xs text-[var(--text-muted)]">{event.company}</span>
+											{/if}
+										</div>
+									</div>
+									
+									<!-- Sentiment + Significance -->
+									<div class="flex items-center gap-2 flex-shrink-0">
+										{#if event.significance === 'high'}
+											<span class="w-2 h-2 rounded-full bg-[var(--amber)]"></span>
+										{:else if event.significance === 'medium'}
+											<span class="w-2 h-2 rounded-full bg-[var(--blue)]"></span>
+										{:else}
+											<span class="w-2 h-2 rounded-full bg-[var(--text-dimmed)]"></span>
+										{/if}
+										{#if event.sentiment === 'bullish'}
+											<Badge variant="bullish">↑</Badge>
+										{:else if event.sentiment === 'bearish'}
+											<Badge variant="bearish">↓</Badge>
+										{/if}
+									</div>
+								</div>
+								
+								<!-- Headline + Description -->
+								<div class="mt-2 pl-0">
+									<p class="text-sm font-medium text-[var(--text-secondary)] leading-relaxed">
+										{event.headline}
+									</p>
+									{#if event.description}
+										<p class="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">
+											{event.description}
+										</p>
 									{/if}
 								</div>
-								<div class="feed-card-right">
-									<span class="feed-sig-dot" style="background: {sigDotColor(event.significance)};"></span>
-									{#if event.sentiment === 'bullish'}
-										<Badge variant="bullish">↑</Badge>
-									{:else if event.sentiment === 'bearish'}
-										<Badge variant="bearish">↓</Badge>
-									{/if}
-								</div>
-							</div>
-							<div class="feed-card-body">
-								<p class="feed-headline">{event.headline}</p>
-								{#if event.description}
-									<p class="feed-desc">{event.description}</p>
-								{/if}
 							</div>
 						</a>
 					{/each}
@@ -160,224 +336,3 @@
 
 	{/if}
 </div>
-
-<style>
-	.feed-page {
-		display: flex;
-		flex-direction: column;
-		gap: 16px;
-	}
-
-	/* ── Header ──────────────────────────────────────────────────── */
-	.feed-header {
-		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-	}
-
-	.feed-title {
-		font-size: 18px;
-		font-weight: 600;
-		color: var(--text-primary);
-		line-height: 1.3;
-	}
-
-	.feed-subtitle {
-		font-size: 12px;
-		color: var(--text-muted);
-		margin-top: 2px;
-	}
-
-	.feed-meta {
-		font-size: 11px;
-		color: var(--text-muted);
-		text-align: right;
-	}
-
-	.feed-count {
-		font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
-		font-size: 11px;
-		color: var(--text-dimmed);
-	}
-
-	/* ── Filters ─────────────────────────────────────────────────── */
-	.feed-filters {
-		display: flex;
-		gap: 6px;
-		flex-wrap: wrap;
-		padding-bottom: 4px;
-	}
-
-	.feed-filter-pill {
-		font-size: 12px;
-		font-weight: 500;
-		padding: 6px 14px;
-		border-radius: 20px;
-		border: 1px solid var(--border-default);
-		background: var(--bg-surface);
-		color: var(--text-muted);
-		cursor: pointer;
-		transition: all 0.15s ease;
-		white-space: nowrap;
-	}
-
-	.feed-filter-pill:hover {
-		border-color: var(--border-hover);
-		color: var(--text-primary);
-	}
-
-	.feed-filter-pill.active {
-		background: var(--bg-elevated);
-		border-color: var(--border-hover);
-		color: var(--text-primary);
-	}
-
-	/* ── Date groups ─────────────────────────────────────────────── */
-	.feed-date-group {
-		margin-bottom: 8px;
-	}
-
-	.feed-date-header {
-		font-size: 12px;
-		font-weight: 600;
-		color: var(--text-secondary);
-		margin-bottom: 8px;
-		padding-left: 4px;
-	}
-
-	/* ── Cards ────────────────────────────────────────────────────── */
-	.feed-card {
-		display: block;
-		padding: 12px 14px;
-		background: var(--bg-surface);
-		border: 1px solid var(--border-default);
-		border-radius: 10px;
-		text-decoration: none;
-		transition: border-color 0.1s ease;
-		margin-bottom: 8px;
-		border-left: 3px solid transparent;
-	}
-
-	.feed-card:hover {
-		border-color: var(--border-hover);
-	}
-
-	.feed-card-high {
-		border-left-color: var(--amber);
-	}
-
-	.feed-card-top {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 8px;
-		margin-bottom: 6px;
-	}
-
-	.feed-card-left {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		min-width: 0;
-		flex: 1;
-	}
-
-	.feed-card-right {
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		flex-shrink: 0;
-	}
-
-	.feed-source-badge {
-		font-family: 'SF Mono', 'Fira Code', monospace;
-		font-size: 10px;
-		font-weight: 700;
-		letter-spacing: 0.04em;
-		padding: 2px 6px;
-		border-radius: 4px;
-		flex-shrink: 0;
-	}
-
-	.source-congress { background: rgba(245, 158, 11, 0.15); color: var(--amber); }
-	.source-ark      { background: rgba(96, 165, 250, 0.15); color: var(--blue); }
-	.source-darkpool { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
-	.source-insider  { background: rgba(249, 115, 22, 0.15); color: #f97316; }
-	.source-institution { background: rgba(34, 197, 94, 0.15); color: var(--green); }
-	.source-superinvestor { background: rgba(236, 72, 153, 0.15); color: #ec4899; }
-	.source-short    { background: rgba(148, 163, 184, 0.15); color: #94a3b8; }
-
-	.feed-ticker {
-		font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
-		font-weight: 700;
-		font-size: 13px;
-		color: var(--text-primary);
-		letter-spacing: 0.02em;
-	}
-
-	.feed-company {
-		font-size: 11px;
-		color: var(--text-muted);
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		max-width: 140px;
-	}
-
-	@media (max-width: 480px) {
-		.feed-company {
-			max-width: 80px;
-		}
-	}
-
-	.feed-sig-dot {
-		width: 7px;
-		height: 7px;
-		border-radius: 50%;
-		flex-shrink: 0;
-	}
-
-	.feed-card-body {
-		padding-left: 1px;
-	}
-
-	.feed-headline {
-		font-size: 13px;
-		font-weight: 500;
-		color: var(--text-secondary);
-		line-height: 1.4;
-	}
-
-	.feed-desc {
-		font-size: 12px;
-		color: var(--text-muted);
-		margin-top: 2px;
-		line-height: 1.4;
-	}
-
-	/* ── Empty state ─────────────────────────────────────────────── */
-	.feed-empty {
-		text-align: center;
-		padding: 48px 16px;
-		color: var(--text-muted);
-		font-size: 14px;
-	}
-
-	.feed-empty-sub {
-		font-size: 12px;
-		color: var(--text-dimmed);
-		margin-top: 4px;
-	}
-
-	/* ── Error ────────────────────────────────────────────────────── */
-	.error-text {
-		color: var(--color-down);
-		margin-bottom: 8px;
-		font-weight: 500;
-	}
-
-	.error-detail {
-		font-size: 13px;
-		color: var(--text-muted);
-	}
-</style>

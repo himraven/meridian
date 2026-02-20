@@ -112,7 +112,7 @@ def api_ticker_aggregate(request: Request, symbol: str):
                     if s.get("ticker", "").upper() == symbol
                 ]
 
-            # Extract company name
+            # Extract company name — check all data sources
             company_name = None
             for t in ark_trades:
                 if t.get("company"):
@@ -127,6 +127,16 @@ def api_ticker_aggregate(request: Request, symbol: str):
                 for h in institution_holdings:
                     if h.get("issuer"):
                         company_name = h["issuer"]
+                        break
+            if not company_name:
+                for t in insider_trades:
+                    if t.get("company"):
+                        company_name = t["company"]
+                        break
+            if not company_name:
+                for t in congress_trades:
+                    if t.get("company"):
+                        company_name = t["company"]
                         break
             if not company_name:
                 company_name = ticker_names.get(symbol)
@@ -269,6 +279,16 @@ def api_ticker_aggregate(request: Request, symbol: str):
                     company_name = h["issuer"]
                     break
             if company_name:
+                break
+    if not company_name:
+        for t in insider_trades:
+            if t.get("company"):
+                company_name = t["company"]
+                break
+    if not company_name:
+        for t in congress_trades:
+            if t.get("company"):
+                company_name = t["company"]
                 break
     if not company_name:
         company_name = ticker_names.get(symbol)

@@ -469,6 +469,7 @@ export interface FeedEvent {
 	value: number | null;
 	sentiment: 'bullish' | 'bearish' | 'neutral';
 	significance: 'high' | 'medium' | 'low';
+	has_score?: boolean;
 }
 
 export interface FeedResponse {

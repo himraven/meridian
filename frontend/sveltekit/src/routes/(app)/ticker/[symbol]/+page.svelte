@@ -115,7 +115,7 @@
 		<div class="flex items-start justify-between mb-4">
 			<div>
 				<h1 class="ticker-code text-3xl mb-2">{data.data.ticker}</h1>
-				<p class="ticker-name text-xl">{data.data.company}</p>
+				<p class="text-base text-[var(--text-secondary)]">{data.data.company}</p>
 			</div>
 			{#if data.data.metadata.has_confluence}
 				<Badge variant="success">
@@ -163,7 +163,7 @@
 					<div class="text-center pb-4 border-b border-[var(--border-default)]">
 						<p class="text-label mb-2">Total Confluence Score</p>
 						<p class="text-5xl font-bold text-[var(--text-primary)] mb-2">{formatScore(conf.score ?? 0)}</p>
-						{#if conf.direction}
+						{#if conf.direction && conf.direction.toLowerCase() !== 'none'}
 							<Badge variant={conf.direction.toLowerCase() === 'bullish' ? 'bullish' : conf.direction.toLowerCase() === 'bearish' ? 'bearish' : 'warning'}>
 								{conf.direction.toUpperCase()}
 							</Badge>
@@ -171,6 +171,15 @@
 						<p class="text-caption text-[var(--text-muted)] mt-2">
 							From {conf.source_count ?? 0} source{(conf.source_count ?? 0) !== 1 ? 's' : ''}{conf.signal_date ? ` · ${formatDate(conf.signal_date)}` : ''}
 						</p>
+						{#if (conf.source_count ?? 0) === 1}
+							<p class="text-xs text-[var(--text-dimmed)] mt-3 max-w-sm mx-auto leading-relaxed">
+								Single-source signal — score is capped at 75% of raw conviction. Add more converging sources to unlock higher scores.
+							</p>
+						{:else if (conf.source_count ?? 0) >= 2}
+							<p class="text-xs text-[var(--text-dimmed)] mt-3 max-w-sm mx-auto leading-relaxed">
+								Multi-source confluence — score includes a +{conf.multi_source_bonus?.toFixed(0) ?? 0} bonus for {conf.source_count} aligned signals.
+							</p>
+						{/if}
 					</div>
 					
 					<!-- Score Breakdown Bars -->
@@ -244,6 +253,34 @@
 								></div>
 							</div>
 						</div>
+						
+						<!-- Short Interest -->
+						<div>
+							<div class="flex items-center justify-between mb-2">
+								<span class="text-label">Short Interest</span>
+								<span class="text-data">{formatScore(conf.short_interest_score ?? 0)} / {maxScore}</span>
+							</div>
+							<div class="progress-bar">
+								<div 
+									class="h-full bg-slate-400 transition-all duration-500 rounded-full" 
+									style="width: {renderScoreBar(conf.short_interest_score ?? 0)}%"
+								></div>
+							</div>
+						</div>
+						
+						<!-- Superinvestors -->
+						<div>
+							<div class="flex items-center justify-between mb-2">
+								<span class="text-label">Superinvestors</span>
+								<span class="text-data">{formatScore(conf.superinvestor_score ?? 0)} / {maxScore}</span>
+							</div>
+							<div class="progress-bar">
+								<div 
+									class="h-full bg-cyan-400 transition-all duration-500 rounded-full" 
+									style="width: {renderScoreBar(conf.superinvestor_score ?? 0)}%"
+								></div>
+							</div>
+						</div>
 					</div>
 					
 					<!-- Details (array of {source, description, date, conviction}) -->
@@ -306,6 +343,27 @@
 				</div>
 			{/snippet}
 		</Card>
+	{:else if data.data.metadata.total_signals > 0}
+		<!-- Has activity but below scoring threshold -->
+		<div class="rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-5">
+			<div class="flex items-start gap-3">
+				<span class="text-lg mt-0.5">📊</span>
+				<div>
+					<h3 class="text-sm font-semibold text-[var(--text-primary)] mb-1">Activity Detected — Below Scoring Threshold</h3>
+					<p class="text-xs text-[var(--text-muted)] leading-relaxed mb-2">
+						This ticker has {data.data.metadata.total_signals} signal{data.data.metadata.total_signals !== 1 ? 's' : ''} but they didn't generate a conviction score. Common reasons:
+					</p>
+					<ul class="text-xs text-[var(--text-muted)] leading-relaxed space-y-1 pl-4">
+						<li>• <span class="text-[var(--text-secondary)]">Insider trades under $10K</span> — too small to be meaningful</li>
+						<li>• <span class="text-[var(--text-secondary)]">Sell-only activity</span> — scoring prioritizes buying signals</li>
+						<li>• <span class="text-[var(--text-secondary)]">No signal clustering</span> — isolated trades carry less conviction</li>
+					</ul>
+					<p class="text-xs text-[var(--text-dimmed)] mt-2">
+						Raw data is shown below for your own analysis.
+					</p>
+				</div>
+			</div>
+		</div>
 	{/if}
 	
 	<!-- Congress Trades -->

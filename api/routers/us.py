@@ -807,6 +807,32 @@ def api_ranking_feed(
                         "significance": sig,
                     })
 
+    # ── Cross-reference with scoring engine to align significance ────
+    # Load ranking data to check which tickers actually have scores
+    ranking_data = smart_money_cache.read("ranking_v2.json")
+    if not ranking_data or not ranking_data.get("signals"):
+        ranking_data = smart_money_cache.read("ranking.json")
+    scored_tickers = set()
+    if ranking_data and ranking_data.get("signals"):
+        for s in ranking_data["signals"]:
+            scored_tickers.add((s.get("ticker", "").upper()))
+
+    for e in events:
+        tk = e.get("ticker", "").upper()
+        # Mark whether this event's ticker has a confluence score
+        e["has_score"] = tk in scored_tickers
+        # Downgrade significance for events that won't produce a score
+        # (keeps them visible but de-emphasizes them)
+        if not e["has_score"] and e["significance"] != "low":
+            # Insider individual buys under $10K → already low
+            # Other unscored events: cap at "low"
+            src = e.get("source", "")
+            val = e.get("value") or 0
+            if src == "insider" and val < 10_000:
+                e["significance"] = "low"
+            elif src == "congress" and val < 15_000:
+                e["significance"] = "low"
+
     # ── Enrich company names, sort, limit ────────────────────────────
     ticker_names.enrich_list(events, ticker_field="ticker", name_field="company")
 

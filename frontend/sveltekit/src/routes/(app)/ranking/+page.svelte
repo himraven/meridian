@@ -381,7 +381,7 @@
 								<!-- Source Tags (with inline scores on mobile) — clickable → Knowledge Hub -->
 								<div class="flex items-center gap-1.5 flex-wrap">
 									{#each signal.sources as src}
-										{@const srcScore = src === 'congress' ? signal.congress_score : src === 'ark' ? signal.ark_score : src === 'darkpool' ? signal.darkpool_score : src === 'institution' ? signal.institution_score : src === 'insider' ? signal.insider_score : 0}
+										{@const srcScore = src === 'congress' ? signal.congress_score : src === 'ark' ? signal.ark_score : src === 'darkpool' ? signal.darkpool_score : src === 'institution' ? signal.institution_score : src === 'insider' ? signal.insider_score : src === 'short_interest' ? (signal.short_interest_score ?? 0) : src === 'superinvestor' ? (signal.superinvestor_score ?? 0) : 0}
 										{@const hasKnowledge = !!knowledgeSlugs[src]}
 										<button
 											class="px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide
@@ -450,6 +450,24 @@
 										<div class="text-[10px] text-[var(--text-muted)] mt-0.5">{signal.insider_score.toFixed(0)}</div>
 									</div>
 								{/if}
+								{#if signal.short_interest_score > 0}
+									<div class="w-16 text-center">
+										<div class="text-[10px] text-[var(--text-dimmed)] mb-0.5">SI</div>
+										<div class="h-1.5 bg-[var(--bg-elevated)] rounded-full overflow-hidden">
+											<div class="h-full bg-slate-400 rounded-full transition-all" style="width: {convictionBar(signal.short_interest_score)}"></div>
+										</div>
+										<div class="text-[10px] text-[var(--text-muted)] mt-0.5">{signal.short_interest_score.toFixed(0)}</div>
+									</div>
+								{/if}
+								{#if signal.superinvestor_score > 0}
+									<div class="w-16 text-center">
+										<div class="text-[10px] text-[var(--text-dimmed)] mb-0.5">SUP</div>
+										<div class="h-1.5 bg-[var(--bg-elevated)] rounded-full overflow-hidden">
+											<div class="h-full bg-cyan-400 rounded-full transition-all" style="width: {convictionBar(signal.superinvestor_score)}"></div>
+										</div>
+										<div class="text-[10px] text-[var(--text-muted)] mt-0.5">{signal.superinvestor_score.toFixed(0)}</div>
+									</div>
+								{/if}
 							</div>
 							
 							<!-- Date -->
@@ -512,6 +530,28 @@
 									</div>
 									<div class="h-1 bg-[var(--bg-elevated)] rounded-full overflow-hidden">
 										<div class="h-full bg-orange-400 rounded-full" style="width: {convictionBar(signal.insider_score)}"></div>
+									</div>
+								</div>
+							{/if}
+							{#if signal.short_interest_score > 0}
+								<div class="flex-1">
+									<div class="flex items-center justify-between text-[10px] mb-0.5">
+										<span class="text-slate-400">SI</span>
+										<span class="text-[var(--text-muted)]">{signal.short_interest_score.toFixed(0)}</span>
+									</div>
+									<div class="h-1 bg-[var(--bg-elevated)] rounded-full overflow-hidden">
+										<div class="h-full bg-slate-400 rounded-full" style="width: {convictionBar(signal.short_interest_score)}"></div>
+									</div>
+								</div>
+							{/if}
+							{#if signal.superinvestor_score > 0}
+								<div class="flex-1">
+									<div class="flex items-center justify-between text-[10px] mb-0.5">
+										<span class="text-cyan-400">SUP</span>
+										<span class="text-[var(--text-muted)]">{signal.superinvestor_score.toFixed(0)}</span>
+									</div>
+									<div class="h-1 bg-[var(--bg-elevated)] rounded-full overflow-hidden">
+										<div class="h-full bg-cyan-400 rounded-full" style="width: {convictionBar(signal.superinvestor_score)}"></div>
 									</div>
 								</div>
 							{/if}
