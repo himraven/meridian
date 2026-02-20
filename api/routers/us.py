@@ -853,7 +853,8 @@ def api_ranking_confluence(
     request: Request,
     min_score: float = 6.0,
     sources: str = None,  # comma-separated: congress,ark,darkpool,institutions
-    days: int = 7
+    days: int = 7,
+    limit: int = 200,
 ):
     """
     Get confluence signals filtered by score, sources, and recency.
@@ -892,15 +893,21 @@ def api_ranking_confluence(
     # Enrich with company names
     ticker_names.enrich_list(filtered, ticker_field="ticker", name_field="company")
     
+    # Apply limit
+    total_filtered = len(filtered)
+    if limit and limit > 0:
+        filtered = filtered[:limit]
+    
     result = {
         "data": filtered,
         "metadata": {
             "total": len(signals),
-            "filtered": len(filtered),
+            "filtered": total_filtered,
             "filters": {
                 "min_score": min_score,
                 "sources": sources,
-                "days": days
+                "days": days,
+                "limit": limit,
             },
             "engine": data.get("metadata", {}).get("engine", "v1"),
             "last_updated": data.get("metadata", {}).get("last_updated", data.get("last_updated"))
@@ -918,6 +925,7 @@ def api_ranking_smart_money(
     min_score: float = 0,
     source: str = None,
     days: int = 30,
+    limit: int = 200,
 ):
     """
     Smart Money v2 signals — conviction-based scoring (0-100).
@@ -981,13 +989,18 @@ def api_ranking_smart_money(
     # Enrich with company names
     ticker_names.enrich_list(filtered, ticker_field="ticker", name_field="company")
     
+    # Apply limit
+    total_filtered = len(filtered)
+    if limit and limit > 0:
+        filtered = filtered[:limit]
+    
     return {
         "data": filtered,
         "metadata": {
             "total": metadata.get("total", len(signals)),
-            "filtered": len(filtered),
+            "filtered": total_filtered,
             "engine": "v2",
-            "filters": {"min_score": min_score, "source": source, "days": days},
+            "filters": {"min_score": min_score, "source": source, "days": days, "limit": limit},
             "last_updated": metadata.get("last_updated"),
         }
     }

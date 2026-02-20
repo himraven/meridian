@@ -41,6 +41,8 @@
 		darkpool: 'source-darkpool',
 		insider: 'source-insider',
 		institution: 'source-institution',
+		superinvestor: 'source-superinvestor',
+		short_interest: 'source-short',
 	};
 
 	const sourceLabels: Record<string, string> = {
@@ -49,6 +51,8 @@
 		darkpool: 'DP',
 		insider: 'INS',
 		institution: '13F',
+		superinvestor: 'SUP',
+		short_interest: 'SI',
 	};
 
 	let filteredEvents = $derived(
@@ -88,6 +92,8 @@
 		darkpool_score: number;
 		institution_score: number;
 		insider_score: number;
+		short_interest_score?: number;
+		superinvestor_score?: number;
 	}): string[] {
 		const tags: string[] = [];
 		if (signal.congress_score > 0) tags.push('congress');
@@ -95,6 +101,8 @@
 		if (signal.darkpool_score > 0) tags.push('darkpool');
 		if (signal.institution_score > 0) tags.push('institution');
 		if (signal.insider_score > 0) tags.push('insider');
+		if ((signal.short_interest_score ?? 0) > 0) tags.push('short_interest');
+		if ((signal.superinvestor_score ?? 0) > 0) tags.push('superinvestor');
 		return tags;
 	}
 
