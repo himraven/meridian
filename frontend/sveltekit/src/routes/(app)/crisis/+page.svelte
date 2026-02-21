@@ -471,11 +471,10 @@
 
 	.signal-top {
 		display: flex;
-		align-items: center;
-		justify-content: space-between;
+		flex-direction: column;
+		align-items: flex-start;
 		margin-bottom: 8px;
-		flex-wrap: wrap;
-		gap: 4px;
+		gap: 3px;
 	}
 
 	.signal-source {
