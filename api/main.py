@@ -79,7 +79,10 @@ app.add_middleware(SmartCacheMiddleware)
 
 # ── Lightweight API Metrics (no Prometheus, just in-memory + log slow requests) ──
 import time
+import logging
 from collections import deque
+
+logger = logging.getLogger(__name__)
 
 _request_metrics: deque = deque(maxlen=5000)  # rolling window
 _SLOW_THRESHOLD_MS = 300  # log requests slower than this
@@ -213,6 +216,17 @@ def health_check():
 # ── Router Registration ────────────────────────────────────────────────────
 from api.routers import register_routers
 register_routers(app)
+
+
+# ── MCP Server (optional) ─────────────────────────────────────────────────
+try:
+    from api.mcp_server import mount_mcp
+    mount_mcp(app)
+    print("[mcp] MCP Server mounted at /mcp")
+except ImportError as e:
+    print(f"[mcp] MCP not available (install 'mcp' package): {e}")
+except Exception as e:
+    print(f"[mcp] Failed to mount MCP server: {e}")
 
 
 # ══════════════════════════════════════════════════════════════════════════

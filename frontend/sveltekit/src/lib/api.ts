@@ -148,4 +148,11 @@ export const api = {
 		list: () => fetchApi('/knowledge'),
 		article: (slug: string) => fetchApi(`/knowledge/${slug}`),
 	},
+
+	// Macro / Market Intelligence
+	macro: {
+		regime: () => fetchApi('/us/regime'),
+		crisis: () => fetchApi('/us/crisis'),
+		crossAsset: () => fetchApi('/us/cross-asset'),
+	},
 };

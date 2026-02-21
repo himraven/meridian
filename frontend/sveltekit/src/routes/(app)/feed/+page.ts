@@ -3,7 +3,8 @@ import type { FeedResponse } from '$lib/types/api';
 
 export async function load() {
 	try {
-		const feed = await api.ranking.feed({ limit: 100, days: 30 }) as FeedResponse;
+		// Load "all" view with higher limit to include all sources
+		const feed = await api.ranking.feed({ limit: 200, days: 30 }) as FeedResponse;
 		return { feed };
 	} catch (error) {
 		console.error('Feed load error:', error);

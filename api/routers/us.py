@@ -558,7 +558,7 @@ def api_us_short_interest(
 
 @router.get("/api/ranking/feed")
 def api_ranking_feed(
-    days: int = 7,
+    days: int = 30,
     source: str = None,
     ticker: str = None,
     limit: int = 50,
@@ -569,6 +569,8 @@ def api_ranking_feed(
     dark pool anomalies, insider trades, and 13F position changes.
     """
     cutoff = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d")
+    # 13F filings are quarterly — use 180-day lookback so they always show
+    institution_cutoff = (datetime.utcnow() - timedelta(days=180)).strftime("%Y-%m-%d")
     events: list[dict] = []
 
     TOP_FUNDS = {"berkshire hathaway", "renaissance technologies", "bridgewater associates",
@@ -772,7 +774,7 @@ def api_ranking_feed(
             for filing in inst_data["filings"]:
                 fund_name = filing.get("fund_name", "Unknown")
                 filing_date = filing.get("filing_date", "")
-                if filing_date < cutoff:
+                if filing_date < institution_cutoff:
                     continue
                 is_top_fund = any(tf in fund_name.lower() for tf in TOP_FUNDS)
                 sig = "high" if is_top_fund else "medium"
@@ -806,6 +808,87 @@ def api_ranking_feed(
                         "sentiment": "neutral",
                         "significance": sig,
                     })
+
+    # ── Superinvestor activity ────────────────────────────────────────
+    if not source or source == "superinvestor":
+        super_data = smart_money_cache.read("superinvestors.json")
+        if super_data and "activity" in super_data:
+            super_events_tmp = []
+            for a in super_data["activity"]:
+                tk = (a.get("ticker") or "").strip()
+                if not tk:
+                    continue
+                if ticker and tk.upper() != ticker.upper():
+                    continue
+                action = a.get("activity_type", "").capitalize()
+                company = a.get("company", "")
+                quarter = a.get("quarter", "")
+                mgr_count = a.get("manager_count", 0) or 0
+                pct = a.get("portfolio_pct", 0)
+                src_type = a.get("source", "")  # aggregate or per_manager
+                # Only show aggregate (cross-manager consensus) in main feed
+                if src_type == "per_manager":
+                    continue
+                # When showing ALL sources, only include high-conviction (3+ managers)
+                if not source and mgr_count < 3:
+                    continue
+                sig = "high" if mgr_count >= 5 else "medium" if mgr_count >= 3 else "low"
+                sentiment = "bullish" if action == "Buy" else "bearish" if action == "Sell" else "neutral"
+                # Use metadata last_updated as proxy date (no per-activity date)
+                act_date = super_data.get("metadata", {}).get("last_updated", "")[:10]
+
+                super_events_tmp.append({
+                    "id": f"super-{tk}-{action}-{quarter}",
+                    "source": "superinvestor",
+                    "ticker": tk.upper(),
+                    "company": company,
+                    "date": act_date,
+                    "headline": f"{mgr_count} superinvestors {action.lower()} {tk.upper()}",
+                    "description": f"{pct:.1f}% avg portfolio weight · {quarter}",
+                    "value": mgr_count,  # sort key
+                    "sentiment": sentiment,
+                    "significance": sig,
+                })
+            # Cap superinvestor events: top 50 by manager consensus
+            super_events_tmp.sort(key=lambda e: e["value"], reverse=True)
+            max_super = 50 if source else 20  # fewer when mixed with other sources
+            events.extend(super_events_tmp[:max_super])
+
+    # ── Short Interest anomalies ───────────────────────────────────────
+    if not source or source == "short_interest":
+        si_data = smart_money_cache.read("short_interest.json")
+        if si_data and "tickers" in si_data:
+            settlement = si_data.get("metadata", {}).get("settlement_date", "")
+            # Only show tickers with high short interest ratio (>20%) or big changes
+            for t in si_data["tickers"]:
+                tk = (t.get("ticker") or "").strip()
+                if not tk:
+                    continue
+                if ticker and tk.upper() != ticker.upper():
+                    continue
+                si_ratio = t.get("short_pct_float", 0) or 0
+                si_change = t.get("change_pct", 0) or 0
+                short_vol = t.get("current_short", 0) or 0
+                # Filter: only show notable SI (>20% of float OR >30% change)
+                if si_ratio < 20 and abs(si_change) < 30:
+                    continue
+                sig = "high" if si_ratio > 30 or abs(si_change) > 50 else "medium"
+                sentiment = "bearish" if si_change > 10 else "bullish" if si_change < -10 else "neutral"
+                change_dir = "↑" if si_change > 0 else "↓"
+                vol_fmt = f"{short_vol / 1e6:.1f}M" if short_vol >= 1e6 else f"{short_vol / 1e3:.0f}K"
+
+                events.append({
+                    "id": f"si-{tk}-{settlement}",
+                    "source": "short_interest",
+                    "ticker": tk.upper(),
+                    "company": t.get("company", tk),
+                    "date": settlement,
+                    "headline": f"{tk.upper()} short interest {si_ratio:.1f}% of float",
+                    "description": f"{vol_fmt} shares short · {change_dir}{abs(si_change):.1f}% change",
+                    "value": short_vol,
+                    "sentiment": sentiment,
+                    "significance": sig,
+                })
 
     # ── Cross-reference with scoring engine to align significance ────
     # Load ranking data to check which tickers actually have scores

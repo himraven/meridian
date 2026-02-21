@@ -8,6 +8,30 @@
 
 	let { data }: { data: PageData } = $props();
 
+	// ─── Regime widget helpers ────────────────────────────────────────
+	const regimeColors: Record<string, string> = {
+		green: 'var(--green)',
+		yellow: 'var(--amber)',
+		red: 'var(--red, #ef4444)',
+		unknown: 'var(--text-muted)',
+	};
+	const regimeLabels: Record<string, string> = {
+		green: 'NORMAL',
+		yellow: 'CAUTION',
+		red: 'CRISIS',
+		unknown: 'N/A',
+	};
+	const vixStatusColor: Record<string, string> = {
+		green: 'var(--green)',
+		yellow: 'var(--amber)',
+		red: 'var(--red, #ef4444)',
+	};
+	const spyStatusColor: Record<string, string> = {
+		bullish: 'var(--green)',
+		bearish: 'var(--red, #ef4444)',
+		neutral: 'var(--text-muted)',
+	};
+
 	// ─── Auto-refresh ────────────────────────────────────────────────
 	let lastRefresh = $state(new Date());
 
@@ -144,6 +168,49 @@
 		</div>
 	</div>
 
+	<!-- ── Regime Widget ─────────────────────────────────────────────────── -->
+	{#if data.regime}
+		{@const regime = data.regime}
+		<div class="regime-widget">
+			<div class="regime-left">
+				<div class="regime-dot" style="background: {regimeColors[regime.regime] ?? 'var(--text-muted)'}; box-shadow: 0 0 8px {regimeColors[regime.regime] ?? 'transparent'}"></div>
+				<div>
+					<span class="regime-badge" style="color: {regimeColors[regime.regime] ?? 'var(--text-muted)'}">
+						MARKET REGIME: {regimeLabels[regime.regime] ?? regime.regime.toUpperCase()}
+					</span>
+					<p class="regime-summary">{regime.summary}</p>
+				</div>
+			</div>
+			<div class="regime-components">
+				{#if regime.components?.vix}
+					<div class="regime-comp">
+						<span class="regime-comp-label">VIX</span>
+						<span class="regime-comp-value" style="color: {vixStatusColor[regime.components.vix.status] ?? 'var(--text-muted)'}">
+							{regime.components.vix.value?.toFixed(1)} · {regime.components.vix.label}
+						</span>
+					</div>
+				{/if}
+				{#if regime.components?.spy_ma200}
+					<div class="regime-comp">
+						<span class="regime-comp-label">SPY/MA200</span>
+						<span class="regime-comp-value" style="color: {spyStatusColor[regime.components.spy_ma200.status] ?? 'var(--text-muted)'}">
+							{regime.components.spy_ma200.pct_above > 0 ? '+' : ''}{regime.components.spy_ma200.pct_above?.toFixed(1)}% · {regime.components.spy_ma200.label}
+						</span>
+					</div>
+				{/if}
+				{#if regime.components?.credit_spread}
+					<div class="regime-comp">
+						<span class="regime-comp-label">HY Spread</span>
+						<span class="regime-comp-value" style="color: {vixStatusColor[regime.components.credit_spread.status] ?? 'var(--text-muted)'}">
+							{regime.components.credit_spread.value?.toFixed(2)}% · {regime.components.credit_spread.label}
+						</span>
+					</div>
+				{/if}
+				<a href="/crisis" class="regime-detail-link">Crisis Dashboard →</a>
+			</div>
+		</div>
+	{/if}
+
 	<!-- ── Error State ─────────────────────────────────────────────────── -->
 	{#if data.error}
 		<Card>
@@ -272,6 +339,96 @@
 </div>
 
 <style>
+	/* ── Regime Widget ────────────────────────────────────────────── */
+	.regime-widget {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		flex-wrap: wrap;
+		gap: 12px;
+		background: var(--bg-surface);
+		border: 1px solid var(--border-default);
+		border-radius: 10px;
+		padding: 12px 16px;
+	}
+
+	.regime-left {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+
+	.regime-dot {
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
+		flex-shrink: 0;
+		animation: pulse-regime 2.5s infinite;
+	}
+
+	@keyframes pulse-regime {
+		0%, 100% { opacity: 1; }
+		50% { opacity: 0.55; }
+	}
+
+	.regime-badge {
+		font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+		font-size: 11px;
+		font-weight: 700;
+		letter-spacing: 0.06em;
+	}
+
+	.regime-summary {
+		font-size: 12px;
+		color: var(--text-muted);
+		margin-top: 2px;
+	}
+
+	.regime-components {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		flex-wrap: wrap;
+	}
+
+	.regime-comp {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		text-align: right;
+	}
+
+	.regime-comp-label {
+		font-family: 'SF Mono', 'Fira Code', monospace;
+		font-size: 10px;
+		font-weight: 500;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--text-dimmed);
+	}
+
+	.regime-comp-value {
+		font-family: 'SF Mono', 'Fira Code', monospace;
+		font-size: 11px;
+		font-weight: 600;
+	}
+
+	.regime-detail-link {
+		font-size: 12px;
+		font-weight: 500;
+		color: var(--blue);
+		text-decoration: none;
+		padding: 4px 8px;
+		border: 1px solid var(--border-default);
+		border-radius: 6px;
+		transition: border-color 0.15s ease, color 0.15s ease;
+	}
+
+	.regime-detail-link:hover {
+		border-color: var(--blue);
+		color: var(--blue);
+	}
+
 	/* ── Header ──────────────────────────────────────────────────── */
 	.dash-header {
 		display: flex;

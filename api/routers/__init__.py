@@ -15,6 +15,7 @@ from . import (
     data_health,
     system,
     knowledge,
+    macro,
 )
 
 
@@ -47,3 +48,6 @@ def register_routers(app: FastAPI) -> None:
 
     # Knowledge Hub (educational articles)
     app.include_router(knowledge.router, tags=["knowledge"])
+
+    # Macro / Market Regime (Regime Detector, Crisis Dashboard, Cross-Asset)
+    app.include_router(macro.router, tags=["macro"])

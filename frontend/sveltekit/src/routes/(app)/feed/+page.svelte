@@ -4,12 +4,53 @@
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { formatDate } from '$lib/utils/format';
 	import type { PageData } from './$types';
-	import type { FeedEvent } from '$lib/types/api';
+	import type { FeedEvent, FeedResponse } from '$lib/types/api';
+	import { api } from '$lib/api';
 
 	let { data }: { data: PageData } = $props();
 
 	// ─── Source filter state ─────────────────────────────────────────
 	let activeSource = $state<string>('all');
+	let sourceEvents = $state<FeedEvent[]>([]);
+	let sourceLoading = $state<boolean>(false);
+
+	// Per-source time windows (days) — each source has appropriate lookback
+	const sourceDays: Record<string, number> = {
+		all: 30,
+		congress: 90,       // Congress disclosure delay means trades show up 30-45 days late
+		ark: 30,
+		darkpool: 30,
+		insider: 30,
+		institution: 180,   // 13F filings are quarterly
+		superinvestor: 180, // Quarterly data from Dataroma
+		short_interest: 60, // FINRA settlement dates, bi-monthly
+	};
+
+	// Fetch events when source changes
+	async function loadSource(source: string) {
+		if (source === 'all') {
+			sourceEvents = data.feed?.events ?? [];
+			return;
+		}
+		sourceLoading = true;
+		try {
+			const days = sourceDays[source] || 30;
+			const resp = await api.ranking.feed({ source, days, limit: 200 }) as FeedResponse;
+			sourceEvents = resp?.events ?? [];
+		} catch (e) {
+			console.error('Feed source load error:', e);
+			sourceEvents = [];
+		} finally {
+			sourceLoading = false;
+		}
+	}
+
+	// Initialize with all events
+	$effect(() => {
+		if (data.feed?.events) {
+			sourceEvents = data.feed.events;
+		}
+	});
 
 	const sourceFilters = [
 		{ key: 'all', label: 'All' },
@@ -42,11 +83,8 @@
 		short_interest: 'SI',
 	};
 
-	let filteredEvents = $derived(
-		(data.feed?.events ?? []).filter(
-			(e: FeedEvent) => activeSource === 'all' || e.source === activeSource
-		)
-	);
+	// Use sourceEvents directly — already filtered server-side
+	let filteredEvents = $derived(sourceEvents);
 
 	// Group events by date
 	let groupedEvents = $derived(() => {
@@ -95,7 +133,11 @@
 		<h1 class="text-heading mb-1">Smart Money Feed</h1>
 		<p class="text-[var(--text-secondary)]">Real-time actions from congress, institutions, and insiders</p>
 		<p class="text-caption text-[var(--text-dimmed)] mt-2">
-			{filteredEvents.length} events · Last 30 days
+			{#if sourceLoading}
+				Loading...
+			{:else}
+				{filteredEvents.length} events · Last {sourceDays[activeSource] || 30} days
+			{/if}
 		</p>
 	</div>
 
@@ -252,7 +294,7 @@
 						{activeSource === f.key 
 							? 'bg-[var(--bg-elevated)] border-[var(--border-hover)] text-[var(--text-primary)]' 
 							: 'bg-[var(--bg-surface)] border-[var(--border-default)] text-[var(--text-muted)] hover:border-[var(--border-hover)] hover:text-[var(--text-primary)]'}"
-					onclick={() => (activeSource = f.key)}
+					onclick={() => { activeSource = f.key; loadSource(f.key); }}
 				>
 					{f.label}
 				</button>
@@ -260,7 +302,11 @@
 		</div>
 
 		<!-- Feed events grouped by date -->
-		{#if filteredEvents.length === 0}
+		{#if sourceLoading}
+			<div class="text-center py-12">
+				<p class="text-[var(--text-muted)]">Loading events...</p>
+			</div>
+		{:else if filteredEvents.length === 0}
 			<EmptyState 
 				title="No Events Found" 
 				message="Try changing the filter or check back later"

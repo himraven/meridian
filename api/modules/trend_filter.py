@@ -19,8 +19,11 @@ from typing import Dict, Optional, Tuple
 import yfinance as yf
 
 
-from api.config import DATA_DIR as _CFG_TF_DIR
-CACHE_FILE = _CFG_TF_DIR / "trend_cache.json"
+import os as _os
+# trend_cache lives in writable /app/db/ (not read-only /app/data/)
+_CACHE_DIR = Path(_os.getenv("DB_DIR", str(Path(__file__).parent.parent.parent / "db")))
+_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+CACHE_FILE = _CACHE_DIR / "trend_cache.json"
 
 
 def _load_cache() -> dict:

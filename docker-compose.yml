@@ -40,6 +40,9 @@ services:
       - BACKTEST_DIR=/app/data/backtest
       - RESEARCH_DIR=/app/research
 
+      # SQLite — must point to writable /app/db/, NOT read-only /app/data/
+      - DATABASE_URL=sqlite:////app/db/smartmoney.db
+
       # API keys (loaded from .env)
       - QUIVER_API_KEY=${QUIVER_API_KEY}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}

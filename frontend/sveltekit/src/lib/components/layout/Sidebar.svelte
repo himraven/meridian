@@ -31,6 +31,13 @@
 			]
 		},
 		{
+			title: 'Market Intelligence',
+			items: [
+				{ href: '/crisis', label: 'Crisis Dashboard' },
+				{ href: '/cross-asset', label: 'Cross-Asset' },
+			]
+		},
+		{
 			title: 'Research',
 			items: [
 				{ href: '/research', label: 'Reports' },
@@ -43,6 +50,7 @@
 	let expandedSections = $state<Record<string, boolean>>({
 		'Sources': true,
 		'Asia Markets': true,
+		'Market Intelligence': true,
 		'Research': true
 	});
 	
