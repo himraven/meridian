@@ -22,14 +22,8 @@
 				{ href: '/insiders', label: 'Insiders' },
 			]
 		},
-		{
-			title: 'Asia Markets',
-			items: [
-				{ href: '/hk', label: 'HK Signals' },
-				{ href: '/cn', label: 'CN Trend' },
-				{ href: '/cn/strategy', label: 'CN Strategy' }
-			]
-		},
+		// Asia Markets hidden — focus on signals
+		// { title: 'Asia Markets', items: [{ href: '/hk', label: 'HK Signals' }, { href: '/cn', label: 'CN Trend' }, { href: '/cn/strategy', label: 'CN Strategy' }] },
 		{
 			title: 'Market Intelligence',
 			items: [
@@ -49,7 +43,6 @@
 	
 	let expandedSections = $state<Record<string, boolean>>({
 		'Sources': true,
-		'Asia Markets': true,
 		'Market Intelligence': true,
 		'Research': true
 	});

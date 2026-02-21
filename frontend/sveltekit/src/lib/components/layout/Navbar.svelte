@@ -91,13 +91,7 @@
 			>
 				Markets
 			</a>
-			<a 
-				href="/hk" 
-				class="nav-link {$page.url.pathname.startsWith('/hk') || 
-					 $page.url.pathname.startsWith('/cn') ? 'nav-link-active' : ''}"
-			>
-				Asia
-			</a>
+			<!-- Asia Markets hidden — focus on signals -->
 			<a 
 				href="/research" 
 				class="nav-link {$page.url.pathname.startsWith('/research') || 
