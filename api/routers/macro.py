@@ -577,6 +577,283 @@ def _fear_greed_narrative(label: str, vix: float) -> str:
     return narratives.get(label, f"VIX at {vix:.1f}")
 
 
+# ── Crypto Signals data ──────────────────────────────────────────────────────
+
+# Crypto stocks: companies whose core business IS crypto
+CRYPTO_STOCKS = {
+    "COIN",  # Coinbase — crypto exchange
+    "MSTR",  # MicroStrategy — BTC treasury company
+    "MARA",  # Marathon Digital — BTC miner
+    "RIOT",  # Riot Platforms — BTC miner
+    "CLSK",  # CleanSpark — BTC miner
+    "HUT",   # Hut 8 — BTC miner
+    "BTBT",  # Bit Digital — BTC miner
+    "CIFR",  # Cipher Mining — BTC miner
+    "CORZ",  # Core Scientific — BTC miner / AI HPC
+    "IREN",  # Iris Energy — BTC miner / AI
+    "WULF",  # TeraWulf — BTC miner
+}
+
+# Hardcoded company names for crypto stocks (fallback when data sources lack them)
+CRYPTO_STOCK_NAMES = {
+    "COIN": "Coinbase Global Inc",
+    "MSTR": "MicroStrategy Inc.",
+    "MARA": "Marathon Digital Holdings",
+    "RIOT": "Riot Platforms Inc.",
+    "CLSK": "CleanSpark Inc.",
+    "HUT": "Hut 8 Corp.",
+    "BTBT": "Bit Digital Inc.",
+    "CIFR": "Cipher Mining Inc.",
+    "CORZ": "Core Scientific Inc.",
+    "IREN": "Iris Energy Ltd.",
+    "WULF": "TeraWulf Inc.",
+}
+
+# Crypto ETFs: pass-through vehicles tracking crypto assets
+CRYPTO_ETFS = {
+    "IBIT",  # iShares Bitcoin Trust (BlackRock)
+    "GBTC",  # Grayscale Bitcoin Trust
+    "FBTC",  # Fidelity Wise Origin Bitcoin Fund
+    "ARKB",  # ARK 21Shares Bitcoin ETF
+    "BITO",  # ProShares Bitcoin Strategy ETF
+    "BITB",  # Bitwise Bitcoin ETF
+    "ETHE",  # Grayscale Ethereum Trust
+    "ETHU",  # ProShares Ultra Ether ETF
+    "BITX",  # 2x Bitcoin Strategy ETF
+    "MSTU",  # T-Rex 2X Long MSTR Daily Target ETF
+    "MSTZ",  # T-Rex 2X Inverse MSTR Daily Target ETF
+    "CONL",  # GraniteShares 2X Long COIN Daily ETF
+}
+
+CRYPTO_TICKERS = CRYPTO_STOCKS | CRYPTO_ETFS
+
+
+def _get_crypto_prices() -> dict:
+    """Fetch BTC and ETH current prices + 90d charts."""
+    btc_rows = _fetch_yf("BTC-USD", period="3mo", interval="1d")
+    eth_rows = _fetch_yf("ETH-USD", period="3mo", interval="1d")
+
+    def _extract(rows: list[dict]) -> dict:
+        if not rows:
+            return {"price": None, "change_24h_pct": None, "chart_90d": []}
+        valid = [r for r in rows if r.get("close") and r["close"] > 0]
+        price = valid[-1]["close"] if valid else None
+        prev = valid[-2]["close"] if len(valid) >= 2 else None
+        change = round((price - prev) / prev * 100, 2) if (price and prev) else None
+        chart = [{"date": r["date"], "value": round(r["close"], 2)} for r in valid]
+        return {
+            "price": round(price, 2) if price else None,
+            "change_24h_pct": change,
+            "chart_90d": chart,
+        }
+
+    return {
+        "btc": _extract(btc_rows),
+        "eth": _extract(eth_rows),
+    }
+
+
+def _get_crypto_signals_data() -> dict:
+    """Aggregate all crypto-relevant data from existing sources. Cached 30 minutes."""
+    CACHE_KEY = "crypto_signals_v1"
+    cached = _cached(CACHE_KEY, 1800)
+    if cached:
+        return cached
+
+    from api.shared import smart_money_cache
+
+    # --- BTC / ETH Prices ---
+    crypto_prices = _get_crypto_prices()
+
+    # --- ARK Trades (crypto stocks + ETFs, but tag them) ---
+    ark_trades = []
+    ark_data = smart_money_cache.read("ark_trades.json")
+    if ark_data and "trades" in ark_data:
+        for t in ark_data["trades"]:
+            tk = (t.get("ticker") or "").upper()
+            if tk not in CRYPTO_TICKERS:
+                continue
+            # Skip ARK rebalancing its own ETF (ARKB in ARKW/ARKF = internal move)
+            if tk == "ARKB":
+                continue
+            trade = {**t, "category": "stock" if tk in CRYPTO_STOCKS else "etf"}
+            ark_trades.append(trade)
+        ark_trades.sort(key=lambda t: t.get("date", ""), reverse=True)
+        ark_trades = ark_trades[:50]
+
+    # --- Insider Trades (crypto STOCKS only) ---
+    insider_trades = []
+    insider_data = smart_money_cache.read("insiders.json")
+    if insider_data and "trades" in insider_data:
+        insider_trades = [
+            t for t in insider_data["trades"]
+            if (t.get("ticker") or "").upper() in CRYPTO_STOCKS
+        ]
+        insider_trades.sort(key=lambda t: t.get("trade_date") or t.get("filing_date", ""), reverse=True)
+        insider_trades = insider_trades[:30]
+
+    # --- Dark Pool (crypto STOCKS only) ---
+    darkpool = []
+    dp_data = smart_money_cache.read("darkpool.json")
+    if dp_data and "tickers" in dp_data:
+        darkpool = [
+            t for t in dp_data["tickers"]
+            if (t.get("ticker") or "").upper() in CRYPTO_STOCKS
+        ]
+        darkpool.sort(key=lambda t: t.get("dpi", 0), reverse=True)
+
+    # --- Short Interest (crypto STOCKS only — ETF short interest is different dynamic) ---
+    short_interest = []
+    si_data = smart_money_cache.read("short_interest.json")
+    if si_data and "tickers" in si_data:
+        short_interest = [
+            t for t in si_data["tickers"]
+            if (t.get("ticker") or "").upper() in CRYPTO_STOCKS
+        ]
+        short_interest.sort(key=lambda t: t.get("short_interest", 0) or 0, reverse=True)
+
+    # --- Smart Money Signals (crypto STOCKS only — ETFs are noise here) ---
+    smart_money_signals = []
+    sig_data = smart_money_cache.read("signals_v2.json")
+    if sig_data and "signals" in sig_data:
+        smart_money_signals = [
+            s for s in sig_data["signals"]
+            if (s.get("ticker") or "").upper() in CRYPTO_STOCKS
+        ]
+        smart_money_signals.sort(key=lambda s: s.get("score", 0) or 0, reverse=True)
+
+    # Enrich missing company names
+    for sig in smart_money_signals:
+        if not sig.get("company"):
+            sig["company"] = CRYPTO_STOCK_NAMES.get((sig.get("ticker") or "").upper(), "")
+
+    # --- Congress Trades (crypto tickers) ---
+    congress_trades = []
+    congress_data = smart_money_cache.read("congress.json")
+    if congress_data and "trades" in congress_data:
+        congress_trades = [
+            t for t in congress_data["trades"]
+            if (t.get("ticker") or "").upper() in CRYPTO_TICKERS
+        ]
+        congress_trades.sort(key=lambda t: t.get("transaction_date", ""), reverse=True)
+        congress_trades = congress_trades[:20]
+
+    # --- Institution Holdings (crypto tickers) ---
+    institution_holdings = []
+    inst_data = smart_money_cache.read("institutions.json")
+    if inst_data and "filings" in inst_data:
+        for filing in inst_data["filings"]:
+            for holding in filing.get("holdings", []):
+                if (holding.get("ticker") or "").upper() in CRYPTO_TICKERS:
+                    institution_holdings.append({
+                        **holding,
+                        "institution": filing.get("fund_name") or filing.get("company_name", ""),
+                        "filing_date": filing.get("filing_date", ""),
+                        "quarter": filing.get("quarter", ""),
+                    })
+        institution_holdings.sort(key=lambda h: h.get("value", 0) or 0, reverse=True)
+        institution_holdings = institution_holdings[:30]
+
+    # --- Summary ---
+    bullish_signals = sum(
+        1 for s in smart_money_signals
+        if (s.get("direction") or "").lower() == "bullish"
+    )
+    bearish_signals = sum(
+        1 for s in smart_money_signals
+        if (s.get("direction") or "").lower() == "bearish"
+    )
+
+    # Most active ticker (by ARK trades + insider + darkpool mentions combined)
+    ticker_counts: dict[str, int] = {}
+    for t in ark_trades:
+        tk = (t.get("ticker") or "").upper()
+        if tk:
+            ticker_counts[tk] = ticker_counts.get(tk, 0) + 1
+    for t in insider_trades:
+        tk = (t.get("ticker") or "").upper()
+        if tk:
+            ticker_counts[tk] = ticker_counts.get(tk, 0) + 1
+    for t in darkpool:
+        tk = (t.get("ticker") or "").upper()
+        if tk:
+            ticker_counts[tk] = ticker_counts.get(tk, 0) + 2
+    most_active = max(ticker_counts, key=lambda k: ticker_counts[k]) if ticker_counts else ""
+
+    # Build narrative
+    narrative_parts = []
+    ark_30d = [
+        t for t in ark_trades
+        if (t.get("date") or "") >= (datetime.now(timezone.utc) - timedelta(days=30)).strftime("%Y-%m-%d")
+    ]
+    if ark_30d:
+        # Count actual buy vs sell for accurate narrative
+        ark_buys = sum(1 for t in ark_30d if t.get("trade_type") == "Buy"
+                       or t.get("change_type") in ("INCREASED", "NEW_POSITION"))
+        ark_sells = sum(1 for t in ark_30d if t.get("trade_type") == "Sell"
+                        or t.get("change_type") in ("DECREASED", "SOLD_OUT"))
+        tickers_30d = set(t.get("ticker") for t in ark_30d)
+        tickers_str = ", ".join(sorted(tickers_30d))
+        if ark_sells > ark_buys:
+            narrative_parts.append(f"ARK net selling crypto stocks ({ark_sells} sells vs {ark_buys} buys in 30d: {tickers_str})")
+        elif ark_buys > ark_sells:
+            narrative_parts.append(f"ARK net buying crypto stocks ({ark_buys} buys vs {ark_sells} sells in 30d: {tickers_str})")
+        else:
+            narrative_parts.append(f"ARK actively trading crypto stocks ({len(ark_30d)} trades in 30d: {tickers_str})")
+
+    high_si = [t for t in short_interest if (t.get("short_pct_float") or 0) >= 15]
+    if high_si:
+        tickers_str = ", ".join(t["ticker"] for t in high_si[:4])
+        narrative_parts.append(f"Elevated short interest in miners ({tickers_str})")
+
+    if bullish_signals > bearish_signals:
+        narrative_parts.append(f"{bullish_signals} bullish smart money signals across crypto-adjacent equities")
+    elif bearish_signals > bullish_signals:
+        narrative_parts.append(f"{bearish_signals} bearish signals — caution warranted")
+
+    if not narrative_parts:
+        narrative_parts.append("No strong crypto-adjacent signals detected across smart money sources")
+
+    narrative = ". ".join(narrative_parts) + "."
+
+    # --- ARK Sentiment (actual buy/sell ratio, more accurate than signal score) ---
+    ark_sentiment = {"buys": 0, "sells": 0, "net": "neutral", "period": "30d"}
+    if ark_30d:
+        ark_sentiment["buys"] = sum(1 for t in ark_30d if t.get("trade_type") == "Buy"
+                                    or t.get("change_type") in ("INCREASED", "NEW_POSITION"))
+        ark_sentiment["sells"] = sum(1 for t in ark_30d if t.get("trade_type") == "Sell"
+                                     or t.get("change_type") in ("DECREASED", "SOLD_OUT"))
+        if ark_sentiment["sells"] > ark_sentiment["buys"] * 1.5:
+            ark_sentiment["net"] = "bearish"
+        elif ark_sentiment["buys"] > ark_sentiment["sells"] * 1.5:
+            ark_sentiment["net"] = "bullish"
+        else:
+            ark_sentiment["net"] = "mixed"
+
+    result = {
+        "crypto_prices": crypto_prices,
+        "ark_sentiment": ark_sentiment,
+        "ark_trades": ark_trades,
+        "insider_trades": insider_trades,
+        "darkpool": darkpool,
+        "short_interest": short_interest,
+        "smart_money_signals": smart_money_signals,
+        "congress_trades": congress_trades,
+        "institution_holdings": institution_holdings,
+        "summary": {
+            "total_signals": len(smart_money_signals),
+            "bullish_signals": bullish_signals,
+            "bearish_signals": bearish_signals,
+            "most_active_ticker": most_active,
+            "narrative": narrative,
+        },
+        "cached_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    _set_cache(CACHE_KEY, result)
+    return result
+
+
 # ── FastAPI routes ───────────────────────────────────────────────────────────
 
 from fastapi import APIRouter
@@ -620,6 +897,33 @@ def api_us_crisis():
             "conviction_score": 0,
             "smart_money_signals": [],
             "historical_playbook": [],
+            "cached_at": datetime.now(timezone.utc).isoformat(),
+        }
+
+
+@router.get("/api/us/crypto-signals")
+def api_us_crypto_signals():
+    """
+    Crypto Signals — aggregated crypto-related data from all smart money sources.
+    Includes BTC/ETH prices, ARK trades, insider activity, dark pool, short interest,
+    smart money signals, Congress trades, and 13F holdings filtered for crypto tickers.
+    Cached 30 minutes.
+    """
+    try:
+        return _get_crypto_signals_data()
+    except Exception as e:
+        logger.error(f"[crypto-signals] Error: {e}", exc_info=True)
+        return {
+            "error": str(e),
+            "crypto_prices": {},
+            "ark_trades": [],
+            "insider_trades": [],
+            "darkpool": [],
+            "short_interest": [],
+            "smart_money_signals": [],
+            "congress_trades": [],
+            "institution_holdings": [],
+            "summary": {"total_signals": 0, "bullish_signals": 0, "bearish_signals": 0, "most_active_ticker": "", "narrative": ""},
             "cached_at": datetime.now(timezone.utc).isoformat(),
         }
 

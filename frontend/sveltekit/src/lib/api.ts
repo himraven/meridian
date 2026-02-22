@@ -154,5 +154,6 @@ export const api = {
 		regime: () => fetchApi('/us/regime'),
 		crisis: () => fetchApi('/us/crisis'),
 		crossAsset: () => fetchApi('/us/cross-asset'),
+		cryptoSignals: () => fetchApi('/us/crypto-signals'),
 	},
 };

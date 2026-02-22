@@ -29,6 +29,7 @@
 			items: [
 				{ href: '/crisis', label: 'Crisis Dashboard' },
 				{ href: '/cross-asset', label: 'Cross-Asset' },
+				{ href: '/crypto-signals', label: 'Crypto Signals' },
 			]
 		},
 		{
