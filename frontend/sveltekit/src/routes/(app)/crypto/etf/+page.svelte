@@ -8,6 +8,13 @@
 	const flows     = $derived((etfData?.flows ?? []) as any[]);
 	const meta      = $derived(etfData?.metadata ?? {});
 
+	// Data freshness check
+	const allFlowsEmpty = $derived(
+		flows.length > 0 && flows.every((f: any) =>
+			f.net_flow_usd === null || f.net_flow_usd === undefined || f.net_flow_usd === 0
+		)
+	);
+
 	// The API returns flat keys (btc_etf_total_aum, etc.) and individual ETFs in flows[]
 	const btcSummary = $derived({
 		total_aum: summary?.btc_etf_total_aum ?? null,
@@ -124,6 +131,13 @@
 		</div>
 
 	{:else}
+
+		{#if allFlowsEmpty}
+			<div class="info-banner">
+				<span class="info-icon">ℹ</span>
+				<span>Flow data requires 2+ trading days of collection. AUM snapshots are available; daily flows will appear after the next market session.</span>
+			</div>
+		{/if}
 
 		<!-- ── Summary Cards ────────────────────────────────────────── -->
 		<div class="summary-cards">
@@ -501,6 +515,25 @@
 	}
 
 	/* ── Loading & States ─────────────────────────────────────────────── */
+	.info-banner {
+		display: flex;
+		align-items: flex-start;
+		gap: 10px;
+		padding: 14px 16px;
+		background: rgba(59, 130, 246, 0.08);
+		border: 1px solid rgba(59, 130, 246, 0.2);
+		border-radius: 10px;
+		font-size: 12px;
+		line-height: 1.6;
+		color: var(--text-muted);
+	}
+
+	.info-icon {
+		font-size: 14px;
+		flex-shrink: 0;
+		margin-top: 1px;
+	}
+
 	.loading-state {
 		display: flex;
 		align-items: center;

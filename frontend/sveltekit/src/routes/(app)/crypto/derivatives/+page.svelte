@@ -4,7 +4,9 @@
 	let { data }: { data: PageData } = $props();
 
 	const d         = $derived(data.derivatives as any);
-	const coins     = $derived((d?.coins ?? []) as any[]);
+	const coins     = $derived(
+		[...(d?.coins ?? [])].sort((a: any, b: any) => (b.openInterest ?? 0) - (a.openInterest ?? 0)) as any[]
+	);
 	const funding   = $derived((d?.funding_rates ?? {}) as Record<string, any[]>);
 	const options   = $derived((d?.options ?? {}) as Record<string, any>);
 	const meta      = $derived(d?.metadata ?? {});

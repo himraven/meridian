@@ -63,6 +63,13 @@
 		return hasData ? sum : null;
 	}
 
+	// ── Data freshness check ──────────────────────────────────────────
+	const allFlowsEmpty = $derived(
+		allEtfs.length > 0 && allEtfs.every((f: any) =>
+			f.net_flow_usd === null || f.net_flow_usd === undefined || f.net_flow_usd === 0
+		)
+	);
+
 	// ── ETF groups ────────────────────────────────────────────────────
 
 	const CRYPTO_TICKERS   = ['IBIT', 'GBTC', 'FBTC', 'ARKB', 'BITB', 'BITO', 'ETHE', 'ETHU'];
@@ -84,6 +91,7 @@
 	const sentimentPct = $derived(((sentiment + 1) / 2) * 100);
 
 	function sentimentLabel(v: number): string {
+		if (allFlowsEmpty) return 'Awaiting Data';
 		if (v >= 0.5)  return 'Risk-On';
 		if (v >= 0.15) return 'Mild Risk-On';
 		if (v > -0.15) return 'Neutral';
@@ -134,6 +142,13 @@
 			<p class="error-msg">Failed to load fund flows: {data.error}</p>
 		</div>
 	{:else if flows}
+
+		{#if allFlowsEmpty}
+			<div class="info-banner">
+				<span class="info-icon">ℹ</span>
+				<span>Flow data requires 2+ trading days of collection. AUM snapshots are available; daily flows will appear after the next market session.</span>
+			</div>
+		{/if}
 
 		<!-- ── Risk Sentiment Bar ──────────────────────────────────── -->
 		<div class="card-base">
@@ -694,6 +709,25 @@
 		color: var(--red);
 		font-size: 13px;
 		padding: 16px;
+	}
+
+	.info-banner {
+		display: flex;
+		align-items: flex-start;
+		gap: 10px;
+		padding: 14px 16px;
+		background: rgba(59, 130, 246, 0.08);
+		border: 1px solid rgba(59, 130, 246, 0.2);
+		border-radius: 10px;
+		font-size: 12px;
+		line-height: 1.6;
+		color: var(--text-muted);
+	}
+
+	.info-icon {
+		font-size: 14px;
+		flex-shrink: 0;
+		margin-top: 1px;
 	}
 
 	.loading-state {

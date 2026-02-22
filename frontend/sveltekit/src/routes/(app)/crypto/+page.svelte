@@ -5,7 +5,9 @@
 
 	const overview  = $derived(data.overview as any);
 	const etfData   = $derived(data.etfData as any);
-	const coins     = $derived((overview?.coins ?? []) as any[]);
+	const coins     = $derived(
+		[...(overview?.coins ?? [])].sort((a: any, b: any) => (b.openInterest ?? 0) - (a.openInterest ?? 0)) as any[]
+	);
 	const btc       = $derived(overview?.btc ?? {});
 	const eth       = $derived(overview?.eth ?? {});
 	const fearGreed = $derived(overview?.fear_greed ?? {});
@@ -66,11 +68,11 @@
 	}
 
 	function fearGreedColor(v: number): string {
-		if (v <= 25)  return 'var(--red)';
-		if (v <= 45)  return '#f97316';  // orange
-		if (v <= 55)  return '#eab308';  // yellow
-		if (v <= 75)  return 'var(--green)';
-		return '#22c55e';                // bright green
+		if (v <= 20)  return 'var(--red)';         // Extreme Fear
+		if (v <= 40)  return '#f97316';             // Fear (orange)
+		if (v <= 60)  return '#eab308';             // Neutral (yellow)
+		if (v <= 80)  return 'var(--green)';        // Greed
+		return '#22c55e';                           // Extreme Greed (bright green)
 	}
 
 	function collectedAt(ts: string | null | undefined): string {
