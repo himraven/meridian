@@ -11,8 +11,16 @@
 	const fearGreed = $derived(overview?.fear_greed ?? {});
 	const meta      = $derived(overview?.metadata ?? {});
 	const summary   = $derived(etfData?.crypto_etf_summary ?? {});
-	const btcEtf    = $derived(summary?.btc ?? {});
-	const ethEtf    = $derived(summary?.eth ?? {});
+	const btcEtf    = $derived({
+		total_aum: summary?.btc_etf_total_aum ?? null,
+		daily_flow: summary?.btc_etf_daily_flow ?? null,
+		weekly_flow: summary?.btc_etf_weekly_flow ?? null,
+	});
+	const ethEtf    = $derived({
+		total_aum: summary?.eth_etf_total_aum ?? null,
+		daily_flow: summary?.eth_etf_daily_flow ?? null,
+		weekly_flow: summary?.eth_etf_weekly_flow ?? null,
+	});
 
 	// ── Formatters ────────────────────────────────────────────────────
 

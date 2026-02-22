@@ -5,11 +5,28 @@
 
 	const etfData   = $derived(data.etfData as any);
 	const summary   = $derived(etfData?.crypto_etf_summary ?? {});
-	const btcSummary = $derived(summary?.btc ?? {});
-	const ethSummary = $derived(summary?.eth ?? {});
-	const btcEtfs   = $derived(btcSummary?.etfs ?? []);
-	const ethEtfs   = $derived(ethSummary?.etfs ?? []);
+	const flows     = $derived((etfData?.flows ?? []) as any[]);
 	const meta      = $derived(etfData?.metadata ?? {});
+
+	// The API returns flat keys (btc_etf_total_aum, etc.) and individual ETFs in flows[]
+	const btcSummary = $derived({
+		total_aum: summary?.btc_etf_total_aum ?? null,
+		daily_flow: summary?.btc_etf_daily_flow ?? null,
+		weekly_flow: summary?.btc_etf_weekly_flow ?? null,
+	});
+	const ethSummary = $derived({
+		total_aum: summary?.eth_etf_total_aum ?? null,
+		daily_flow: summary?.eth_etf_daily_flow ?? null,
+		weekly_flow: summary?.eth_etf_weekly_flow ?? null,
+	});
+
+	// BTC ETFs: IBIT, GBTC, FBTC, ARKB, BITB, BITO
+	const BTC_TICKERS = new Set(['IBIT', 'GBTC', 'FBTC', 'ARKB', 'BITB', 'BITO']);
+	// ETH ETFs: ETHE, ETHU
+	const ETH_TICKERS = new Set(['ETHE', 'ETHU']);
+
+	const btcEtfs = $derived(flows.filter((f: any) => BTC_TICKERS.has(f.ticker)));
+	const ethEtfs = $derived(flows.filter((f: any) => ETH_TICKERS.has(f.ticker)));
 
 	// ── Formatters ────────────────────────────────────────────────────
 
@@ -193,20 +210,20 @@
 								<tr>
 									<td><span class="ticker-mono">{etf.ticker}</span></td>
 									<td class="dim truncate">{etf.name ?? '—'}</td>
-									<td class="text-right mono">{fmtAum(etf.aum)}</td>
-									<td class="text-right mono" style="color: {flowColor(etf.daily_flow)}">{fmtFlow(etf.daily_flow)}</td>
-									<td class="text-right mono" style="color: {flowColor(etf.weekly_flow)}">{fmtFlow(etf.weekly_flow)}</td>
+									<td class="text-right mono">{fmtAum(etf.total_assets)}</td>
+									<td class="text-right mono" style="color: {flowColor(etf.net_flow_usd)}">{fmtFlow(etf.net_flow_usd)}</td>
+									<td class="text-right mono" style="color: {flowColor(etf.flow_5d_usd)}">{fmtFlow(etf.flow_5d_usd)}</td>
 									<td class="text-right">
-										{#if etf.streak}
-											<span class="streak-badge" style="color: {streakColor(etf.streak)}; border-color: {streakColor(etf.streak)}40">
-												{streakLabel(etf.streak)}
+										{#if etf.flow_streak}
+											<span class="streak-badge" style="color: {streakColor(etf.flow_streak)}; border-color: {streakColor(etf.flow_streak)}40">
+												{streakLabel(etf.flow_streak)}
 											</span>
 										{:else}
 											<span class="dim">—</span>
 										{/if}
 									</td>
 									<td class="text-right mono dim">{fmtPrice(etf.price)}</td>
-									<td class="text-right mono" style="color: {flowColor(etf.change_pct)}">{fmtPct(etf.change_pct)}</td>
+									<td class="text-right mono" style="color: {flowColor(etf.daily_return_pct)}">{fmtPct(etf.daily_return_pct)}</td>
 								</tr>
 							{/each}
 						</tbody>
@@ -241,20 +258,20 @@
 								<tr>
 									<td><span class="ticker-mono">{etf.ticker}</span></td>
 									<td class="dim truncate">{etf.name ?? '—'}</td>
-									<td class="text-right mono">{fmtAum(etf.aum)}</td>
-									<td class="text-right mono" style="color: {flowColor(etf.daily_flow)}">{fmtFlow(etf.daily_flow)}</td>
-									<td class="text-right mono" style="color: {flowColor(etf.weekly_flow)}">{fmtFlow(etf.weekly_flow)}</td>
+									<td class="text-right mono">{fmtAum(etf.total_assets)}</td>
+									<td class="text-right mono" style="color: {flowColor(etf.net_flow_usd)}">{fmtFlow(etf.net_flow_usd)}</td>
+									<td class="text-right mono" style="color: {flowColor(etf.flow_5d_usd)}">{fmtFlow(etf.flow_5d_usd)}</td>
 									<td class="text-right">
-										{#if etf.streak}
-											<span class="streak-badge" style="color: {streakColor(etf.streak)}; border-color: {streakColor(etf.streak)}40">
-												{streakLabel(etf.streak)}
+										{#if etf.flow_streak}
+											<span class="streak-badge" style="color: {streakColor(etf.flow_streak)}; border-color: {streakColor(etf.flow_streak)}40">
+												{streakLabel(etf.flow_streak)}
 											</span>
 										{:else}
 											<span class="dim">—</span>
 										{/if}
 									</td>
 									<td class="text-right mono dim">{fmtPrice(etf.price)}</td>
-									<td class="text-right mono" style="color: {flowColor(etf.change_pct)}">{fmtPct(etf.change_pct)}</td>
+									<td class="text-right mono" style="color: {flowColor(etf.daily_return_pct)}">{fmtPct(etf.daily_return_pct)}</td>
 								</tr>
 							{/each}
 						</tbody>

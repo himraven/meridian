@@ -155,8 +155,8 @@ def _build_derivatives() -> dict:
         oi_collected_at = oi_data.get("collected_at")
 
     # ── Funding Rates ────────────────────────────────────────────────────────
-    # Each exchange appears ~957 times (historical). Dedup: take the LAST entry
-    # per exchange name per coin.
+    # New format: each coin key maps to a list of exchange entries (already deduped).
+    # Old format: each coin key maps to {"exchanges": [...]} (with historical data).
     funding_rates: dict[str, list[dict]] = {}
     fr_collected_at: str | None = None
     fr_data = _load_json("funding_rates.json")
@@ -165,14 +165,18 @@ def _build_derivatives() -> dict:
         for coin_sym, coin_obj in fr_data.items():
             if coin_sym == "collected_at":
                 continue
-            exchanges_raw: list[dict] = coin_obj.get("exchanges", [])
-            # Walk forward — later entries overwrite earlier ones (last wins)
-            latest_per_exchange: dict[str, dict] = {}
-            for entry in exchanges_raw:
-                name = entry.get("name")
-                if name:
-                    latest_per_exchange[name] = entry
-            funding_rates[coin_sym] = list(latest_per_exchange.values())
+            if isinstance(coin_obj, list):
+                # New format: already a clean list of exchange entries
+                funding_rates[coin_sym] = coin_obj
+            elif isinstance(coin_obj, dict):
+                # Old format: {"exchanges": [...]} — dedup by last-write-wins
+                exchanges_raw = coin_obj.get("exchanges", [])
+                latest_per_exchange: dict[str, dict] = {}
+                for entry in exchanges_raw:
+                    name = entry.get("name")
+                    if name:
+                        latest_per_exchange[name] = entry
+                funding_rates[coin_sym] = list(latest_per_exchange.values())
 
     # ── Options ──────────────────────────────────────────────────────────────
     options: dict[str, dict] = {}
