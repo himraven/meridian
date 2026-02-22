@@ -38,3 +38,24 @@
 - **Data fallbacks matter** — upstream data gaps (Quiver missing float, signal engine missing company names) need fallback layers
 - **Signal source diversity** — single-source dominance in a sector creates contradictory UX. Need balanced multi-source coverage.
 - **Don't ship then pray** — check the live site yourself before telling Raven it's done
+
+### Crypto Expansion — Post-Deploy Bug Fixes (Raven QA)
+**Issues found by visual inspection:**
+
+1. **Funding rates BTC/ETH identical + absurd values (-208%)**
+   - Root cause: CoinGlass `/v2/funding` endpoint IGNORES the `symbol` parameter — always returns all 957 coins
+   - Collector called it once per coin (BTC, ETH) → got identical 25,839 entry arrays
+   - Dedup picked last entry per exchange name across ALL coins → accumulated/wrong rates
+   - Fix: Single API call, build symbol lookup map, extract per-coin correctly
+   - Result: 6.6MB → 71KB, BTC ≠ ETH rates, correct percentages
+   - Commit: `8e1c0c8` (rsnest)
+
+2. **ETF page showing all dashes (no data)**
+   - Root cause: Frontend expected nested `summary.btc.total_aum` but API returns flat `btc_etf_total_aum`
+   - Also: ETF table expected `etf.aum` but API sends `etf.total_assets`
+   - Fix: Adapted frontend derived values to match actual API shape
+   - Commit: `9209c76` (meridian)
+
+3. **Deribit 40%+ Options OI** — NOT a bug. Deribit is genuinely 83% of BTC options market. Confirmed with raw API data.
+
+**Lesson**: Always verify data shapes end-to-end (API → JSON → backend → frontend) before deploying. Sub-agents can't do this because they work on one layer at a time.
