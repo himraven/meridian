@@ -973,3 +973,80 @@ def api_us_cross_asset():
             "fear_greed": {},
             "cached_at": datetime.now(timezone.utc).isoformat(),
         }
+
+
+# ── ETF Flows ────────────────────────────────────────────────────────────────
+
+def _get_etf_flows_data(category: str | None = None) -> dict:
+    """
+    Read ETF flow data from cache file (written by rsnest cron).
+    Optionally filter by category (crypto|sector|mega|cross_asset|asia).
+    Cached 30 minutes.
+    """
+    cache_key = f"etf_flows_v1_{category or 'all'}"
+    cached = _cached(cache_key, 1800)
+    if cached:
+        return cached
+
+    from api.shared import smart_money_cache
+
+    data = smart_money_cache.read("etf_flows.json")
+    if not data:
+        result = {
+            "flows": [],
+            "sector_rotation": {},
+            "crypto_etf_summary": {},
+            "metadata": {
+                "etf_count": 0,
+                "last_updated": None,
+                "data_source": "yfinance",
+                "history_days": 90,
+                "note": "No data yet — run etf_flow_collector to populate",
+            },
+        }
+        _set_cache(cache_key, result)
+        return result
+
+    # Filter by category if requested
+    if category:
+        flows = [f for f in data.get("flows", []) if f.get("category") == category]
+        result = {
+            **data,
+            "flows": flows,
+            "metadata": {
+                **data.get("metadata", {}),
+                "filtered_category": category,
+                "filtered_count": len(flows),
+            },
+        }
+    else:
+        result = data
+
+    _set_cache(cache_key, result)
+    return result
+
+
+@router.get("/api/us/etf-flows")
+def api_us_etf_flows(category: str | None = None):
+    """
+    ETF Fund Flow Dashboard — daily net flows across ~40 ETFs.
+    Categories: crypto, sector, mega, cross_asset, asia.
+    Optional ?category=crypto filter.
+    Cached 30 minutes.
+    Data source: rsnest ETF Flow Collector (yfinance).
+    """
+    try:
+        return _get_etf_flows_data(category=category)
+    except Exception as e:
+        logger.error(f"[etf-flows] Error: {e}", exc_info=True)
+        return {
+            "error": str(e),
+            "flows": [],
+            "sector_rotation": {},
+            "crypto_etf_summary": {},
+            "metadata": {
+                "etf_count": 0,
+                "last_updated": None,
+            },
+            "cached_at": datetime.now(timezone.utc).isoformat(),
+        }

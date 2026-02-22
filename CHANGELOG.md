@@ -4,6 +4,20 @@ All notable changes to the Meridian platform are documented here.
 
 ---
 
+## 2026-02-22 — ETF Flow Integration (Phase 1)
+
+**FEAT: ETF Fund Flow API + Frontend Client**
+
+- Added `GET /api/us/etf-flows` endpoint to `api/routers/macro.py`
+  - Reads `etf_flows.json` from shared data mount (written by rsnest cron)
+  - Optional `?category=crypto|sector|mega|cross_asset|asia` filter
+  - 30-min in-memory cache
+  - Returns: flows[], sector_rotation, crypto_etf_summary, metadata
+- Added `api.macro.etfFlows(params?)` to `frontend/sveltekit/src/lib/api.ts`
+- Data source: rsnest `etf_flow_collector.py` → `/app/data/etf_flows.json` → bind mount → meridian reads
+
+---
+
 ## 2026-02-21 — Crisis Dashboard UI Fix
 
 **FIX: SMART MONEY CRISIS BEHAVIOR 卡片分行不一致**

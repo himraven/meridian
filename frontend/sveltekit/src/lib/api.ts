@@ -155,5 +155,7 @@ export const api = {
 		crisis: () => fetchApi('/us/crisis'),
 		crossAsset: () => fetchApi('/us/cross-asset'),
 		cryptoSignals: () => fetchApi('/us/crypto-signals'),
+		etfFlows: (params?: { category?: string }) =>
+			fetchApi(`/us/etf-flows${buildQueryString(params || {})}`),
 	},
 };
