@@ -33,7 +33,27 @@
 - Add sector ETF flows for entire platform
 - Enhance superinvestor crypto coverage
 
+### Full QA Round (post-deployment)
+**Raven directive**: "所有发现的问题按照优先级现在就修复，做到信心指数 9.5 以上"
+
+**Fixed:**
+1. Funding rates BTC=ETH — rsnest container never rebuilt after `8e1c0c8` fix. **Lesson: always rebuild + verify container after code fix**
+2. OI table unsorted — frontend sorts by `openInterest` desc now
+3. F&G color/label threshold mismatch (frontend 25/45/55/75 vs backend 20/40/60/80) — aligned to 20/40/60/80
+4. ETF flow pages show "—" everywhere — added info banner explaining data collection period
+5. Missing `eth_etf_total_aum` in crypto ETF summary — added to collector
+6. Risk sentiment "Neutral" with no data — changed to "Awaiting Data"
+7. Created shared `lib/format.ts` for DRY formatters
+
+**Not fixable yet:**
+- `h24OIChange` null (CoinGlass upstream)
+- ETF flow real data (needs 2+ trading days)
+- Mobile render verification (needs physical device)
+
+Commits: `eeba916` (meridian), `b441dab` (rsnest)
+
 ### Lessons
+- **After any code fix: REBUILD THE CONTAINER** — code on host ≠ code in container
 - **Always test on mobile** — layout issues Raven caught were mobile-specific UX problems
 - **Data fallbacks matter** — upstream data gaps (Quiver missing float, signal engine missing company names) need fallback layers
 - **Signal source diversity** — single-source dominance in a sector creates contradictory UX. Need balanced multi-source coverage.
