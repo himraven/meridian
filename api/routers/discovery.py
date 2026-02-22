@@ -28,9 +28,23 @@ TOOL_PRICING = {
     "get_13f_filings": 0.05,
     "get_darkpool_activity": 0.05,
     "get_short_interest": 0.03,
-    "get_superinvestor_activity": 0.05,
+    "get_superinvestor_activity": 0.03,
     "get_confluence_signals": 0.10,
-    "get_market_regime": 0.02,
+    "get_market_regime": 0.00,  # FREE
+}
+
+# REST v1 endpoint map: tool name → GET path (mirrors MCP tools)
+V1_REST_PATHS = {
+    "get_congress_trades":       "/api/v1/congress",
+    "get_ark_trades":            "/api/v1/ark/trades",
+    "get_ark_holdings":          "/api/v1/ark/holdings",
+    "get_insider_trades":        "/api/v1/insiders",
+    "get_13f_filings":           "/api/v1/13f",
+    "get_darkpool_activity":     "/api/v1/darkpool",
+    "get_short_interest":        "/api/v1/short-interest",
+    "get_superinvestor_activity":"/api/v1/superinvestors",
+    "get_confluence_signals":    "/api/v1/confluence",
+    "get_market_regime":         "/api/v1/regime",
 }
 
 # ── Tool registry (ordered, mirrors mcp_server.py) ────────────────────────
@@ -310,7 +324,7 @@ def api_stats():
         "pricing_preview": {
             "get_confluence_signals": "$0.10",
             "get_congress_trades": "$0.05",
-            "get_market_regime": "$0.02",
+            "get_market_regime": "FREE",
         },
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
@@ -319,21 +333,84 @@ def api_stats():
 # ── /api/openapi.json ──────────────────────────────────────────────────────
 
 def _build_openapi_spec() -> dict:
-    """Build OpenAPI 3.1 spec from the 10 MCP tool definitions."""
+    """Build OpenAPI 3.1 spec covering both MCP tools and REST v1 endpoints."""
 
-    def _tool_to_path(tool: dict) -> dict:
+    _success_response = {
+        "description": "Successful response",
+        "content": {
+            "application/json": {
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "data": {"type": "object"},
+                        "metadata": {
+                            "type": "object",
+                            "properties": {
+                                "filtered": {"type": "integer"},
+                                "source": {"type": "string"},
+                            },
+                        },
+                    },
+                }
+            }
+        },
+    }
+
+    _payment_required_response = {
+        "description": "Payment required — send x402 PAYMENT-SIGNATURE header",
+        "headers": {
+            "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded JSON with payment instructions (x402 v2 protocol)",
+                "schema": {"type": "string"},
+            }
+        },
+        "content": {
+            "application/json": {
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "error": {"type": "string"},
+                    },
+                }
+            }
+        },
+    }
+
+    def _build_query_params(params: dict) -> list:
+        """Convert parameter description map to OpenAPI query parameter list."""
+        result = []
+        for param_name, param_desc in params.items():
+            desc_lower = param_desc.lower()
+            if "int" in desc_lower:
+                schema: dict = {"type": "integer"}
+            elif "float" in desc_lower:
+                schema = {"type": "number"}
+            elif "bool" in desc_lower:
+                schema = {"type": "boolean"}
+            else:
+                schema = {"type": "string"}
+            result.append({
+                "name": param_name,
+                "in": "query",
+                "required": False,
+                "description": param_desc,
+                "schema": schema,
+            })
+        return result
+
+    def _mcp_path(tool: dict) -> dict:
+        """Build OpenAPI path entry for an MCP tool (POST to /mcp)."""
         price = TOOL_PRICING.get(tool["name"], 0.05)
         params = tool.get("parameters", {})
 
-        # Build JSON Schema properties from parameter descriptions
         properties: dict[str, Any] = {}
         for param_name, param_desc in params.items():
-            # Infer type from description hint
-            if "int" in param_desc.lower():
+            desc_lower = param_desc.lower()
+            if "int" in desc_lower:
                 schema: dict = {"type": "integer"}
-            elif "float" in param_desc.lower():
+            elif "float" in desc_lower:
                 schema = {"type": "number"}
-            elif "bool" in param_desc.lower():
+            elif "bool" in desc_lower:
                 schema = {"type": "boolean"}
             else:
                 schema = {"type": "string"}
@@ -346,80 +423,80 @@ def _build_openapi_spec() -> dict:
                 "required": False,
                 "content": {
                     "application/json": {
-                        "schema": {
-                            "type": "object",
-                            "properties": properties,
-                        }
+                        "schema": {"type": "object", "properties": properties}
                     }
                 },
             }
 
+        x402_ext = {
+            "price": price,
+            "currency": "USDC",
+            "network": "eip155:8453",
+            "pay_to": "0xb8280cd9d2a2e7ac3be92c0b5b875c1ca7ab76f4",
+            "facilitator": "https://x402.org/facilitator",
+            "scheme": "exact",
+        }
+        if price == 0:
+            x402_ext["free"] = True
+
         return {
             "post": {
-                "operationId": tool["name"],
-                "summary": tool["description"],
+                "operationId": f"mcp_{tool['name']}",
+                "summary": f"[MCP] {tool['description']}",
                 "description": tool["description"],
                 "tags": [tool["category"]],
-                "x-x402": {
-                    "price": price,
-                    "currency": "USDC",
-                    "network": "base",
-                    "payment_url": "https://meridianfin.io/mcp",
-                    "scheme": "exact",
-                },
+                "x-x402": x402_ext,
                 **({"requestBody": request_body} if request_body else {}),
                 "responses": {
-                    "200": {
-                        "description": "Successful response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {"type": "object"},
-                                        "metadata": {
-                                            "type": "object",
-                                            "properties": {
-                                                "filtered": {"type": "integer"},
-                                                "source": {"type": "string"},
-                                            },
-                                        },
-                                    },
-                                }
-                            }
-                        },
-                    },
-                    "402": {
-                        "description": "Payment required — send x402 payment header",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {"type": "string"},
-                                        "payment_required": {
-                                            "type": "object",
-                                            "properties": {
-                                                "amount": {"type": "number"},
-                                                "currency": {"type": "string"},
-                                                "network": {"type": "string"},
-                                            },
-                                        },
-                                    },
-                                }
-                            }
-                        },
-                    },
+                    "200": _success_response,
+                    "402": _payment_required_response,
                 },
+            }
+        }
+
+    def _v1_path(tool: dict) -> dict:
+        """Build OpenAPI path entry for a REST v1 GET endpoint."""
+        price = TOOL_PRICING.get(tool["name"], 0.05)
+        params = _build_query_params(tool.get("parameters", {}))
+
+        x402_ext: dict = {
+            "price": price,
+            "currency": "USDC",
+            "network": "eip155:8453",
+            "pay_to": "0xb8280cd9d2a2e7ac3be92c0b5b875c1ca7ab76f4",
+            "facilitator": "https://x402.org/facilitator",
+            "scheme": "exact",
+        }
+        if price == 0:
+            x402_ext["free"] = True
+
+        response_codes: dict = {"200": _success_response}
+        if price > 0:
+            response_codes["402"] = _payment_required_response
+
+        return {
+            "get": {
+                "operationId": f"v1_{tool['name']}",
+                "summary": f"[REST v1] {tool['description']} — {'FREE' if price == 0 else f'${price:.2f}/call'}",
+                "description": tool["description"],
+                "tags": ["v1 — REST Endpoints"],
+                "x-x402": x402_ext,
+                **({"parameters": params} if params else {}),
+                "responses": response_codes,
             }
         }
 
     paths = {}
     for tool in TOOLS:
-        paths[f"/mcp/tools/{tool['name']}"] = _tool_to_path(tool)
+        # MCP tool path (POST /mcp via MCP protocol)
+        paths[f"/mcp/tools/{tool['name']}"] = _mcp_path(tool)
+        # REST v1 path (GET /api/v1/*)
+        v1_path = V1_REST_PATHS.get(tool["name"])
+        if v1_path:
+            paths[v1_path] = _v1_path(tool)
 
     # Collect unique tags/categories
-    tags = list({t["category"] for t in TOOLS})
+    tags = list({t["category"] for t in TOOLS}) + ["v1 — REST Endpoints"]
 
     return {
         "openapi": "3.1.0",

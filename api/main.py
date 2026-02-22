@@ -117,6 +117,67 @@ class MetricsMiddleware(BaseHTTPMiddleware):
 app.add_middleware(MetricsMiddleware)
 
 
+# ── x402 Payment Middleware ────────────────────────────────────────────────
+# Gates the paid REST v1 endpoints (see /api/v1/*).
+# Free routes (/api/v1/regime and all non-v1 routes) pass through unchanged.
+# The MCP server at /mcp is NOT affected — it remains free.
+try:
+    from x402.http import HTTPFacilitatorClient
+    from x402.http.middleware.fastapi import payment_middleware
+    from x402 import x402ResourceServer
+    from x402.mechanisms.evm.exact import ExactEvmServerScheme
+
+    _X402_PAY_TO = "0xb8280cd9d2a2e7ac3be92c0b5b875c1ca7ab76f4"
+    _X402_NETWORK = "eip155:8453"  # Base mainnet
+
+    # Route → payment config. /api/v1/regime intentionally absent (FREE).
+    _X402_ROUTES = {
+        "GET /api/v1/congress":       {"accepts": {"scheme": "exact", "payTo": _X402_PAY_TO, "price": "$0.05", "network": _X402_NETWORK}},
+        "GET /api/v1/ark/trades":     {"accepts": {"scheme": "exact", "payTo": _X402_PAY_TO, "price": "$0.03", "network": _X402_NETWORK}},
+        "GET /api/v1/ark/holdings":   {"accepts": {"scheme": "exact", "payTo": _X402_PAY_TO, "price": "$0.03", "network": _X402_NETWORK}},
+        "GET /api/v1/insiders":       {"accepts": {"scheme": "exact", "payTo": _X402_PAY_TO, "price": "$0.05", "network": _X402_NETWORK}},
+        "GET /api/v1/13f":            {"accepts": {"scheme": "exact", "payTo": _X402_PAY_TO, "price": "$0.05", "network": _X402_NETWORK}},
+        "GET /api/v1/darkpool":       {"accepts": {"scheme": "exact", "payTo": _X402_PAY_TO, "price": "$0.05", "network": _X402_NETWORK}},
+        "GET /api/v1/short-interest": {"accepts": {"scheme": "exact", "payTo": _X402_PAY_TO, "price": "$0.03", "network": _X402_NETWORK}},
+        "GET /api/v1/superinvestors": {"accepts": {"scheme": "exact", "payTo": _X402_PAY_TO, "price": "$0.03", "network": _X402_NETWORK}},
+        "GET /api/v1/confluence":     {"accepts": {"scheme": "exact", "payTo": _X402_PAY_TO, "price": "$0.10", "network": _X402_NETWORK}},
+    }
+
+    _x402_facilitator = HTTPFacilitatorClient({"url": "https://x402.org/facilitator"})
+    _x402_server = x402ResourceServer(_x402_facilitator)
+    _x402_server.register(_X402_NETWORK, ExactEvmServerScheme())
+
+    # Create middleware function once (holds initialization state in closure).
+    # sync_facilitator_on_start=False: don't block on startup; the facilitator
+    # is only needed when verifying actual payments, not for returning 402s.
+    _x402_middleware_fn = payment_middleware(
+        _X402_ROUTES,
+        _x402_server,
+        sync_facilitator_on_start=False,
+    )
+
+    @app.middleware("http")
+    async def x402_payment_middleware(request: Request, call_next):
+        """Intercept paid v1 routes — return 402 or verify payment before routing."""
+        try:
+            return await _x402_middleware_fn(request, call_next)
+        except Exception as exc:
+            # Fail closed: never expose paid content on middleware crash
+            logger.error(f"[x402] Middleware error on {request.url.path}: {exc}")
+            from fastapi.responses import JSONResponse
+            return JSONResponse(
+                content={"error": "payment_service_unavailable"},
+                status_code=503,
+            )
+
+    print("[x402] Payment middleware registered — 9 paid v1 endpoints (USDC on Base L2, eip155:8453)")
+
+except ImportError as exc:
+    print(f"[x402] Package not installed ({exc}) — payment gating disabled")
+except Exception as exc:
+    print(f"[x402] Middleware setup failed ({exc}) — payment gating disabled")
+
+
 @app.get("/api/metrics")
 def api_metrics():
     """Lightweight request metrics — no external dependencies."""
@@ -251,7 +312,23 @@ _LLMS_TXT = """\
 - get_confluence_signals ($0.10) — Stocks where multiple smart money sources agree. Scored 0-100, direction-aware (bullish/bearish).
 
 ### Signals — Macro
-- get_market_regime ($0.02) — Market regime: Green/Yellow/Red via VIX + SPY 200MA + credit spreads (FRED). Cached 1h.
+- get_market_regime (FREE) — Market regime: Green/Yellow/Red via VIX + SPY 200MA + credit spreads (FRED). Cached 1h.
+
+## REST API v1 Endpoints (x402-gated, same data as MCP tools)
+
+### Paid endpoints (USDC on Base L2, eip155:8453)
+- GET /api/v1/congress?party=&chamber=&trade_type=&days=30&limit=100   ($0.05)
+- GET /api/v1/ark/trades?trade_type=&etf=&days=30&limit=100            ($0.03)
+- GET /api/v1/ark/holdings?etf=&min_weight=0&limit=100                 ($0.03)
+- GET /api/v1/insiders?transaction_type=&ticker=&days=30&cluster_only=false ($0.05)
+- GET /api/v1/13f?fund=&limit=50                                       ($0.05)
+- GET /api/v1/darkpool?min_zscore=2.0&min_dpi=0.4&days=7&limit=100     ($0.05)
+- GET /api/v1/short-interest?ticker=&min_short_ratio=&sort_by=short_interest ($0.03)
+- GET /api/v1/superinvestors?manager=&ticker=&activity_type=&limit=100 ($0.03)
+- GET /api/v1/confluence?min_score=6.0&sources=&days=7&limit=100       ($0.10)
+
+### Free endpoint (no payment)
+- GET /api/v1/regime                                                    (FREE)
 
 ## Free Endpoints (no auth)
 - GET /api/health       — Service health check, version, capabilities
@@ -260,17 +337,31 @@ _LLMS_TXT = """\
 - GET /llms.txt         — This file
 - GET /.well-known/agents.json — Agent discovery metadata (JSON)
 - GET /api/data-health  — Detailed data freshness monitoring
+- GET /api/v1/regime    — Market regime (free)
 
 ## Payment
-All MCP tool calls require x402 payment header (USDC on Base L2, Coinbase).
+REST v1 endpoints require x402 payment (USDC on Base L2, Coinbase).
+MCP tools at /mcp are also available (same data, same pricing via x402).
 No subscriptions, no API keys. Pay only for what you use.
-Minimum per-call cost: $0.02 (get_market_regime). Max: $0.10 (get_confluence_signals).
+Minimum per-call cost: $0.03. Max: $0.10 (get_confluence_signals).
+
+## Integration Example (REST v1 with x402)
+```
+# 1. First call — receive 402 with payment instructions
+GET https://meridianfin.io/api/v1/congress
+→ HTTP 402
+→ Header: PAYMENT-REQUIRED: <base64-encoded payment requirements>
+
+# 2. Create payment via CDP / x402 client, then retry with header
+GET https://meridianfin.io/api/v1/congress
+Header: PAYMENT-SIGNATURE: <base64-encoded signed payment payload>
+→ HTTP 200 with Congress trade data
+```
 
 ## Integration Example (MCP)
 ```
 POST https://meridianfin.io/mcp
 Content-Type: application/json
-X-PAYMENT: <x402-payment-header>
 
 {"method": "tools/call", "params": {"name": "get_confluence_signals", "arguments": {"min_score": 7, "days": 7}}}
 ```
@@ -305,6 +396,7 @@ _AGENTS_JSON = {
     "url": "https://meridianfin.io",
     "api_base": "https://meridianfin.io",
     "mcp_url": "https://meridianfin.io/mcp",
+    "rest_api_base": "https://meridianfin.io/api/v1",
     "openapi_url": "https://meridianfin.io/api/openapi.json",
     "llms_txt_url": "https://meridianfin.io/llms.txt",
     "version": "1.0.0",
@@ -324,27 +416,32 @@ _AGENTS_JSON = {
         "protocol": "x402",
         "currency": "USDC",
         "network": "base",
+        "chain_id": 8453,
+        "caip2": "eip155:8453",
+        "facilitator": "https://x402.org/facilitator",
+        "pay_to": "0xb8280cd9d2a2e7ac3be92c0b5b875c1ca7ab76f4",
         "description": "Pay-per-call. No subscriptions. USDC on Base L2 (Coinbase).",
-        "price_range": {"min_usd": 0.02, "max_usd": 0.10},
+        "price_range": {"min_usd": 0.03, "max_usd": 0.10},
     },
     "tools": [
-        {"name": "get_congress_trades",       "price_usd": 0.05},
-        {"name": "get_ark_trades",            "price_usd": 0.03},
-        {"name": "get_ark_holdings",          "price_usd": 0.03},
-        {"name": "get_insider_trades",        "price_usd": 0.05},
-        {"name": "get_13f_filings",           "price_usd": 0.05},
-        {"name": "get_darkpool_activity",     "price_usd": 0.05},
-        {"name": "get_short_interest",        "price_usd": 0.03},
-        {"name": "get_superinvestor_activity","price_usd": 0.05},
-        {"name": "get_confluence_signals",    "price_usd": 0.10},
-        {"name": "get_market_regime",         "price_usd": 0.02},
+        {"name": "get_congress_trades",       "price_usd": 0.05, "rest_path": "/api/v1/congress"},
+        {"name": "get_ark_trades",            "price_usd": 0.03, "rest_path": "/api/v1/ark/trades"},
+        {"name": "get_ark_holdings",          "price_usd": 0.03, "rest_path": "/api/v1/ark/holdings"},
+        {"name": "get_insider_trades",        "price_usd": 0.05, "rest_path": "/api/v1/insiders"},
+        {"name": "get_13f_filings",           "price_usd": 0.05, "rest_path": "/api/v1/13f"},
+        {"name": "get_darkpool_activity",     "price_usd": 0.05, "rest_path": "/api/v1/darkpool"},
+        {"name": "get_short_interest",        "price_usd": 0.03, "rest_path": "/api/v1/short-interest"},
+        {"name": "get_superinvestor_activity","price_usd": 0.03, "rest_path": "/api/v1/superinvestors"},
+        {"name": "get_confluence_signals",    "price_usd": 0.10, "rest_path": "/api/v1/confluence"},
+        {"name": "get_market_regime",         "price_usd": 0.00, "rest_path": "/api/v1/regime", "free": True},
     ],
     "free_endpoints": [
-        {"path": "/api/health",            "description": "Service health check"},
-        {"path": "/api/stats",             "description": "Data freshness and coverage stats"},
-        {"path": "/api/openapi.json",      "description": "OpenAPI 3.1 spec with x-x402 extensions"},
-        {"path": "/llms.txt",              "description": "LLM-readable endpoint guide"},
+        {"path": "/api/health",             "description": "Service health check"},
+        {"path": "/api/stats",              "description": "Data freshness and coverage stats"},
+        {"path": "/api/openapi.json",       "description": "OpenAPI 3.1 spec with x-x402 extensions"},
+        {"path": "/llms.txt",               "description": "LLM-readable endpoint guide"},
         {"path": "/.well-known/agents.json","description": "Agent discovery metadata"},
+        {"path": "/api/v1/regime",          "description": "Market regime: Green/Yellow/Red (FREE)"},
     ],
     "data_sources": [
         "SEC EDGAR (Form 4, 13F)",

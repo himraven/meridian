@@ -17,6 +17,7 @@ from . import (
     knowledge,
     macro,
     discovery,
+    v1,
 )
 
 
@@ -55,3 +56,6 @@ def register_routers(app: FastAPI) -> None:
 
     # Agent discovery (health, stats, openapi spec)
     app.include_router(discovery.router, tags=["discovery"])
+
+    # REST API v1 — x402 micropayment-gated endpoints (mirrors MCP tools)
+    app.include_router(v1.router, tags=["v1"])
