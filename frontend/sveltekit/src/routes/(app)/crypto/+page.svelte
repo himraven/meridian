@@ -1,28 +1,54 @@
 <script lang="ts">
+	import LWLineChart from '$lib/components/charts/LWLineChart.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
-	const overview  = $derived(data.overview as any);
-	const etfData   = $derived(data.etfData as any);
-	const coins     = $derived(
+	const overview       = $derived(data.overview as any);
+	const etfData        = $derived(data.etfData as any);
+	const fgData         = $derived(data.fearGreed as any);
+	const cryptoSignals  = $derived(data.cryptoSignals as any);
+
+	// ── Overview-derived ────────────────────────────────────────────
+	const coins   = $derived(
 		[...(overview?.coins ?? [])].sort((a: any, b: any) => (b.openInterest ?? 0) - (a.openInterest ?? 0)) as any[]
 	);
-	const btc       = $derived(overview?.btc ?? {});
-	const eth       = $derived(overview?.eth ?? {});
-	const fearGreed = $derived(overview?.fear_greed ?? {});
-	const meta      = $derived(overview?.metadata ?? {});
-	const summary   = $derived(etfData?.crypto_etf_summary ?? {});
-	const btcEtf    = $derived({
-		total_aum: summary?.btc_etf_total_aum ?? null,
-		daily_flow: summary?.btc_etf_daily_flow ?? null,
-		weekly_flow: summary?.btc_etf_weekly_flow ?? null,
+	const btcOI   = $derived(overview?.btc ?? {});
+	const ethOI   = $derived(overview?.eth ?? {});
+	const fgKpi   = $derived(overview?.fear_greed ?? {});
+	const meta    = $derived(overview?.metadata ?? {});
+
+	// ── ETF-derived ─────────────────────────────────────────────────
+	const summary = $derived(etfData?.crypto_etf_summary ?? {});
+	const btcEtf  = $derived({
+		total_aum:    summary?.btc_etf_total_aum  ?? null,
+		daily_flow:   summary?.btc_etf_daily_flow  ?? null,
+		weekly_flow:  summary?.btc_etf_weekly_flow ?? null,
 	});
-	const ethEtf    = $derived({
-		total_aum: summary?.eth_etf_total_aum ?? null,
-		daily_flow: summary?.eth_etf_daily_flow ?? null,
-		weekly_flow: summary?.eth_etf_weekly_flow ?? null,
+	const ethEtf  = $derived({
+		total_aum:    summary?.eth_etf_total_aum  ?? null,
+		daily_flow:   summary?.eth_etf_daily_flow  ?? null,
+		weekly_flow:  summary?.eth_etf_weekly_flow ?? null,
 	});
+
+	// ── Price cards ─────────────────────────────────────────────────
+	const btcPrice = $derived(cryptoSignals?.crypto_prices?.btc);
+	const ethPrice = $derived(cryptoSignals?.crypto_prices?.eth);
+
+	// ── Smart Money ─────────────────────────────────────────────────
+	const topSignals = $derived((cryptoSignals?.smart_money_signals ?? []).slice(0, 3) as any[]);
+
+	// ── Fear & Greed ─────────────────────────────────────────────────
+	const fgCurrent = $derived(fgData?.current ?? fgKpi ?? {});
+	const fgChartData = $derived(
+		(fgData?.entries ?? []).map((e: any) => ({ time: e.date, value: e.value }))
+	);
+
+	// ── Chart helpers ─────────────────────────────────────────────────
+	function toChartData(rows: { date: string; value: number }[] | undefined | null) {
+		if (!rows?.length) return [];
+		return rows.map(r => ({ time: r.date, value: r.value }));
+	}
 
 	// ── Formatters ────────────────────────────────────────────────────
 
@@ -35,6 +61,12 @@
 		return `$${abs.toLocaleString()}`;
 	}
 
+	function fmtPrice(v: number | null | undefined): string {
+		if (v == null) return '—';
+		if (v >= 1000) return `$${v.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+		return `$${v.toFixed(2)}`;
+	}
+
 	function fmtFlow(v: number | null | undefined): string {
 		if (v === null || v === undefined || v === 0) return '—';
 		const abs = Math.abs(v);
@@ -45,14 +77,8 @@
 		return `${prefix}${abs.toLocaleString()}`;
 	}
 
-	function fmtPct(v: number | null | undefined, decimals = 2): string {
-		if (v === null || v === undefined) return '—';
-		return `${v > 0 ? '+' : ''}${v.toFixed(decimals)}%`;
-	}
-
 	function fmtFunding(v: number | null | undefined): string {
 		if (v === null || v === undefined) return '—';
-		// funding rate is stored as decimal (e.g. 0.002617), display as %
 		const pct = v * 100;
 		return `${pct > 0 ? '+' : ''}${pct.toFixed(4)}%`;
 	}
@@ -62,25 +88,37 @@
 		return `${v > 0 ? '+' : ''}${v.toFixed(2)}%`;
 	}
 
+	function fmtScore(v: number | null | undefined): string {
+		if (v == null) return '—';
+		return v.toFixed(1);
+	}
+
 	function changeColor(v: number | null | undefined): string {
 		if (v === null || v === undefined) return 'var(--text-dimmed)';
 		return v > 0 ? 'var(--green)' : v < 0 ? 'var(--red)' : 'var(--text-muted)';
 	}
 
-	function fearGreedColor(v: number): string {
-		if (v <= 20)  return 'var(--red)';         // Extreme Fear
-		if (v <= 40)  return '#f97316';             // Fear (orange)
-		if (v <= 60)  return '#eab308';             // Neutral (yellow)
-		if (v <= 80)  return 'var(--green)';        // Greed
-		return '#22c55e';                           // Extreme Greed (bright green)
+	function scoreColor(v: number | null | undefined): string {
+		if (v == null) return 'var(--text-dimmed)';
+		if (v >= 70) return 'var(--green)';
+		if (v >= 50) return 'var(--amber)';
+		return 'var(--red)';
+	}
+
+	function fearGreedColor(v: number | null | undefined): string {
+		if (v == null) return 'var(--text-muted)';
+		if (v <= 20)  return 'var(--red)';
+		if (v <= 40)  return '#f97316';
+		if (v <= 60)  return '#eab308';
+		if (v <= 80)  return 'var(--green)';
+		return '#22c55e';
 	}
 
 	function collectedAt(ts: string | null | undefined): string {
 		if (!ts) return '';
 		try {
 			const d = new Date(ts);
-			const now = Date.now();
-			const diffMin = Math.round((now - d.getTime()) / 60000);
+			const diffMin = Math.round((Date.now() - d.getTime()) / 60000);
 			if (diffMin < 1)   return 'just now';
 			if (diffMin < 60)  return `${diffMin}m ago`;
 			const h = Math.floor(diffMin / 60);
@@ -110,13 +148,11 @@
 	</div>
 
 	{#if data.error && !overview}
-		<!-- Error state -->
 		<div class="card-base">
 			<p class="error-msg">⚠ Failed to load crypto data: {data.error}</p>
 		</div>
 
 	{:else if !overview}
-		<!-- Loading state -->
 		<div class="card-base">
 			<div class="loading-state">
 				<div class="spinner"></div>
@@ -126,66 +162,140 @@
 
 	{:else}
 
-		<!-- ── KPI Cards ────────────────────────────────────────────── -->
+		<!-- ── BTC / ETH Price Cards ────────────────────────────────── -->
+		{#if cryptoSignals}
+			<div class="two-col">
+
+				<!-- BTC Price -->
+				<div class="card-base price-card btc-price-card">
+					<div class="price-header">
+						<span class="price-symbol btc-sym">₿</span>
+						<span class="price-name">BITCOIN</span>
+					</div>
+					<div class="price-row">
+						<span class="price-value">{fmtPrice(btcPrice?.price)}</span>
+						<span class="price-change" style="color: {changeColor(btcPrice?.change_24h_pct)}">
+							{fmtChange(btcPrice?.change_24h_pct)}
+						</span>
+					</div>
+					{#if btcPrice?.chart_90d?.length}
+						<div class="chart-sublabel">90-Day Price</div>
+						<LWLineChart
+							data={toChartData(btcPrice.chart_90d)}
+							height={120}
+							color="#f59e0b"
+						/>
+					{/if}
+				</div>
+
+				<!-- ETH Price -->
+				<div class="card-base price-card eth-price-card">
+					<div class="price-header">
+						<span class="price-symbol eth-sym">Ξ</span>
+						<span class="price-name">ETHEREUM</span>
+					</div>
+					<div class="price-row">
+						<span class="price-value">{fmtPrice(ethPrice?.price)}</span>
+						<span class="price-change" style="color: {changeColor(ethPrice?.change_24h_pct)}">
+							{fmtChange(ethPrice?.change_24h_pct)}
+						</span>
+					</div>
+					{#if ethPrice?.chart_90d?.length}
+						<div class="chart-sublabel">90-Day Price</div>
+						<LWLineChart
+							data={toChartData(ethPrice.chart_90d)}
+							height={120}
+							color="#818cf8"
+						/>
+					{/if}
+				</div>
+
+			</div>
+		{/if}
+
+		<!-- ── Fear & Greed Section ─────────────────────────────────── -->
+		<div class="card-base fg-section">
+			<div class="section-label">FEAR &amp; GREED INDEX</div>
+			<div class="fg-inner">
+
+				<!-- Left: current reading -->
+				<div class="fg-left">
+					{#if fgCurrent?.value !== undefined}
+						<div class="fg-big-val" style="color: {fearGreedColor(fgCurrent.value)}">
+							{fgCurrent.value}
+						</div>
+						<div class="fg-big-label" style="color: {fearGreedColor(fgCurrent.value)}">
+							{fgCurrent.label ?? '—'}
+						</div>
+						{#if fgCurrent.btc_price}
+							<div class="fg-btc-price">
+								BTC at ${fgCurrent.btc_price.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+							</div>
+						{/if}
+					{:else}
+						<div class="fg-big-val dim">—</div>
+					{/if}
+				</div>
+
+				<!-- Right: 30-day sparkline -->
+				<div class="fg-right">
+					{#if fgChartData.length}
+						<div class="chart-sublabel">30-Day History</div>
+						<LWLineChart
+							data={fgChartData}
+							height={110}
+							color="#eab308"
+						/>
+					{:else if fgKpi?.value !== undefined}
+						<!-- Fallback: no history, just show the KPI values -->
+						<div class="fg-fallback">
+							<span class="fg-sub-label">Current</span>
+							<span class="fg-sub-val" style="color: {fearGreedColor(fgKpi.value)}">{fgKpi.value} — {fgKpi.label ?? ''}</span>
+						</div>
+					{/if}
+				</div>
+
+			</div>
+		</div>
+
+		<!-- ── KPI Cards (OI only — F&G has its own section) ───────── -->
 		<div class="kpi-grid">
 
-			<!-- BTC Card -->
+			<!-- BTC OI -->
 			<div class="kpi-card btc-card">
 				<div class="kpi-header">
 					<span class="kpi-icon btc-icon">₿</span>
-					<span class="kpi-title">BTC</span>
+					<span class="kpi-title">BTC OI</span>
 				</div>
-				<div class="kpi-value">{fmtOI(btc?.openInterest)}</div>
+				<div class="kpi-value">{fmtOI(btcOI?.openInterest)}</div>
 				<div class="kpi-subs">
 					<span class="kpi-sub-label">Funding</span>
-					<span class="kpi-sub-val" style="color: {changeColor(btc?.avgFundingRate)}">{fmtFunding(btc?.avgFundingRate)}</span>
+					<span class="kpi-sub-val" style="color: {changeColor(btcOI?.avgFundingRate)}">{fmtFunding(btcOI?.avgFundingRate)}</span>
 				</div>
 				<div class="kpi-subs">
 					<span class="kpi-sub-label">OI 4h</span>
-					<span class="kpi-sub-val" style="color: {changeColor(btc?.h4OIChange)}">{fmtChange(btc?.h4OIChange)}</span>
+					<span class="kpi-sub-val" style="color: {changeColor(btcOI?.h4OIChange)}">{fmtChange(btcOI?.h4OIChange)}</span>
 				</div>
 			</div>
 
-			<!-- ETH Card -->
+			<!-- ETH OI -->
 			<div class="kpi-card eth-card">
 				<div class="kpi-header">
 					<span class="kpi-icon eth-icon">Ξ</span>
-					<span class="kpi-title">ETH</span>
+					<span class="kpi-title">ETH OI</span>
 				</div>
-				<div class="kpi-value">{fmtOI(eth?.openInterest)}</div>
+				<div class="kpi-value">{fmtOI(ethOI?.openInterest)}</div>
 				<div class="kpi-subs">
 					<span class="kpi-sub-label">Funding</span>
-					<span class="kpi-sub-val" style="color: {changeColor(eth?.avgFundingRate)}">{fmtFunding(eth?.avgFundingRate)}</span>
+					<span class="kpi-sub-val" style="color: {changeColor(ethOI?.avgFundingRate)}">{fmtFunding(ethOI?.avgFundingRate)}</span>
 				</div>
 				<div class="kpi-subs">
 					<span class="kpi-sub-label">OI 4h</span>
-					<span class="kpi-sub-val" style="color: {changeColor(eth?.h4OIChange)}">{fmtChange(eth?.h4OIChange)}</span>
+					<span class="kpi-sub-val" style="color: {changeColor(ethOI?.h4OIChange)}">{fmtChange(ethOI?.h4OIChange)}</span>
 				</div>
 			</div>
 
-			<!-- Fear & Greed Card -->
-			<div class="kpi-card fg-card">
-				<div class="kpi-header">
-					<span class="kpi-icon fg-icon">◉</span>
-					<span class="kpi-title">Fear &amp; Greed</span>
-				</div>
-				{#if fearGreed?.value !== undefined}
-					<div class="kpi-value" style="color: {fearGreedColor(fearGreed.value)}">{fearGreed.value}</div>
-					<div class="kpi-subs">
-						<span class="kpi-sub-val fg-label" style="color: {fearGreedColor(fearGreed.value)}">{fearGreed.label ?? '—'}</span>
-					</div>
-					{#if fearGreed.btc_price}
-						<div class="kpi-subs">
-							<span class="kpi-sub-label">BTC</span>
-							<span class="kpi-sub-val dim">${fearGreed.btc_price.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-						</div>
-					{/if}
-				{:else}
-					<div class="kpi-value dim">—</div>
-				{/if}
-			</div>
-
-			<!-- Total OI Card -->
+			<!-- Total OI -->
 			<div class="kpi-card oi-card">
 				<div class="kpi-header">
 					<span class="kpi-icon oi-icon">∑</span>
@@ -196,15 +306,42 @@
 					<span class="kpi-sub-label">Coins</span>
 					<span class="kpi-sub-val dim">{meta?.coin_count ?? coins.length}</span>
 				</div>
-				{#if btc?.h4OIChange !== undefined}
+				{#if btcOI?.h4OIChange !== undefined}
 					<div class="kpi-subs">
 						<span class="kpi-sub-label">BTC 4h</span>
-						<span class="kpi-sub-val" style="color: {changeColor(btc?.h4OIChange)}">{fmtChange(btc?.h4OIChange)}</span>
+						<span class="kpi-sub-val" style="color: {changeColor(btcOI?.h4OIChange)}">{fmtChange(btcOI?.h4OIChange)}</span>
 					</div>
 				{/if}
 			</div>
 
 		</div>
+
+		<!-- ── Smart Money Highlight ────────────────────────────────── -->
+		{#if topSignals.length}
+			<div class="card-base">
+				<div class="section-header">
+					<div class="section-label">SMART MONEY — CRYPTO EQUITIES</div>
+					<a href="/crypto/equities" class="see-more-link">View all equity signals →</a>
+				</div>
+
+				<div class="sm-rows">
+					{#each topSignals as sig}
+						<div class="sm-row">
+							<a href="/ticker/{sig.ticker}" class="sm-ticker">{sig.ticker}</a>
+							{#if sig.company}
+								<span class="sm-company">{sig.company}</span>
+							{/if}
+							<span class="sm-score" style="color: {scoreColor(sig.score)}">{fmtScore(sig.score)}</span>
+							<span
+								class="sm-dir-badge"
+								class:bullish={sig.direction?.toLowerCase() === 'bullish'}
+								class:bearish={sig.direction?.toLowerCase() === 'bearish'}
+							>{sig.direction ?? '—'}</span>
+						</div>
+					{/each}
+				</div>
+			</div>
+		{/if}
 
 		<!-- ── OI Table ─────────────────────────────────────────────── -->
 		<div class="card-base">
@@ -313,7 +450,10 @@
 </div>
 
 <style>
-	/* ── Layout ─────────────────────────────────────────────────────── */
+	/* ── Spacing ────────────────────────────────────────────────────── */
+	.space-y-6 > * + * { margin-top: 24px; }
+
+	/* ── Page Header ────────────────────────────────────────────────── */
 	.page-header {
 		display: flex;
 		align-items: flex-start;
@@ -341,6 +481,7 @@
 		white-space: nowrap;
 	}
 
+	/* ── Card Base ──────────────────────────────────────────────────── */
 	.card-base {
 		background: var(--bg-surface);
 		border: 1px solid var(--border-default);
@@ -348,18 +489,164 @@
 		padding: 20px;
 	}
 
-	/* ── KPI Grid ────────────────────────────────────────────────────── */
+	/* ── Two-col grid ───────────────────────────────────────────────── */
+	.two-col {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 16px;
+	}
+
+	@media (max-width: 768px) {
+		.two-col { grid-template-columns: 1fr; }
+	}
+
+	/* ── BTC/ETH Price Cards ────────────────────────────────────────── */
+	.price-card {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.btc-price-card { border-top: 2px solid rgba(245, 158, 11, 0.35); }
+	.eth-price-card { border-top: 2px solid rgba(129, 140, 248, 0.35); }
+
+	.price-header {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.price-symbol {
+		font-size: 18px;
+		font-weight: 800;
+		line-height: 1;
+	}
+
+	.btc-sym { color: #f59e0b; }
+	.eth-sym { color: #818cf8; }
+
+	.price-name {
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
+		font-size: 11px;
+		font-weight: 600;
+		letter-spacing: 0.07em;
+		text-transform: uppercase;
+		color: var(--text-dimmed);
+	}
+
+	.price-row {
+		display: flex;
+		align-items: baseline;
+		gap: 12px;
+		flex-wrap: wrap;
+	}
+
+	.price-value {
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
+		font-size: 32px;
+		font-weight: 700;
+		color: var(--text-primary);
+		letter-spacing: -0.02em;
+		line-height: 1;
+	}
+
+	.price-change {
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
+		font-size: 16px;
+		font-weight: 600;
+	}
+
+	.chart-sublabel {
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
+		font-size: 10px;
+		font-weight: 500;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+		color: var(--text-dimmed);
+		margin-top: 4px;
+		margin-bottom: 6px;
+	}
+
+	/* ── Fear & Greed Section ───────────────────────────────────────── */
+	.fg-section {
+		/* Full-width card */
+	}
+
+	.fg-inner {
+		display: grid;
+		grid-template-columns: 200px 1fr;
+		gap: 24px;
+		align-items: center;
+	}
+
+	@media (max-width: 640px) {
+		.fg-inner { grid-template-columns: 1fr; }
+	}
+
+	.fg-left {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+
+	.fg-big-val {
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
+		font-size: 64px;
+		font-weight: 800;
+		line-height: 1;
+		letter-spacing: -0.02em;
+	}
+
+	.fg-big-label {
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
+		font-size: 13px;
+		font-weight: 600;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+
+	.fg-btc-price {
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
+		font-size: 11px;
+		color: var(--text-dimmed);
+		margin-top: 4px;
+	}
+
+	.fg-fallback {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	.fg-sub-label {
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
+		font-size: 10px;
+		font-weight: 500;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+		color: var(--text-dimmed);
+	}
+
+	.fg-sub-val {
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
+		font-size: 14px;
+		font-weight: 700;
+	}
+
+	.fg-right {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	/* ── KPI Grid (3 cards) ─────────────────────────────────────────── */
 	.kpi-grid {
 		display: grid;
-		grid-template-columns: repeat(4, 1fr);
+		grid-template-columns: repeat(3, 1fr);
 		gap: 14px;
 	}
 
-	@media (max-width: 900px) {
-		.kpi-grid { grid-template-columns: repeat(2, 1fr); }
-	}
-
-	@media (max-width: 480px) {
+	@media (max-width: 768px) {
 		.kpi-grid { grid-template-columns: 1fr; }
 	}
 
@@ -375,7 +662,6 @@
 
 	.btc-card { border-top: 2px solid #f7931a50; }
 	.eth-card  { border-top: 2px solid #627eea50; }
-	.fg-card   { border-top: 2px solid rgba(255, 255, 255, 0.1); }
 	.oi-card   { border-top: 2px solid rgba(255, 255, 255, 0.1); }
 
 	.kpi-header {
@@ -393,11 +679,10 @@
 
 	.btc-icon { color: #f7931a; }
 	.eth-icon { color: #627eea; }
-	.fg-icon  { color: var(--text-muted); }
 	.oi-icon  { color: var(--text-muted); }
 
 	.kpi-title {
-		font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
 		font-size: 11px;
 		font-weight: 500;
 		letter-spacing: 0.06em;
@@ -406,7 +691,7 @@
 	}
 
 	.kpi-value {
-		font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
 		font-size: 22px;
 		font-weight: 700;
 		color: var(--text-primary);
@@ -421,7 +706,7 @@
 	}
 
 	.kpi-sub-label {
-		font-family: 'SF Mono', 'Fira Code', monospace;
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
 		font-size: 10px;
 		font-weight: 500;
 		letter-spacing: 0.06em;
@@ -431,24 +716,18 @@
 	}
 
 	.kpi-sub-val {
-		font-family: 'SF Mono', 'Fira Code', monospace;
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
 		font-size: 12px;
 		font-weight: 600;
 		color: var(--text-secondary);
 	}
 
-	.fg-label {
-		font-size: 11px;
-		letter-spacing: 0.04em;
-		text-transform: uppercase;
-	}
-
-	/* ── Section Label ───────────────────────────────────────────────── */
+	/* ── Section Labels ─────────────────────────────────────────────── */
 	.section-label {
-		font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
-		font-size: 11px;
-		font-weight: 500;
-		letter-spacing: 0.05em;
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
+		font-size: 10px;
+		font-weight: 600;
+		letter-spacing: 0.07em;
 		text-transform: uppercase;
 		color: var(--text-muted);
 		margin-bottom: 14px;
@@ -466,7 +745,7 @@
 	}
 
 	.see-more-link {
-		font-family: 'SF Mono', 'Fira Code', monospace;
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
 		font-size: 11px;
 		color: var(--text-dimmed);
 		text-decoration: none;
@@ -475,6 +754,88 @@
 
 	.see-more-link:hover {
 		color: var(--text-secondary);
+	}
+
+	/* ── Smart Money Highlight ──────────────────────────────────────── */
+	.sm-rows {
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+	}
+
+	.sm-row {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 10px 0;
+		border-bottom: 1px solid var(--border-default);
+	}
+
+	.sm-row:last-child {
+		border-bottom: none;
+		padding-bottom: 0;
+	}
+
+	.sm-row:first-child {
+		padding-top: 0;
+	}
+
+	.sm-ticker {
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--text-primary);
+		text-decoration: none;
+		letter-spacing: 0.03em;
+		min-width: 56px;
+		transition: color 0.15s;
+	}
+
+	.sm-ticker:hover {
+		color: var(--blue, #818cf8);
+	}
+
+	.sm-company {
+		font-size: 12px;
+		color: var(--text-dimmed);
+		flex: 1;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.sm-score {
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
+		font-size: 13px;
+		font-weight: 700;
+		min-width: 36px;
+		text-align: right;
+	}
+
+	.sm-dir-badge {
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
+		font-size: 10px;
+		font-weight: 700;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+		padding: 2px 7px;
+		border-radius: 4px;
+		background: var(--bg-elevated);
+		border: 1px solid var(--border-default);
+		color: var(--text-dimmed);
+		white-space: nowrap;
+	}
+
+	.sm-dir-badge.bullish {
+		color: var(--green);
+		background: rgba(34, 197, 94, 0.08);
+		border-color: rgba(34, 197, 94, 0.2);
+	}
+
+	.sm-dir-badge.bearish {
+		color: var(--red);
+		background: rgba(239, 68, 68, 0.08);
+		border-color: rgba(239, 68, 68, 0.2);
 	}
 
 	/* ── OI Table ────────────────────────────────────────────────────── */
@@ -489,7 +850,7 @@
 	}
 
 	.data-table th {
-		font-family: 'SF Mono', 'Fira Code', monospace;
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
 		font-size: 10px;
 		font-weight: 500;
 		letter-spacing: 0.06em;
@@ -519,13 +880,13 @@
 	.text-right { text-align: right; }
 
 	.mono {
-		font-family: 'SF Mono', 'Fira Code', monospace;
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
 	}
 
 	.dim { color: var(--text-dimmed); }
 
 	.ticker-mono {
-		font-family: 'SF Mono', 'Fira Code', monospace;
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
 		font-size: 12px;
 		font-weight: 700;
 		color: var(--text-primary);
@@ -533,7 +894,7 @@
 	}
 
 	.rank-col {
-		font-family: 'SF Mono', 'Fira Code', monospace;
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
 		font-size: 10px;
 		width: 32px;
 		min-width: 32px;
@@ -573,7 +934,7 @@
 	}
 
 	.etf-label {
-		font-family: 'SF Mono', 'Fira Code', monospace;
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
 		font-size: 12px;
 		font-weight: 700;
 		letter-spacing: 0.04em;
@@ -595,7 +956,7 @@
 	}
 
 	.etf-stat-label {
-		font-family: 'SF Mono', 'Fira Code', monospace;
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
 		font-size: 10px;
 		font-weight: 500;
 		letter-spacing: 0.05em;
@@ -604,14 +965,14 @@
 	}
 
 	.etf-stat-val {
-		font-family: 'SF Mono', 'Fira Code', monospace;
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
 		font-size: 14px;
 		font-weight: 700;
 		color: var(--text-primary);
 		text-align: right;
 	}
 
-	/* ── Loading & Error states ──────────────────────────────────────── */
+	/* ── Loading & Error ─────────────────────────────────────────────── */
 	.loading-state {
 		display: flex;
 		align-items: center;
