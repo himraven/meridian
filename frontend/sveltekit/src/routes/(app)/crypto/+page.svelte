@@ -142,9 +142,6 @@
 			<h1 class="page-title">Crypto Market Overview</h1>
 			<p class="page-subtitle">Open interest, funding rates, fear & greed, and ETF flows</p>
 		</div>
-		{#if meta?.oi_collected_at}
-			<span class="cache-label">Updated {collectedAt(meta.oi_collected_at)}</span>
-		{/if}
 	</div>
 
 	{#if data.error && !overview}
@@ -164,6 +161,12 @@
 
 		<!-- ── BTC / ETH Price Cards ────────────────────────────────── -->
 		{#if cryptoSignals}
+			<div class="section-ts-row">
+				<span class="section-ts-label">Prices</span>
+				{#if cryptoSignals.cached_at}
+					<span class="section-ts">{collectedAt(cryptoSignals.cached_at)}</span>
+				{/if}
+			</div>
 			<div class="two-col">
 
 				<!-- BTC Price -->
@@ -215,7 +218,12 @@
 
 		<!-- ── Fear & Greed Section ─────────────────────────────────── -->
 		<div class="card-base fg-section">
-			<div class="section-label">FEAR &amp; GREED INDEX</div>
+			<div class="section-header-inline">
+				<div class="section-label">FEAR &amp; GREED INDEX</div>
+				{#if fgData?.metadata?.collected_at}
+					<span class="section-ts">{collectedAt(fgData.metadata.collected_at)}</span>
+				{/if}
+			</div>
 			<div class="fg-inner">
 
 				<!-- Left: current reading -->
@@ -345,7 +353,12 @@
 
 		<!-- ── OI Table ─────────────────────────────────────────────── -->
 		<div class="card-base">
-			<div class="section-label">Top {coins.length} Coins by Open Interest</div>
+			<div class="section-header-inline">
+				<div class="section-label">Top {coins.length} Coins by Open Interest</div>
+				{#if meta?.oi_collected_at}
+					<span class="section-ts">{collectedAt(meta.oi_collected_at)}</span>
+				{/if}
+			</div>
 
 			{#if coins.length}
 				<div class="table-wrap">
@@ -389,7 +402,12 @@
 		<div class="card-base">
 			<div class="section-header">
 				<div class="section-label">ETF Flow Summary</div>
-				<a href="/crypto/etf" class="see-more-link">Full ETF details →</a>
+				<div class="section-header-right">
+					{#if etfData?.metadata?.last_updated}
+						<span class="section-ts">{collectedAt(etfData.metadata.last_updated)}</span>
+					{/if}
+					<a href="/crypto/etf" class="see-more-link">Full ETF details →</a>
+				</div>
 			</div>
 
 			{#if !etfData}
@@ -738,6 +756,46 @@
 		align-items: center;
 		justify-content: space-between;
 		margin-bottom: 14px;
+	}
+
+	.section-header-right {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+
+	.section-header-inline {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		margin-bottom: 14px;
+	}
+
+	.section-header-inline .section-label {
+		margin-bottom: 0;
+	}
+
+	.section-ts-row {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		margin-bottom: 6px;
+	}
+
+	.section-ts-label {
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
+		font-size: 10px;
+		font-weight: 500;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+		color: var(--text-dimmed);
+	}
+
+	.section-ts {
+		font-family: 'JetBrains Mono', 'SF Mono', monospace;
+		font-size: 10px;
+		color: var(--text-dimmed);
+		opacity: 0.7;
 	}
 
 	.section-header .section-label {
