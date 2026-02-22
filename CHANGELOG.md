@@ -289,3 +289,35 @@ rsnest crons (smart-money-api)
 ---
 
 *Maintained by Nova*
+
+---
+
+## 2026-02-22 — Crypto Expansion (Major Upgrade)
+
+**FEAT: Full crypto derivatives section — 3 new pages + sidebar restructure + CoinGlass integration**
+
+### New Pages
+- **`/crypto`** — Overview dashboard: 4 KPI cards (BTC OI, ETH OI, Fear & Greed, Total OI), Top 20 coins OI table, ETF flow summary
+- **`/crypto/derivatives`** — Pill-tabbed derivatives detail: Open Interest (20 coins), Funding Rates (21 exchanges per coin), Options (exchange breakdown with share bars)
+- **`/crypto/etf`** — Dedicated BTC/ETH ETF flows page with summary cards + individual ETF breakdown tables
+
+### Sidebar Restructure
+- 4 sections: **Smart Money**, **Market Pulse**, **Crypto**, **Research**
+- Renamed "Sources" → "Smart Money", "Market Intelligence" → "Market Pulse"
+- New Crypto section with Overview, Derivatives, ETF Flows
+
+### Backend
+- **`api/routers/crypto.py`** — 4 endpoints: overview, derivatives, etf (redirect), fear-greed
+- 5-minute in-memory cache, orjson for fast JSON loading
+- Reads from CoinGlass data bind mount (`/app/data/coinglass/`)
+
+### Data Pipeline (rsnest)
+- **`api/cron/coinglass_collector.py`** — Collects from CoinGlass API v2/v4
+- Data: 20 coins OI, BTC/ETH funding rates (21 exchanges), options OI, Fear & Greed (90d history)
+- Cron: every 15 minutes
+- Output: 5 JSON files in `/data/coinglass/`
+
+### Infrastructure
+- `/crypto-signals` → 301 redirect to `/crypto`
+- CoinGlass Hobbyist API ($29/mo), API key in .env
+- Commit: `6fabadd`
