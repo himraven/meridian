@@ -28,7 +28,7 @@
 				{ href: '/fund-flows', label: 'Fund Flows (ETF)' },
 				{ href: '/crisis', label: 'Crisis Dashboard' },
 				{ href: '/cross-asset', label: 'Cross-Asset' },
-				{ href: '/market-regime', label: 'Market Regime', comingSoon: true },
+				{ href: '/market-regime', label: 'Market Regime' },
 			]
 		},
 		{
