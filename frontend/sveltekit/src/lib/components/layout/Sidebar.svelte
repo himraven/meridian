@@ -38,7 +38,6 @@
 				{ href: '/crypto/derivatives', label: 'Derivatives' },
 				{ href: '/crypto/etf', label: 'ETF Flows' },
 				{ href: '/crypto/equities', label: 'Equity Signals' },
-				{ href: '/crypto/equities', label: 'Equity Signals' },
 			]
 		},
 		{

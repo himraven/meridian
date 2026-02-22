@@ -468,6 +468,7 @@ def api_us_short_interest(
         "days_to_cover": "days_to_cover",
         "short_volume": "short_interest",
         "short_interest": "short_interest",
+        "change_pct": "change_pct",
     }
     sort_col = sort_col_map.get(sort_by, "short_interest")
 
@@ -491,6 +492,10 @@ def api_us_short_interest(
             total_sql = "SELECT COUNT(*) AS cnt FROM short_interest"
             total = db.query(total_sql)[0]["cnt"]
 
+            # Count with filters applied (before LIMIT) for accurate pagination
+            filtered_sql = sql.replace("SELECT *", "SELECT COUNT(*) AS cnt")
+            filtered_count = db.query(filtered_sql, params)[0]["cnt"]
+
             sql += f" ORDER BY {sort_col} DESC NULLS LAST LIMIT ?"
             params.append(limit)
 
@@ -501,7 +506,7 @@ def api_us_short_interest(
                 "data": rows,
                 "metadata": {
                     "total": total,
-                    "filtered": len(rows),
+                    "filtered": filtered_count,
                     "sort_by": sort_by,
                     "filters": {
                         "ticker": ticker,
