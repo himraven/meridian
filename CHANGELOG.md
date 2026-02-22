@@ -4,6 +4,28 @@ All notable changes to the Meridian platform are documented here.
 
 ---
 
+## 2026-02-22 — Agent Discovery Infrastructure (P1)
+
+**FEAT: Agent discovery infra — OpenAPI, llms.txt, agents.json, /health, /stats**
+
+Makes Meridian discoverable by AI agents and marketplaces.
+
+### New Files
+- `api/routers/discovery.py` — Agent discovery router with 3 endpoints
+
+### New Endpoints (all free, no auth)
+- `GET /api/health` — Full health check: status, version, tools_count=10, mcp_url, payment info, data sources
+- `GET /api/stats` — Data freshness per source, 790 tickers tracked, sample confluence signal preview
+- `GET /api/openapi.json` — OpenAPI 3.1 spec for all 10 MCP tools with x-x402 pricing extensions
+- `GET /llms.txt` — Human+LLM readable endpoint guide (all tools with prices, integration examples)
+- `GET /.well-known/agents.json` — Standard agent discovery metadata (schema_version 1.0)
+
+### Modified Files
+- `api/main.py` — Added `/llms.txt`, `/.well-known/agents.json`; updated `/health` (kept minimal for Docker); removed old /api/health stub
+- `api/routers/__init__.py` — Registered discovery router
+
+---
+
 ## 2026-02-22
 
 ### Fixed

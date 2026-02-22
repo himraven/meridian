@@ -205,12 +205,172 @@ def bootstrap_ticker_names():
     threading.Thread(target=_bootstrap, daemon=True).start()
 
 
-# ── Health Check ───────────────────────────────────────────────────────────
+# ── Health Check (Docker / load-balancer) ─────────────────────────────────
 @app.get("/health")
-@app.get("/api/health")
 def health_check():
-    """Basic health check endpoint."""
+    """Minimal health check for Docker / Cloudflare health monitors."""
     return {"status": "ok", "service": "meridian-api"}
+
+
+# ── Agent Discovery — root-level static endpoints ─────────────────────────
+
+_LLMS_TXT = """\
+# Meridian — Smart Money Intelligence API
+# https://meridianfin.io
+# MCP Server: https://meridianfin.io/mcp
+# Pay-per-call via x402 (USDC on Base L2). No API keys or subscriptions needed.
+#
+# Meridian tracks smart money activity across US markets: Congress trades (STOCK Act),
+# ARK Invest, dark pool anomalies (FINRA), SEC insider filings, 13F institutional
+# holdings, superinvestors (Buffett, Soros, Ackman, ...), short interest, multi-source
+# confluence signals, and market regime.
+
+## MCP Tools (10 tools) — transport: Streamable HTTP at /mcp
+
+### Smart Money — Government
+- get_congress_trades ($0.05) — US Congress trading activity (STOCK Act filings). Filter by party, chamber, trade_type, days.
+
+### Smart Money — Institutional
+- get_ark_trades     ($0.03) — ARK Invest buy/sell activity across ARKK/ARKW/ARKG/ARKQ/ARKF/ARKX. Filter by etf, trade_type, days.
+- get_ark_holdings   ($0.03) — Current ARK ETF portfolio holdings with weight percentages.
+- get_13f_filings    ($0.05) — 13F quarterly holdings from Berkshire, Bridgewater, Citadel, Soros, Renaissance, and 75+ others.
+
+### Smart Money — Insiders
+- get_insider_trades ($0.05) — SEC Form 4 insider trades. Includes cluster buy detection (multiple insiders buying same stock).
+
+### Smart Money — Dark Pool
+- get_darkpool_activity ($0.05) — FINRA off-exchange dark pool anomalies. Statistical Z-score detection of unusual volume.
+
+### Smart Money — Short Selling
+- get_short_interest ($0.03) — FINRA short interest for 8,600+ tickers. Shares short, days to cover, % of float.
+
+### Smart Money — Superinvestors
+- get_superinvestor_activity ($0.05) — Portfolio changes from ~80 legendary investors (Dataroma). Tracks buys, sells, adds, reduces.
+
+### Signals — Multi-Source
+- get_confluence_signals ($0.10) — Stocks where multiple smart money sources agree. Scored 0-100, direction-aware (bullish/bearish).
+
+### Signals — Macro
+- get_market_regime ($0.02) — Market regime: Green/Yellow/Red via VIX + SPY 200MA + credit spreads (FRED). Cached 1h.
+
+## Free Endpoints (no auth)
+- GET /api/health       — Service health check, version, capabilities
+- GET /api/stats        — Data freshness per source, total tickers tracked, sample confluence signal
+- GET /api/openapi.json — OpenAPI 3.1 spec with x-x402 pricing extensions
+- GET /llms.txt         — This file
+- GET /.well-known/agents.json — Agent discovery metadata (JSON)
+- GET /api/data-health  — Detailed data freshness monitoring
+
+## Payment
+All MCP tool calls require x402 payment header (USDC on Base L2, Coinbase).
+No subscriptions, no API keys. Pay only for what you use.
+Minimum per-call cost: $0.02 (get_market_regime). Max: $0.10 (get_confluence_signals).
+
+## Integration Example (MCP)
+```
+POST https://meridianfin.io/mcp
+Content-Type: application/json
+X-PAYMENT: <x402-payment-header>
+
+{"method": "tools/call", "params": {"name": "get_confluence_signals", "arguments": {"min_score": 7, "days": 7}}}
+```
+
+## Data Sources
+- SEC EDGAR (Form 4 insider filings, 13F institutional holdings)
+- US Congress STOCK Act disclosure portal (via Quiver Quantitative)
+- FINRA (daily dark pool volume, bi-monthly short interest)
+- ARK Invest (daily ETF trade disclosures)
+- Dataroma (superinvestor 13F aggregation)
+- Yahoo Finance / FRED (VIX, SPY, HY credit spreads)
+
+## Update Cadence
+- Congress trades: 3× daily
+- ARK trades/holdings: 4× daily (Mon-Fri)
+- Dark pool: daily (Tue-Sat, after FINRA publish)
+- Insider trades: 2× daily
+- 13F / Superinvestors: weekly (SEC quarterly cadence)
+- Confluence signals: 2× daily
+- Market regime: live (1h cache)
+"""
+
+_AGENTS_JSON = {
+    "schema_version": "1.0",
+    "name": "Meridian Smart Money Intelligence",
+    "description": (
+        "Real-time smart money intelligence API for US markets. Tracks Congress trades, "
+        "ARK Invest, dark pool anomalies, SEC insider filings, 13F institutional holdings, "
+        "superinvestors, short interest, confluence signals, and market regime. "
+        "Pay-per-call via x402 (USDC on Base L2). No API keys needed."
+    ),
+    "url": "https://meridianfin.io",
+    "api_base": "https://meridianfin.io",
+    "mcp_url": "https://meridianfin.io/mcp",
+    "openapi_url": "https://meridianfin.io/api/openapi.json",
+    "llms_txt_url": "https://meridianfin.io/llms.txt",
+    "version": "1.0.0",
+    "categories": ["finance", "trading", "smart-money", "market-intelligence"],
+    "capabilities": [
+        "congress_trades",
+        "ark_invest_tracking",
+        "dark_pool_analysis",
+        "insider_trading",
+        "institutional_13f",
+        "superinvestor_tracking",
+        "short_interest",
+        "confluence_signals",
+        "market_regime",
+    ],
+    "payment": {
+        "protocol": "x402",
+        "currency": "USDC",
+        "network": "base",
+        "description": "Pay-per-call. No subscriptions. USDC on Base L2 (Coinbase).",
+        "price_range": {"min_usd": 0.02, "max_usd": 0.10},
+    },
+    "tools": [
+        {"name": "get_congress_trades",       "price_usd": 0.05},
+        {"name": "get_ark_trades",            "price_usd": 0.03},
+        {"name": "get_ark_holdings",          "price_usd": 0.03},
+        {"name": "get_insider_trades",        "price_usd": 0.05},
+        {"name": "get_13f_filings",           "price_usd": 0.05},
+        {"name": "get_darkpool_activity",     "price_usd": 0.05},
+        {"name": "get_short_interest",        "price_usd": 0.03},
+        {"name": "get_superinvestor_activity","price_usd": 0.05},
+        {"name": "get_confluence_signals",    "price_usd": 0.10},
+        {"name": "get_market_regime",         "price_usd": 0.02},
+    ],
+    "free_endpoints": [
+        {"path": "/api/health",            "description": "Service health check"},
+        {"path": "/api/stats",             "description": "Data freshness and coverage stats"},
+        {"path": "/api/openapi.json",      "description": "OpenAPI 3.1 spec with x-x402 extensions"},
+        {"path": "/llms.txt",              "description": "LLM-readable endpoint guide"},
+        {"path": "/.well-known/agents.json","description": "Agent discovery metadata"},
+    ],
+    "data_sources": [
+        "SEC EDGAR (Form 4, 13F)",
+        "US Congress STOCK Act (Quiver Quantitative)",
+        "FINRA (Dark Pool, Short Interest)",
+        "ARK Invest daily disclosures",
+        "Dataroma (Superinvestors)",
+        "Yahoo Finance / FRED",
+    ],
+}
+
+
+from fastapi.responses import PlainTextResponse
+
+
+@app.get("/llms.txt", include_in_schema=False)
+def serve_llms_txt():
+    """LLM-readable guide to all Meridian endpoints and tools."""
+    return PlainTextResponse(content=_LLMS_TXT, media_type="text/plain; charset=utf-8")
+
+
+@app.get("/.well-known/agents.json", include_in_schema=False)
+def serve_agents_json():
+    """Agent discovery metadata — standard /.well-known/agents.json."""
+    from fastapi.responses import JSONResponse
+    return JSONResponse(content=_AGENTS_JSON)
 
 
 # ── Router Registration ────────────────────────────────────────────────────

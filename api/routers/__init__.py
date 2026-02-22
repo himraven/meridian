@@ -16,6 +16,7 @@ from . import (
     system,
     knowledge,
     macro,
+    discovery,
 )
 
 
@@ -51,3 +52,6 @@ def register_routers(app: FastAPI) -> None:
 
     # Macro / Market Regime (Regime Detector, Crisis Dashboard, Cross-Asset)
     app.include_router(macro.router, tags=["macro"])
+
+    # Agent discovery (health, stats, openapi spec)
+    app.include_router(discovery.router, tags=["discovery"])
