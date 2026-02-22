@@ -72,32 +72,25 @@
 			</div>
 		</div>
 		
-		<!-- Desktop Nav Links -->
+		<!-- Desktop Nav Links — minimal, sidebar is primary nav -->
 		<div class="hidden lg:flex items-center gap-1">
 			<a 
 				href="/dashboard" 
-				class="nav-link {$page.url.pathname === '/dashboard' ? 'nav-link-active' : ''}"
+				class="nav-link {$page.url.pathname === '/dashboard' || $page.url.pathname === '/' ? 'nav-link-active' : ''}"
 			>
 				Dashboard
 			</a>
 			<a 
-				href="/smart-money" 
-				class="nav-link {$page.url.pathname.startsWith('/smart-money') || 
-					 $page.url.pathname.startsWith('/congress') || 
-					 $page.url.pathname.startsWith('/ark') ||
-					 $page.url.pathname.startsWith('/darkpool') ||
-					 $page.url.pathname.startsWith('/institutions') ||
-					 $page.url.pathname.startsWith('/ranking') ? 'nav-link-active' : ''}"
+				href="/feed" 
+				class="nav-link {$page.url.pathname === '/feed' ? 'nav-link-active' : ''}"
 			>
-				Markets
+				Feed
 			</a>
-			<!-- Asia Markets hidden — focus on signals -->
 			<a 
-				href="/research" 
-				class="nav-link {$page.url.pathname.startsWith('/research') || 
-					 $page.url.pathname.startsWith('/dividend') ? 'nav-link-active' : ''}"
+				href="/crypto" 
+				class="nav-link {$page.url.pathname.startsWith('/crypto') ? 'nav-link-active' : ''}"
 			>
-				Research
+				Crypto
 			</a>
 		</div>
 	</div>
