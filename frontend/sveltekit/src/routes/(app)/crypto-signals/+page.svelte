@@ -173,15 +173,6 @@
 					</div>
 				{/if}
 				</div>
-			{#if d.ark_sentiment}
-				<div class="ark-sentiment-row">
-					<span class="ark-label">ARK 30d</span>
-					<span class="ark-badge" style="color: {d.ark_sentiment.net === 'bullish' ? 'var(--green)' : d.ark_sentiment.net === 'bearish' ? 'var(--red)' : 'var(--amber)'}">
-						{d.ark_sentiment.net?.toUpperCase()}
-					</span>
-					<span class="ark-detail">({d.ark_sentiment.buys}B / {d.ark_sentiment.sells}S)</span>
-				</div>
-			{/if}
 			{#if d.summary?.narrative}
 				<p class="summary-narrative">{d.summary.narrative}</p>
 			{/if}
@@ -237,6 +228,15 @@
 			<!-- ARK Trades -->
 			<div class="card-base">
 				<div class="section-label">ARK INVEST — CRYPTO STOCK TRADES</div>
+				{#if d.ark_sentiment}
+					<div class="ark-sentiment-row">
+						<span class="ark-label">30d Sentiment</span>
+						<span class="ark-badge" style="color: {d.ark_sentiment.net === 'bullish' ? 'var(--green)' : d.ark_sentiment.net === 'bearish' ? 'var(--red)' : 'var(--amber)'}">
+							{d.ark_sentiment.net?.toUpperCase()}
+						</span>
+						<span class="ark-detail">{d.ark_sentiment.buys} buys · {d.ark_sentiment.sells} sells</span>
+					</div>
+				{/if}
 				{#if d.ark_trades?.length}
 					<div class="table-wrap">
 						<table class="data-table compact">
