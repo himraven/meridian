@@ -492,13 +492,6 @@
 		margin-top: 2px;
 	}
 
-	.cache-label {
-		font-size: 11px;
-		color: var(--text-dimmed);
-		flex-shrink: 0;
-		white-space: nowrap;
-	}
-
 	/* ── Card Base ──────────────────────────────────────────────────── */
 	.card-base {
 		background: var(--bg-surface);
