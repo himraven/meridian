@@ -1,0 +1,126 @@
+{
+  "project": "meridian-crypto-expansion",
+  "spec": "specs/projects/crypto-expansion.md",
+  "created_at": "2026-02-22T10:16:00Z",
+  "tasks": [
+    {
+      "id": "B1",
+      "title": "CoinGlass Collector — Core Data Collection",
+      "description": "Create CoinGlass cron collector on rsnest. Collects OI overview (top 30 coins), funding rates, options OI, fear & greed index. Outputs to /data/coinglass/*.json. Schedule: every 15 min.",
+      "repo": "smart-money-platform",
+      "type": "backend",
+      "priority": "high",
+      "status": "pending",
+      "depends_on": [],
+      "files": [
+        "api/cron/coinglass_collector.py",
+        "docker-compose.yml"
+      ]
+    },
+    {
+      "id": "B2",
+      "title": "CoinGlass Cron Registration + Env Setup",
+      "description": "Register coinglass_collector in rsnest cron system. Add COINGLASS_API_KEY to docker env. Verify data collection runs successfully.",
+      "repo": "smart-money-platform",
+      "type": "backend",
+      "priority": "high",
+      "status": "pending",
+      "depends_on": ["B1"]
+    },
+    {
+      "id": "M1",
+      "title": "Meridian Crypto API Router",
+      "description": "Create /api/crypto/* endpoints: overview, derivatives, etf, fear-greed. Read from /app/data/coinglass/*.json bind mount. Add volume mount in docker-compose.yml. Register router.",
+      "repo": "meridian",
+      "type": "backend",
+      "priority": "high",
+      "status": "pending",
+      "depends_on": ["B1"],
+      "files": [
+        "api/routers/crypto.py",
+        "api/routers/__init__.py",
+        "docker-compose.yml"
+      ]
+    },
+    {
+      "id": "F1",
+      "title": "Sidebar Navigation Restructure",
+      "description": "Reorganize sidebar into 4 sections: Smart Money, Market Pulse, Crypto, Research. Add Crypto sub-items. No breaking changes to existing routes.",
+      "repo": "meridian",
+      "type": "frontend",
+      "priority": "high",
+      "status": "pending",
+      "depends_on": [],
+      "files": [
+        "frontend/sveltekit/src/lib/components/layout/Sidebar.svelte"
+      ]
+    },
+    {
+      "id": "F2",
+      "title": "Crypto Overview Page (/crypto)",
+      "description": "Main crypto dashboard page. KPI bar (BTC, ETH, F&G, Total OI), Top 20 coins OI table, Smart Money crypto signals (migrated from /crypto-signals), BTC/ETH ETF flow summary cards.",
+      "repo": "meridian",
+      "type": "frontend",
+      "priority": "high",
+      "status": "pending",
+      "depends_on": ["M1", "F1"],
+      "files": [
+        "frontend/sveltekit/src/routes/(app)/crypto/+page.ts",
+        "frontend/sveltekit/src/routes/(app)/crypto/+page.svelte",
+        "frontend/sveltekit/src/lib/api.ts"
+      ]
+    },
+    {
+      "id": "F3",
+      "title": "Derivatives Page (/crypto/derivatives)",
+      "description": "Pill-tabbed page: Open Interest tab (exchange breakdown table + bar chart), Funding Rates tab (all exchanges, color-coded), Options tab (exchange OI). CoinGlass data density + Stocknear cleanliness.",
+      "repo": "meridian",
+      "type": "frontend",
+      "priority": "medium",
+      "status": "pending",
+      "depends_on": ["M1", "F1"],
+      "files": [
+        "frontend/sveltekit/src/routes/(app)/crypto/derivatives/+page.ts",
+        "frontend/sveltekit/src/routes/(app)/crypto/derivatives/+page.svelte"
+      ]
+    },
+    {
+      "id": "F4",
+      "title": "Crypto ETF Page (/crypto/etf)",
+      "description": "Dedicated BTC/ETH ETF flows page. Extract from existing fund-flows + crypto-signals data. More detail than summary cards. Reuse existing etfFlows API.",
+      "repo": "meridian",
+      "type": "frontend",
+      "priority": "medium",
+      "status": "pending",
+      "depends_on": ["F1"],
+      "files": [
+        "frontend/sveltekit/src/routes/(app)/crypto/etf/+page.ts",
+        "frontend/sveltekit/src/routes/(app)/crypto/etf/+page.svelte"
+      ]
+    },
+    {
+      "id": "F5",
+      "title": "Redirect /crypto-signals → /crypto",
+      "description": "Add server-side redirect from /crypto-signals to /crypto. Update internal links. Keep old route working via 301.",
+      "repo": "meridian",
+      "type": "frontend",
+      "priority": "low",
+      "status": "pending",
+      "depends_on": ["F2"],
+      "files": [
+        "frontend/sveltekit/src/routes/(app)/crypto-signals/+page.server.ts"
+      ]
+    },
+    {
+      "id": "D1",
+      "title": "Deploy + Integration Test",
+      "description": "Build and deploy both rsnest (collector) and meridian (API + frontend). Verify all pages render, data flows correctly, no SSR errors. Update CHANGELOG.md.",
+      "repo": "both",
+      "type": "ops",
+      "priority": "high",
+      "status": "pending",
+      "depends_on": ["B2", "F2", "F3", "F4", "F5"]
+    }
+  ],
+  "completed": []
+}
