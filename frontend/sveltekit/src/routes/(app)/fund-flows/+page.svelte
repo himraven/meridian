@@ -347,7 +347,7 @@
 						<tbody>
 							{#each asiaEtfs as etf}
 								<tr>
-									<td><span class="ticker-mono">{etf.ticker}</span></td>
+									<td><a href="/ticker/{etf.ticker}" class="ticker-link">{etf.ticker}</a></td>
 									<td class="dim truncate">{etf.name}</td>
 									<td class="text-right mono">{fmtAum(etf.total_assets)}</td>
 									<td class="text-right mono" style="color: {flowColor(etf.net_flow_usd)}">{fmtFlow(etf.net_flow_usd)}</td>
@@ -669,6 +669,18 @@
 		font-weight: 700;
 		color: var(--text-primary);
 		letter-spacing: 0.02em;
+	}
+
+	.ticker-link {
+		font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+		font-weight: 600;
+		color: var(--text-primary);
+		text-decoration: none;
+		letter-spacing: 0.02em;
+	}
+
+	.ticker-link:hover {
+		color: var(--accent, #818cf8);
 	}
 
 	/* ── States ──────────────────────────────────────────────────────── */
