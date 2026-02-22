@@ -594,6 +594,22 @@ CRYPTO_STOCKS = {
     "WULF",  # TeraWulf — BTC miner
 }
 
+# Hardcoded float shares for crypto stocks (fallback when collector misses them)
+# Source: Yahoo Finance, updated periodically
+CRYPTO_FLOAT_SHARES = {
+    "COIN": 220_117_216,
+    "MSTR": 292_995_012,
+    "MARA": 372_367_878,
+    "RIOT": 340_958_344,
+    "CLSK": 246_949_898,
+    "HUT": 88_017_444,
+    "BTBT": 318_293_712,
+    "CIFR": 319_996_907,
+    "CORZ": 228_053_187,
+    "IREN": 302_757_271,
+    "WULF": 302_803_297,
+}
+
 # Hardcoded company names for crypto stocks (fallback when data sources lack them)
 CRYPTO_STOCK_NAMES = {
     "COIN": "Coinbase Global Inc",
@@ -711,6 +727,16 @@ def _get_crypto_signals_data() -> dict:
             if (t.get("ticker") or "").upper() in CRYPTO_STOCKS
         ]
         short_interest.sort(key=lambda t: t.get("short_interest", 0) or 0, reverse=True)
+
+    # Enrich missing float data from hardcoded fallback
+    for si in short_interest:
+        tk = (si.get("ticker") or "").upper()
+        if not si.get("short_pct_float") and tk in CRYPTO_FLOAT_SHARES:
+            float_shares = CRYPTO_FLOAT_SHARES[tk]
+            si_val = si.get("short_interest", 0) or 0
+            if float_shares > 0 and si_val > 0:
+                si["float_shares"] = float_shares
+                si["short_pct_float"] = round(si_val / float_shares * 100, 2)
 
     # --- Smart Money Signals (crypto STOCKS only — ETFs are noise here) ---
     smart_money_signals = []
