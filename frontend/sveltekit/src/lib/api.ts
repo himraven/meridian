@@ -158,4 +158,12 @@ export const api = {
 		etfFlows: (params?: { category?: string }) =>
 			fetchApi(`/us/etf-flows${buildQueryString(params || {})}`),
 	},
+
+	// Crypto
+	crypto: {
+		overview: () => fetchApi('/crypto/overview'),
+		derivatives: () => fetchApi('/crypto/derivatives'),
+		fearGreed: (params?: { limit?: number }) =>
+			fetchApi(`/crypto/fear-greed${buildQueryString(params || {})}`),
+	},
 };

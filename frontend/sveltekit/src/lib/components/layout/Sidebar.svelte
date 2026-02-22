@@ -12,7 +12,7 @@
 	// Nav sections — no emoji, clean text labels only
 	const navSections = [
 		{
-			title: 'Sources',
+			title: 'Smart Money',
 			items: [
 				{ href: '/smart-money', label: 'Overview' },
 				{ href: '/congress', label: 'Congress' },
@@ -25,12 +25,19 @@
 		// Asia Markets hidden — focus on signals
 		// { title: 'Asia Markets', items: [{ href: '/hk', label: 'HK Signals' }, { href: '/cn', label: 'CN Trend' }, { href: '/cn/strategy', label: 'CN Strategy' }] },
 		{
-			title: 'Market Intelligence',
+			title: 'Market Pulse',
 			items: [
 				{ href: '/crisis', label: 'Crisis Dashboard' },
 				{ href: '/cross-asset', label: 'Cross-Asset' },
 				{ href: '/fund-flows', label: 'Fund Flows' },
-				{ href: '/crypto-signals', label: 'Crypto Signals' },
+			]
+		},
+		{
+			title: 'Crypto',
+			items: [
+				{ href: '/crypto', label: 'Overview' },
+				{ href: '/crypto/derivatives', label: 'Derivatives' },
+				{ href: '/crypto/etf', label: 'ETF Flows' },
 			]
 		},
 		{
@@ -44,8 +51,9 @@
 	];
 	
 	let expandedSections = $state<Record<string, boolean>>({
-		'Sources': true,
-		'Market Intelligence': true,
+		'Smart Money': true,
+		'Market Pulse': true,
+		'Crypto': true,
 		'Research': true
 	});
 	
