@@ -9,33 +9,32 @@
 	
 	let { open = $bindable(), onClose }: Props = $props();
 	
-	// Nav sections — no emoji, clean text labels only
-	const navSections = [
+	// Nav sections — organized by investment decision dimensions
+	const navSections: { title: string; items: { href: string; label: string; comingSoon?: boolean }[] }[] = [
 		{
 			title: 'Smart Money',
 			items: [
-				{ href: '/smart-money', label: 'Overview' },
-				{ href: '/congress', label: 'Congress' },
+				{ href: '/congress', label: 'Congress Trades' },
 				{ href: '/ark', label: 'ARK Invest' },
+				{ href: '/institutions', label: 'Institutions (13F)' },
+				{ href: '/insiders', label: 'Insiders (Form 4)' },
 				{ href: '/darkpool', label: 'Dark Pool' },
-				{ href: '/institutions', label: 'Institutions' },
-				{ href: '/insiders', label: 'Insiders' },
+				{ href: '/short-interest', label: 'Short Interest', comingSoon: true },
 			]
 		},
-		// Asia Markets hidden — focus on signals
-		// { title: 'Asia Markets', items: [{ href: '/hk', label: 'HK Signals' }, { href: '/cn', label: 'CN Trend' }, { href: '/cn/strategy', label: 'CN Strategy' }] },
 		{
 			title: 'Market Pulse',
 			items: [
+				{ href: '/fund-flows', label: 'Fund Flows (ETF)' },
 				{ href: '/crisis', label: 'Crisis Dashboard' },
 				{ href: '/cross-asset', label: 'Cross-Asset' },
-				{ href: '/fund-flows', label: 'Fund Flows' },
+				{ href: '/market-regime', label: 'Market Regime', comingSoon: true },
 			]
 		},
 		{
 			title: 'Crypto',
 			items: [
-				{ href: '/crypto', label: 'Overview' },
+				{ href: '/crypto', label: 'Signals Overview' },
 				{ href: '/crypto/derivatives', label: 'Derivatives' },
 				{ href: '/crypto/etf', label: 'ETF Flows' },
 			]
@@ -43,9 +42,11 @@
 		{
 			title: 'Research',
 			items: [
-				{ href: '/research', label: 'Reports' },
-				{ href: '/dividend', label: 'Dividend' },
-				{ href: '/knowledge', label: 'Knowledge Hub' }
+				{ href: '/confluence', label: 'Confluence Signals', comingSoon: true },
+				{ href: '/search', label: 'Ticker Lookup' },
+				{ href: '/ranking', label: 'Ranking' },
+				{ href: '/dividend', label: 'Dividend Screener' },
+				{ href: '/knowledge', label: 'Knowledge Hub' },
 			]
 		}
 	];
@@ -62,8 +63,15 @@
 	}
 	
 	function isActive(href: string): boolean {
-		return $page.url.pathname === href || 
-			($page.url.pathname !== '/' && $page.url.pathname.startsWith(href));
+		const path = $page.url.pathname;
+		if (path === href) return true;
+		// For non-root hrefs, check startsWith but avoid partial prefix matches
+		// e.g., /search should not match /search-something
+		if (href !== '/' && path.startsWith(href)) {
+			const next = path.charAt(href.length);
+			return next === '' || next === '/' || next === '?';
+		}
+		return false;
 	}
 </script>
 
@@ -107,20 +115,6 @@
 		>
 			Feed
 		</a>
-		<a 
-			href="/ranking" 
-			class="sidebar-link {$page.url.pathname.startsWith('/ranking') ? 'sidebar-link-active' : ''}"
-			onclick={() => { if (window.innerWidth < 768) onClose(); }}
-		>
-			Ranking
-		</a>
-		<a 
-			href="/search" 
-			class="sidebar-link {$page.url.pathname === '/search' ? 'sidebar-link-active' : ''}"
-			onclick={() => { if (window.innerWidth < 768) onClose(); }}
-		>
-			Search
-		</a>
 		
 		<!-- Navigation sections -->
 		{#each navSections as section}
@@ -145,10 +139,13 @@
 						{#each section.items as item}
 							<a 
 								href={item.href}
-								class="sidebar-link {isActive(item.href) ? 'sidebar-link-active' : ''}"
+								class="sidebar-link {isActive(item.href) ? 'sidebar-link-active' : ''} {item.comingSoon ? 'sidebar-link-soon' : ''}"
 								onclick={() => { if (window.innerWidth < 768) onClose(); }}
 							>
 								{item.label}
+								{#if item.comingSoon}
+									<span class="soon-badge">Soon</span>
+								{/if}
 							</a>
 						{/each}
 					</div>
@@ -307,5 +304,24 @@
 		color: var(--text-primary) !important;
 		font-weight: 500;
 		background: var(--bg-elevated);
+	}
+
+	.sidebar-link-soon {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+	}
+
+	.soon-badge {
+		font-size: 9px;
+		font-weight: 600;
+		letter-spacing: 0.03em;
+		color: var(--text-dimmed);
+		background: var(--bg-elevated);
+		border: 1px solid var(--border-default);
+		padding: 1px 5px;
+		border-radius: 8px;
+		line-height: 1.4;
+		flex-shrink: 0;
 	}
 </style>
