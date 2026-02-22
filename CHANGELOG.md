@@ -4,6 +4,31 @@ All notable changes to the Meridian platform are documented here.
 
 ---
 
+## 2026-02-22 — Crypto API Router M1
+
+**FEAT: Crypto Market Intelligence router — CoinGlass derivatives data**
+
+New `/api/crypto/*` endpoints serving CoinGlass JSON data (OI, funding rates, options, fear & greed).
+
+### New Files
+- `api/routers/crypto.py` — Crypto router with 4 endpoints, 5-min in-memory cache, orjson loading
+
+### New Endpoints
+- `GET /api/crypto/overview` — Dashboard summary: 20 coins OI table, total OI, BTC/ETH highlights, current F&G value
+- `GET /api/crypto/derivatives` — Full derivatives: OI + funding rates (deduped to latest per exchange, 25k→21 entries) + options data
+- `GET /api/crypto/etf` — Convenience 302 redirect → `/api/us/etf-flows?category=crypto`
+- `GET /api/crypto/fear-greed` — F&G time series: last 90 entries (configurable) with dates, labels, BTC prices
+
+### Modified Files
+- `api/routers/__init__.py` — Registered crypto router with `tags=["crypto"]`
+
+### Notes
+- Funding rates.json has 25k+ entries (historical per exchange) — router deduplicates to last entry per exchange name
+- `/app/data/coinglass/` already accessible via existing rsnest data bind mount — no new mount needed
+- All responses include `collected_at` timestamps from source files
+
+---
+
 ## 2026-02-22 — Agent Discovery Infrastructure (P1)
 
 **FEAT: Agent discovery infra — OpenAPI, llms.txt, agents.json, /health, /stats**

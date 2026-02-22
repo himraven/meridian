@@ -18,6 +18,7 @@ from . import (
     macro,
     discovery,
     v1,
+    crypto,
 )
 
 
@@ -59,3 +60,6 @@ def register_routers(app: FastAPI) -> None:
 
     # REST API v1 — x402 micropayment-gated endpoints (mirrors MCP tools)
     app.include_router(v1.router, tags=["v1"])
+
+    # Crypto Market Intelligence (CoinGlass data: OI, funding, options, F&G)
+    app.include_router(crypto.router, tags=["crypto"])
