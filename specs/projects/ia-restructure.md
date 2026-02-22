@@ -109,3 +109,8 @@
 
 ## 变更记录
 - 2026-02-22: Raven confirmed 四大板块框架 + Crypto 扩展方向
+- 2026-02-22: Phase 1A complete — Sidebar restructured (commit 3d8b2eb, 21b8315)
+- 2026-02-22: Market Regime upgraded from "Coming Soon" to live page (commit a38eeaf)
+- 2026-02-22: Nginx 502 retry added for worker restart resilience
+- 2026-02-22: Phase 1B assessed — Liquidation/L/S Ratio need CoinGlass plan upgrade ($29→$79/mo)
+- 2026-02-22: Sentinel QA agent created and first deployed successfully

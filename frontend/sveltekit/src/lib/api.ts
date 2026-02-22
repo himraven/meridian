@@ -149,6 +149,12 @@ export const api = {
 		article: (slug: string) => fetchApi(`/knowledge/${slug}`),
 	},
 
+	// Short Interest
+	shortInterest: {
+		list: (params?: { limit?: number; sort_by?: string; min_short_ratio?: number; ticker?: string; min_days_to_cover?: number }) =>
+			fetchApi(`/us/short-interest${buildQueryString(params || {})}`),
+	},
+
 	// Macro / Market Intelligence
 	macro: {
 		regime: () => fetchApi('/us/regime'),

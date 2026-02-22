@@ -19,7 +19,7 @@
 				{ href: '/institutions', label: 'Institutions (13F)' },
 				{ href: '/insiders', label: 'Insiders (Form 4)' },
 				{ href: '/darkpool', label: 'Dark Pool' },
-				{ href: '/short-interest', label: 'Short Interest', comingSoon: true },
+				{ href: '/short-interest', label: 'Short Interest' },
 			]
 		},
 		{
@@ -37,6 +37,8 @@
 				{ href: '/crypto', label: 'Signals Overview' },
 				{ href: '/crypto/derivatives', label: 'Derivatives' },
 				{ href: '/crypto/etf', label: 'ETF Flows' },
+				{ href: '/crypto/equities', label: 'Equity Signals' },
+				{ href: '/crypto/equities', label: 'Equity Signals' },
 			]
 		},
 		{
