@@ -90,8 +90,10 @@ def api_ticker_aggregate(request: Request, symbol: str):
                 if h.get("ticker", "").upper() == symbol
             ]
             if not confluence_signals:
-                signals_data = smart_money_cache.read("ranking_v2.json")
-                if not signals_data.get("signals"):
+                signals_data = smart_money_cache.read("ranking_v3.json")
+                if not signals_data or not signals_data.get("signals"):
+                    signals_data = smart_money_cache.read("ranking_v2.json")
+                if not signals_data or not signals_data.get("signals"):
                     signals_data = smart_money_cache.read("ranking.json")
                 confluence_signals = [
                     s for s in signals_data.get("signals", [])
@@ -235,8 +237,10 @@ def api_ticker_aggregate(request: Request, symbol: str):
         if t.get("ticker", "").upper() == symbol
     ]
 
-    signals_data = smart_money_cache.read("ranking_v2.json")
-    if not signals_data.get("signals"):
+    signals_data = smart_money_cache.read("ranking_v3.json")
+    if not signals_data or not signals_data.get("signals"):
+        signals_data = smart_money_cache.read("ranking_v2.json")
+    if not signals_data or not signals_data.get("signals"):
         signals_data = smart_money_cache.read("ranking.json")
     confluence_signals = [
         s for s in signals_data.get("signals", [])

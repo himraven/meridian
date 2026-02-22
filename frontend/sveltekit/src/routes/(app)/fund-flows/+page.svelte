@@ -118,7 +118,7 @@
 	<!-- Header -->
 	<div class="page-header">
 		<div>
-			<h1 class="page-title">💰 Fund Flows</h1>
+			<h1 class="page-title">Fund Flows</h1>
 			<p class="page-subtitle">ETF money flows across crypto, sectors, mega-cap, cross-asset &amp; Asia</p>
 		</div>
 		{#if meta?.last_updated}
@@ -221,7 +221,7 @@
 						<tbody>
 							{#each cryptoEtfs as etf}
 								<tr>
-									<td><span class="ticker-mono">{etf.ticker}</span></td>
+									<td><a href="/ticker/{etf.ticker}" class="ticker-link">{etf.ticker}</a></td>
 									<td class="dim truncate">{etf.name}</td>
 									<td class="text-right mono">{fmtAum(etf.total_assets)}</td>
 									<td class="text-right mono" style="color: {flowColor(etf.net_flow_usd)}">{fmtFlow(etf.net_flow_usd)}</td>
@@ -245,7 +245,7 @@
 					{#each sectorEtfs as etf}
 						<div class="sector-cell" style="border-color: {flowColor(etf.net_flow_usd)}20">
 							<div class="sector-cell-top">
-								<span class="ticker-mono">{etf.ticker}</span>
+								<a href="/ticker/{etf.ticker}" class="ticker-link">{etf.ticker}</a>
 								<span class="sector-flow" style="color: {flowColor(etf.net_flow_usd)}">{fmtFlow(etf.net_flow_usd)}</span>
 							</div>
 							<div class="sector-name">{SECTOR_NAMES[etf.ticker] ?? etf.name}</div>
@@ -279,7 +279,7 @@
 							<tbody>
 								{#each megaEtfs as etf}
 									<tr>
-										<td><span class="ticker-mono">{etf.ticker}</span></td>
+										<td><a href="/ticker/{etf.ticker}" class="ticker-link">{etf.ticker}</a></td>
 										<td class="dim truncate">{etf.name}</td>
 										<td class="text-right mono">{fmtAum(etf.total_assets)}</td>
 										<td class="text-right mono" style="color: {flowColor(etf.net_flow_usd)}">{fmtFlow(etf.net_flow_usd)}</td>
@@ -312,7 +312,7 @@
 							<tbody>
 								{#each crossEtfs as etf}
 									<tr>
-										<td><span class="ticker-mono">{etf.ticker}</span></td>
+										<td><a href="/ticker/{etf.ticker}" class="ticker-link">{etf.ticker}</a></td>
 										<td class="dim truncate">{etf.name}</td>
 										<td class="text-right mono">{fmtAum(etf.total_assets)}</td>
 										<td class="text-right mono" style="color: {flowColor(etf.net_flow_usd)}">{fmtFlow(etf.net_flow_usd)}</td>

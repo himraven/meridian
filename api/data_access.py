@@ -195,7 +195,10 @@ class DataAccess:
         except Exception:
             pass
 
-        data = smart_money_cache.read("ranking.json")
+        # Prefer V7 ranking (ranking_v3.json), fall back to ranking.json
+        data = smart_money_cache.read("ranking_v3.json")
+        if not data or not data.get("signals"):
+            data = smart_money_cache.read("ranking.json")
         if data:
             data.setdefault("metadata", {})["source"] = "json"
         return data or {"signals": [], "metadata": {"source": "none"}}

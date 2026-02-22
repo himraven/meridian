@@ -5,6 +5,7 @@
 
 	let { data }: { data: PageData } = $props();
 	const d = $derived(data.data);
+	const ef = $derived(data.etfFlows as any);
 
 	function toChartData(rows: {date: string; value: number}[] | undefined) {
 		if (!rows) return [];
@@ -72,6 +73,79 @@
 	function fmtSiPct(v: number | null | undefined): string {
 		if (v === null || v === undefined || v === 0) return '—';
 		return v.toFixed(1) + '%';
+	}
+
+	// ── ETF Flow helpers ──────────────────────────────────────────────
+
+	/** Format a dollar AUM/flow value: $64.8B, $245.0M, $1.2K, — for null/zero */
+	function fmtAum(v: number | null | undefined): string {
+		if (v === null || v === undefined) return '—';
+		const abs = Math.abs(v);
+		const prefix = v < 0 ? '-$' : '$';
+		if (abs >= 1_000_000_000) return `${prefix}${(abs / 1_000_000_000).toFixed(1)}B`;
+		if (abs >= 1_000_000) return `${prefix}${(abs / 1_000_000).toFixed(0)}M`;
+		if (abs >= 1_000) return `${prefix}${(abs / 1_000).toFixed(0)}K`;
+		return `${prefix}${abs.toLocaleString()}`;
+	}
+
+	/** Format a net flow value — show "—" for null, show signed $ for non-null non-zero */
+	function fmtFlow(v: number | null | undefined): string {
+		if (v === null || v === undefined) return '—';
+		if (v === 0) return '—';
+		const abs = Math.abs(v);
+		const prefix = v > 0 ? '+$' : '-$';
+		if (abs >= 1_000_000_000) return `${prefix}${(abs / 1_000_000_000).toFixed(1)}B`;
+		if (abs >= 1_000_000) return `${prefix}${(abs / 1_000_000).toFixed(0)}M`;
+		if (abs >= 1_000) return `${prefix}${(abs / 1_000).toFixed(0)}K`;
+		return `${prefix}${abs.toLocaleString()}`;
+	}
+
+	/** Flow color: green positive, red negative, muted null/zero */
+	function flowColor(v: number | null | undefined): string {
+		if (v === null || v === undefined || v === 0) return 'var(--text-dimmed)';
+		return v > 0 ? 'var(--green)' : 'var(--red)';
+	}
+
+	/** Format flow % AUM */
+	function fmtFlowPct(v: number | null | undefined): string {
+		if (v === null || v === undefined || v === 0) return '—';
+		return `${v > 0 ? '+' : ''}${v.toFixed(2)}%`;
+	}
+
+	/** Filter ETFs by tickers list */
+	function filterEtfs(tickers: string[]): any[] {
+		if (!ef?.flows) return [];
+		return tickers
+			.map(t => ef.flows.find((f: any) => f.ticker === t))
+			.filter(Boolean);
+	}
+
+	const BTC_TICKERS = ['IBIT', 'GBTC', 'FBTC', 'ARKB', 'BITB', 'BITO'];
+	const ETH_TICKERS = ['ETHE', 'ETHU'];
+
+	const btcEtfs = $derived(filterEtfs(BTC_TICKERS));
+	const ethEtfs = $derived(filterEtfs(ETH_TICKERS));
+	const btcSummary = $derived(ef?.crypto_etf_summary);
+
+	/** Compute total AUM for a list of ETF rows */
+	function sumAum(rows: any[]): number | null {
+		if (!rows.length) return null;
+		const total = rows.reduce((s, r) => s + (r.total_assets ?? 0), 0);
+		return total > 0 ? total : null;
+	}
+
+	/** Compute sum of daily flows (skip nulls) */
+	function sumFlow(rows: any[], field: string): number | null {
+		if (!rows.length) return null;
+		let sum = 0;
+		let hasData = false;
+		for (const r of rows) {
+			if (r[field] !== null && r[field] !== undefined) {
+				sum += r[field];
+				hasData = true;
+			}
+		}
+		return hasData ? sum : null;
 	}
 </script>
 
@@ -149,6 +223,137 @@
 				{/if}
 			</div>
 		</div>
+
+		<!-- Row 1b: ETF Flow Cards -->
+		{#if ef?.flows?.length}
+			<div class="two-col">
+				<!-- BTC ETF Flows -->
+				<div class="card-base">
+					<div class="section-label">BTC ETF FLOWS</div>
+
+					<!-- Summary row -->
+					<div class="etf-summary-row">
+						<div class="etf-summary-stat">
+							<span class="etf-summary-label">TOTAL AUM</span>
+							<span class="etf-summary-val">{fmtAum(btcSummary?.btc_etf_total_aum ?? sumAum(btcEtfs))}</span>
+						</div>
+						<div class="etf-summary-stat">
+							<span class="etf-summary-label">DAILY FLOW</span>
+							<span class="etf-summary-val" style="color: {flowColor(btcSummary?.btc_etf_daily_flow ?? sumFlow(btcEtfs, 'net_flow_usd'))}">
+								{fmtFlow(btcSummary?.btc_etf_daily_flow ?? sumFlow(btcEtfs, 'net_flow_usd'))}
+							</span>
+						</div>
+						<div class="etf-summary-stat">
+							<span class="etf-summary-label">WEEKLY FLOW</span>
+							<span class="etf-summary-val" style="color: {flowColor(btcSummary?.btc_etf_weekly_flow ?? sumFlow(btcEtfs, 'flow_5d_usd'))}">
+								{fmtFlow(btcSummary?.btc_etf_weekly_flow ?? sumFlow(btcEtfs, 'flow_5d_usd'))}
+							</span>
+						</div>
+					</div>
+
+					<!-- Individual ETF table -->
+					{#if btcEtfs.length}
+						<div class="table-wrap">
+							<table class="data-table compact">
+								<thead>
+									<tr>
+										<th>Ticker</th>
+										<th>Name</th>
+										<th class="text-right">AUM</th>
+										<th class="text-right">Daily Flow</th>
+										<th class="text-right">Flow %</th>
+									</tr>
+								</thead>
+								<tbody>
+									{#each btcEtfs as etf}
+										<tr>
+											<td><span class="ticker-mono">{etf.ticker}</span></td>
+											<td class="dim truncate">{etf.name}</td>
+											<td class="text-right mono">{fmtAum(etf.total_assets)}</td>
+											<td class="text-right mono" style="color: {flowColor(etf.net_flow_usd)}">
+												{fmtFlow(etf.net_flow_usd)}
+											</td>
+											<td class="text-right mono" style="color: {flowColor(etf.flow_pct_aum)}">
+												{fmtFlowPct(etf.flow_pct_aum)}
+											</td>
+										</tr>
+									{/each}
+								</tbody>
+							</table>
+						</div>
+					{:else}
+						<p class="empty-state">No BTC ETF data available</p>
+					{/if}
+
+					{#if !btcSummary?.btc_etf_daily_flow && !sumFlow(btcEtfs, 'net_flow_usd')}
+						<p class="etf-collecting-note">Flow data collecting — check back tomorrow</p>
+					{/if}
+				</div>
+
+				<!-- ETH ETF Flows -->
+				<div class="card-base">
+					<div class="section-label">ETH ETF FLOWS</div>
+
+					<!-- Summary row -->
+					<div class="etf-summary-row">
+						<div class="etf-summary-stat">
+							<span class="etf-summary-label">TOTAL AUM</span>
+							<span class="etf-summary-val">{fmtAum(sumAum(ethEtfs))}</span>
+						</div>
+						<div class="etf-summary-stat">
+							<span class="etf-summary-label">DAILY FLOW</span>
+							<span class="etf-summary-val" style="color: {flowColor(btcSummary?.eth_etf_daily_flow ?? sumFlow(ethEtfs, 'net_flow_usd'))}">
+								{fmtFlow(btcSummary?.eth_etf_daily_flow ?? sumFlow(ethEtfs, 'net_flow_usd'))}
+							</span>
+						</div>
+						<div class="etf-summary-stat">
+							<span class="etf-summary-label">WEEKLY FLOW</span>
+							<span class="etf-summary-val" style="color: {flowColor(btcSummary?.eth_etf_weekly_flow ?? sumFlow(ethEtfs, 'flow_5d_usd'))}">
+								{fmtFlow(btcSummary?.eth_etf_weekly_flow ?? sumFlow(ethEtfs, 'flow_5d_usd'))}
+							</span>
+						</div>
+					</div>
+
+					<!-- Individual ETF table -->
+					{#if ethEtfs.length}
+						<div class="table-wrap">
+							<table class="data-table compact">
+								<thead>
+									<tr>
+										<th>Ticker</th>
+										<th>Name</th>
+										<th class="text-right">AUM</th>
+										<th class="text-right">Daily Flow</th>
+										<th class="text-right">Flow %</th>
+									</tr>
+								</thead>
+								<tbody>
+									{#each ethEtfs as etf}
+										<tr>
+											<td><span class="ticker-mono">{etf.ticker}</span></td>
+											<td class="dim truncate">{etf.name}</td>
+											<td class="text-right mono">{fmtAum(etf.total_assets)}</td>
+											<td class="text-right mono" style="color: {flowColor(etf.net_flow_usd)}">
+												{fmtFlow(etf.net_flow_usd)}
+											</td>
+											<td class="text-right mono" style="color: {flowColor(etf.flow_pct_aum)}">
+												{fmtFlowPct(etf.flow_pct_aum)}
+											</td>
+										</tr>
+									{/each}
+								</tbody>
+							</table>
+						</div>
+					{:else}
+						<p class="empty-state">No ETH ETF data available</p>
+					{/if}
+
+					{#if !btcSummary?.eth_etf_daily_flow && !sumFlow(ethEtfs, 'net_flow_usd')}
+						<p class="etf-collecting-note">Flow data collecting — check back tomorrow</p>
+					{/if}
+				</div>
+			</div>
+		{/if}
 
 		<!-- Row 2: Summary Card -->
 		<div class="card-base">
@@ -774,6 +979,58 @@
 		background: var(--bg-elevated);
 		color: var(--text-dimmed);
 		white-space: nowrap;
+	}
+
+	/* ── ETF Flow cards ─────────────────────────────────────────────── */
+	.etf-summary-row {
+		display: flex;
+		gap: 20px;
+		flex-wrap: wrap;
+		margin-bottom: 14px;
+		padding: 10px 12px;
+		background: var(--bg-elevated);
+		border-radius: 8px;
+	}
+
+	.etf-summary-stat {
+		display: flex;
+		flex-direction: column;
+		gap: 3px;
+		min-width: 0;
+	}
+
+	.etf-summary-label {
+		font-family: 'SF Mono', 'Fira Code', monospace;
+		font-size: 10px;
+		font-weight: 500;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--text-dimmed);
+	}
+
+	.etf-summary-val {
+		font-family: 'SF Mono', 'Fira Code', monospace;
+		font-size: 18px;
+		font-weight: 700;
+		color: var(--text-primary);
+		line-height: 1.2;
+	}
+
+	.ticker-mono {
+		font-family: 'SF Mono', 'Fira Code', monospace;
+		font-size: 12px;
+		font-weight: 700;
+		color: var(--text-primary);
+		letter-spacing: 0.02em;
+	}
+
+	.etf-collecting-note {
+		font-family: 'SF Mono', 'Fira Code', monospace;
+		font-size: 11px;
+		color: var(--text-dimmed);
+		margin-top: 10px;
+		padding: 6px 10px;
+		border-left: 2px solid var(--border-default);
 	}
 
 	/* Empty states */

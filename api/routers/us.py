@@ -892,7 +892,9 @@ def api_ranking_feed(
 
     # ── Cross-reference with scoring engine to align significance ────
     # Load ranking data to check which tickers actually have scores
-    ranking_data = smart_money_cache.read("ranking_v2.json")
+    ranking_data = smart_money_cache.read("ranking_v3.json")
+    if not ranking_data or not ranking_data.get("signals"):
+        ranking_data = smart_money_cache.read("ranking_v2.json")
     if not ranking_data or not ranking_data.get("signals"):
         ranking_data = smart_money_cache.read("ranking.json")
     scored_tickers = set()
@@ -946,16 +948,17 @@ def api_ranking_confluence(
       - sources: comma-separated source filter (e.g., 'congress,ark')
       - days: only signals with activity in last N days (default: 7)
     """
-    # Primary: V2 engine (conviction-based, 0-100 scale)
-    data = smart_money_cache.read("ranking_v2.json")
-    if data and "signals" in data:
-        signals = data["signals"]
-    else:
-        # Fallback: V1 engine
+    # Primary: V7 direction-aware ranking
+    data = smart_money_cache.read("ranking_v3.json")
+    if not data or "signals" not in data:
+        # Fallback: V2 engine
+        data = smart_money_cache.read("ranking_v2.json")
+    if not data or "signals" not in data:
+        # Last resort: ranking.json
         data = smart_money_cache.read("ranking.json")
-        if not data or "signals" not in data:
-            return {"data": [], "metadata": {"total": 0, "filtered": 0}}
-        signals = data["signals"]
+    if not data or "signals" not in data:
+        return {"data": [], "metadata": {"total": 0, "filtered": 0}}
+    signals = data["signals"]
     
     # Filter by min_score
     filtered = [s for s in signals if s.get("score", 0) >= min_score]

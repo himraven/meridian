@@ -29,7 +29,7 @@
 			items: [
 				{ href: '/crisis', label: 'Crisis Dashboard' },
 				{ href: '/cross-asset', label: 'Cross-Asset' },
-				{ href: '/fund-flows', label: '💰 Fund Flows' },
+				{ href: '/fund-flows', label: 'Fund Flows' },
 				{ href: '/crypto-signals', label: 'Crypto Signals' },
 			]
 		},

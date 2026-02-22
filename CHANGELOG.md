@@ -4,6 +4,28 @@ All notable changes to the Meridian platform are documented here.
 
 ---
 
+## 2026-02-22 — ETF Flow Integration (Phase 2) — Frontend Pages
+
+**FEAT: Fund Flows page + Crypto Signals ETF cards**
+
+- NEW `/fund-flows` page — full ETF flow dashboard
+  - Risk Sentiment Gauge: visual -1→+1 gradient bar with live needle
+  - Sector Rotation: 11-cell heatmap (color-coded by flow magnitude) + detail table
+  - Crypto ETFs: BTC (6 ETFs) + ETH (2 ETFs) with AUM, daily/weekly flow, streak
+  - Mega ETFs: SPY, QQQ, IWM, DIA, EEM, EFA, VTI, VOO — 1d/5d/20d flow table
+  - Cross-Asset: GLD, TLT, HYG, LQD, UUP, TIP — risk appetite rotation
+  - Asia/China: FXI, KWEB, EWJ, VNM
+  - Graceful null handling: shows "—" for first-day zero flow, "collecting" note
+- UPDATED `/crypto-signals` — BTC ETF FLOWS + ETH ETF FLOWS cards inserted between price and summary
+  - Summary stats (AUM, daily flow, weekly flow) from `crypto_etf_summary`
+  - Individual ETF breakdown tables
+- UPDATED `Sidebar.svelte` — added Fund Flows link under Market Intelligence
+- Files: `frontend/sveltekit/src/routes/(app)/fund-flows/+page.ts`, `+page.svelte`
+- Files: `frontend/sveltekit/src/routes/(app)/crypto-signals/+page.ts`, `+page.svelte`
+- Files: `frontend/sveltekit/src/lib/components/layout/Sidebar.svelte`
+
+---
+
 ## 2026-02-22 — ETF Flow Integration (Phase 1)
 
 **FEAT: ETF Fund Flow API + Frontend Client**

@@ -123,26 +123,31 @@ def refresh_signals(
         logger.warning(f"v2 engine failed (v1 still saved): {e}")
 
     # v3: V7 direction-aware ranking (built on top of V2 conviction scores)
+    # This is the source of truth — also overwrites ranking.json for backward compat
+    v3_output = None
     try:
         v3_output = generate_ranking_v3(DATA_DIR)
         cache.write("ranking_v3.json", v3_output)
+        # Overwrite ranking.json with V7 data for backward compatibility
+        cache.write("ranking.json", v3_output)
         v3_count = v3_output["metadata"].get("total", 0)
-        logger.info(f"v3 engine (V7 algo): {v3_count} signals written")
+        logger.info(f"v3 engine (V7 algo): {v3_count} signals written to ranking_v3.json + ranking.json")
     except Exception as e:
         logger.warning(f"v3/V7 engine failed (v2 still saved): {e}")
     
-    # Dual-write to SQLite
+    # Dual-write to SQLite — prefer V7 signals, fall back to V1
     try:
         from api.database import SessionLocal
         from api.crud import upsert_signals, log_refresh
         import time
         db = SessionLocal()
         t0 = time.time()
-        count = upsert_signals(db, output.get("signals", []))
+        sqlite_source = v3_output if v3_output else output
+        count = upsert_signals(db, sqlite_source.get("signals", []))
         ms = int((time.time() - t0) * 1000)
         log_refresh(db, "signals", "success", count, ms)
         db.close()
-        logger.info(f"SQLite: {count} signals written ({ms}ms)")
+        logger.info(f"SQLite: {count} V7 signals written ({ms}ms)")
     except Exception as e:
         logger.warning(f"SQLite write failed (JSON still saved): {e}")
     
