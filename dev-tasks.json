@@ -127,13 +127,14 @@
       "repo": "meridian",
       "type": "frontend",
       "priority": "low",
-      "status": "pending",
+      "status": "done",
       "depends_on": [
         "F2"
       ],
       "files": [
         "frontend/sveltekit/src/routes/(app)/crypto-signals/+page.server.ts"
-      ]
+      ],
+      "completed_at": "2026-02-22T10:42:00Z"
     },
     {
       "id": "D1",
@@ -142,14 +143,16 @@
       "repo": "both",
       "type": "ops",
       "priority": "high",
-      "status": "pending",
+      "status": "done",
       "depends_on": [
         "B2",
         "F2",
         "F3",
         "F4",
         "F5"
-      ]
+      ],
+      "completed_at": "2026-02-22T10:42:00Z",
+      "commit": "6fabadd"
     }
   ],
   "completed": []
