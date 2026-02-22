@@ -4,6 +4,14 @@ All notable changes to the Meridian platform are documented here.
 
 ---
 
+## 2026-02-22
+
+### Fixed
+- **fund-flows**: All ETF tickers (Crypto, Sector, Mega, Cross-Asset, Asia) are now clickable links to `/ticker/{symbol}` — replaced `<span class="ticker-mono">` with `<a class="ticker-link">` throughout; added `.ticker-link` CSS
+- **crypto-signals**: Verified all table sections (Smart Money, ARK, Insider, Short Interest, Dark Pool, Congress, Institution Holdings) already had `ticker-link` anchors — no changes needed
+
+---
+
 ## 2026-02-22 — ETF Flow Integration (Phase 2) — Frontend Pages
 
 **FEAT: Fund Flows page + Crypto Signals ETF cards**
